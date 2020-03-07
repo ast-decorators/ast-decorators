@@ -13,8 +13,11 @@
     "build": "rimraf lib && run-p build:cjs build:es",
     "build:cjs": "cross-env BABEL_ENV=cjs babel src -d lib/cjs -x .ts",
     "build:es": "babel src -d lib/es -x .ts",
+    "lint": "eslint \"{src,tests}/**/*.{ts,js}\"",
+    "lint-staged": "lint-staged",
     "test": "jest -c jest.config.cjs",
-    "test:update": "npm run test -- --updateSnapshot"
+    "test:update": "npm run test -- --updateSnapshot",
+    "typecheck": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -47,7 +50,9 @@
     "eslint-config-poetez": "^0.2.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^4.2.3",
     "jest": "^25.1.0",
+    "lint-staged": "^10.0.8",
     "npm-run-all": "^4.1.5",
     "prettier": "^1.19.1",
     "rimraf": "^3.0.2",
