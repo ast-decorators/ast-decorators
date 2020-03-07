@@ -1,5 +1,6 @@
 {
-  "name": "@ast-decorators/core",
+  "name": "ast-decorators",
+  "private": true,
   "version": "0.1.0",
   "description": "AST Decorators core plugin",
   "scripts": {
