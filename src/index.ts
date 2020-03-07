@@ -13,10 +13,10 @@ const processEachDecorator = (
     options: DecoratorProcessorOptions,
   ) => void,
 ): void => {
-  if (path.node.decorators && path.node.decorators.length > 0) {
+  if (path.node.decorators?.length > 0) {
     const decorators = path.get('decorators') as Array<NodePath<Decorator>>;
-    let decorator: NodePath<Decorator> | undefined;
 
+    let decorator: NodePath<Decorator> | undefined;
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     while (path.node && (decorator = decorators.pop())) {
       processor(decorator, opts);
