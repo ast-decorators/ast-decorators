@@ -1,5 +1,5 @@
 {
-  "name": "ast-decorators",
+  "name": "@ast-decorators/core",
   "version": "0.1.0",
   "description": "Core plugin for Babel-based implementation of decorators",
   "type": "module",
