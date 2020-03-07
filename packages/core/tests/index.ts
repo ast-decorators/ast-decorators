@@ -1,21 +1,7 @@
-/* eslint-disable global-require */
-const {transformFileAsync} = require('@babel/core');
-const {resolve} = require('path');
+import {compare as _compare} from '../../../utils/testing';
 
-const getOptions = (fixture: string, type: string): object =>
-  require(resolve(__dirname, 'fixtures', type, fixture, 'options.js'));
-
-const compare = async (fixture: string, type: string): Promise<void> => {
-  const options = getOptions(fixture, type);
-  const fixtureDir = resolve(__dirname, 'fixtures', type, fixture);
-
-  const {code: inputCode} = await transformFileAsync(
-    resolve(fixtureDir, 'input.ts'),
-    options,
-  );
-
-  expect(inputCode).toMatchSnapshot();
-};
+const compare = async (fixture: string, type: string): Promise<void> =>
+  _compare(__dirname, fixture, type);
 
 describe('AST Decorators', () => {
   describe('class', () => {

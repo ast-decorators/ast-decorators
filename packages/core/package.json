@@ -1,0 +1,16 @@
+{
+  "name": "@ast-decorators/core",
+  "version": "0.1.0",
+  "description": "AST Decorators core plugin",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "npm run build:remove && run-p build:js build:dts",
+    "build:js": "babel src -d lib -x .ts --config-file ../../babel.config.json",
+    "build:dts": "tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:remove": "rimraf lib",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@babel/types": "^7"
+  }
+}
