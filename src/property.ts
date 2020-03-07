@@ -3,19 +3,17 @@ import {Decorator, isClassDeclaration, isClassExpression} from '@babel/types';
 import processDecorator, {DecoratorProcessorOptions} from './processor';
 import {DecorableClass, DecorableClassMember} from './utils';
 
-const processClassPropertyOrMethodDecorator = (
+const processClassMemberDecorator = (
   decorator: NodePath<Decorator>,
   options: DecoratorProcessorOptions,
 ): void => {
-  const propertyOrMethod = decorator.parentPath as NodePath<
-    DecorableClassMember
-  >;
+  const member = decorator.parentPath as NodePath<DecorableClassMember>;
 
-  const klass = propertyOrMethod.findParent(
+  const klass = member.findParent(
     path => isClassDeclaration(path) || isClassExpression(path),
   ) as NodePath<DecorableClass>;
 
-  processDecorator(decorator, [klass, propertyOrMethod], options);
+  processDecorator(decorator, [klass, member], options);
 };
 
-export default processClassPropertyOrMethodDecorator;
+export default processClassMemberDecorator;

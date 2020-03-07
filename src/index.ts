@@ -2,7 +2,7 @@ import {NodePath} from '@babel/core';
 import {Decorator} from '@babel/types';
 import processClassDecorator from './class';
 import {DecoratorProcessorOptions} from './processor';
-import processClassPropertyOrMethodDecorator from './property';
+import processClassMemberDecorator from './property';
 import {DecorableClass, DecorableClassMember} from './utils';
 
 const processEachDecorator = (
@@ -16,10 +16,14 @@ const processEachDecorator = (
   if (path.node.decorators?.length > 0) {
     const decorators = path.get('decorators') as Array<NodePath<Decorator>>;
 
-    let decorator: NodePath<Decorator> | undefined;
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    while (path.node && (decorator = decorators.pop())) {
-      processor(decorator, opts);
+    // Decorators apply in the reverse order of their storing
+    for (let i = decorators.length - 1; i >= 0; i--) {
+      processor(decorators[i], opts);
+
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (!path.node) {
+        break;
+      }
     }
   }
 };
@@ -36,7 +40,7 @@ const babelPluginAstDecorators = (): object => ({
       path: NodePath<DecorableClassMember>,
       opts: DecoratorProcessorOptions,
     ) {
-      processEachDecorator(path, opts, processClassPropertyOrMethodDecorator);
+      processEachDecorator(path, opts, processClassMemberDecorator);
     },
   },
 });
