@@ -1,0 +1,146 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AST Decorators class compiles decorator for a class 1`] = `
+"\\"use strict\\";
+
+class Link extends HTMLAnchorElement {}
+
+const {
+  extends: _temp
+} = {
+  extends: 'a'
+};
+customElements.define('x-test', {
+  extends: _temp
+});"
+`;
+
+exports[`AST Decorators class compiles decorators imported as namespace 1`] = `
+"\\"use strict\\";
+
+class Link extends HTMLAnchorElement {}
+
+console.log('foo is 1');
+console.log('bar is 0');"
+`;
+
+exports[`AST Decorators class compiles multiple decorators for a class 1`] = `
+"\\"use strict\\";
+
+class Link extends HTMLAnchorElement {}
+
+console.log('foo is 1');
+console.log('bar is 0');"
+`;
+
+exports[`AST Decorators class-member compiles decorator for a private method 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  constructor() {
+    this.#bar = this.#bar.bind(this);
+  }
+
+  #bar() {}
+
+}"
+`;
+
+exports[`AST Decorators class-member compiles decorator for a private property 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  get #bar() {
+    return 50;
+  }
+
+}"
+`;
+
+exports[`AST Decorators class-member compiles decorator for a public method 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  constructor() {
+    this.bar = this.bar.bind(this);
+  }
+
+  bar() {}
+
+}"
+`;
+
+exports[`AST Decorators class-member compiles decorator for a public property 1`] = `
+"\\"use strict\\";
+
+function _barObserver(value) {
+  this.observed = value;
+}
+
+class Foo {
+  #_bar
+
+  get bar() {
+    return this.#_bar;
+  }
+
+  set bar(value) {
+    this.#_bar = value;
+
+    _barObserver.call(this);
+  }
+
+}"
+`;
+
+exports[`AST Decorators class-member compiles decorators imported as a namespace for a method 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  get baz() {
+    console.log('The last is foo');
+    return 100;
+  }
+
+}
+
+console.log('foo is 1');
+console.log('bar is 0');
+
+class Bar {
+  get baz() {
+    console.log('The last is bar');
+    return 10;
+  }
+
+}
+
+console.log('bar is 3');
+console.log('foo is 2');"
+`;
+
+exports[`AST Decorators class-member compiles multiple decorators for a method 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  get baz() {
+    console.log('The last is foo');
+    return 100;
+  }
+
+}
+
+console.log('foo is 1');
+console.log('bar is 0');
+
+class Bar {
+  get baz() {
+    console.log('The last is bar');
+    return 10;
+  }
+
+}
+
+console.log('bar is 3');
+console.log('foo is 2');"
+`;

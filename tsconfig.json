@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "lib": ["dom", "esnext"],
+    "mapRoot": "dist",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "dist",
+    "sourceMap": true,
+    "strict": true,
+    "strictFunctionTypes": false,
+    "stripInternal": true,
+    "target": "esnext"
+  },
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules/!(@open-wc)", "tests/fixtures/**/*"]
+}
