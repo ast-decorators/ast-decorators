@@ -1,12 +1,7 @@
+import {NodePath} from '@babel/core';
 import {Binding} from '@babel/traverse';
 import {
   CallExpression,
-  ClassDeclaration,
-  ClassExpression,
-  ClassMethod,
-  ClassPrivateMethod,
-  ClassPrivateProperty,
-  ClassProperty,
   Decorator,
   Identifier,
   ImportDeclaration,
@@ -17,14 +12,6 @@ import {
   isMemberExpression,
   MemberExpression,
 } from '@babel/types';
-import {NodePath} from '@babel/core';
-
-export type DecorableClass = ClassDeclaration | ClassExpression;
-export type DecorableClassMember =
-  | ClassProperty
-  | ClassPrivateProperty
-  | ClassMethod
-  | ClassPrivateMethod;
 
 const $args = Symbol();
 const $binding = Symbol();

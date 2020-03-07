@@ -1,7 +1,7 @@
+import {DecorableClass, DecorableClassMember} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {Decorator, isClassDeclaration, isClassExpression} from '@babel/types';
 import processDecorator, {DecoratorProcessorOptions} from './processor';
-import {DecorableClass, DecorableClassMember} from './utils';
 
 const processClassMemberDecorator = (
   decorator: NodePath<Decorator>,

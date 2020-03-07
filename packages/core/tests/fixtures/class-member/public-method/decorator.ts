@@ -1,3 +1,4 @@
+import {DecorableClass} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   assignmentExpression,
@@ -10,7 +11,6 @@ import {
   memberExpression,
   thisExpression,
 } from '@babel/types';
-import {DecorableClass} from '../../../../src/utils';
 
 const bind: PropertyDecorator = ((
   _: NodePath<DecorableClass>,

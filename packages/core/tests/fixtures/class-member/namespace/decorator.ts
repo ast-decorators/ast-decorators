@@ -1,3 +1,4 @@
+import {DecorableClass} from '@ast-decorators/typings';
 import {NodePath, template} from '@babel/core';
 import {
   BlockStatement,
@@ -10,7 +11,6 @@ import {
   returnStatement,
   Statement,
 } from '@babel/types';
-import {DecorableClass} from '../../../../src/utils';
 
 let count = 0;
 

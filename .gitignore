@@ -1,6 +1,7 @@
 .idea
 .coverage
 lib
+!packages/typings/lib
 node_modules
 *.tgz
 *.log

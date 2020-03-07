@@ -1,3 +1,4 @@
+import {DecorableClass} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   blockStatement,
@@ -5,7 +6,6 @@ import {
   ClassPrivateProperty,
   returnStatement,
 } from '@babel/types';
-import {DecorableClass} from '../../../../src/utils';
 
 const readonly: PropertyDecorator = ((
   _: NodePath<DecorableClass>,

@@ -1,7 +1,7 @@
+import {DecorableClass} from '@ast-decorators/typings';
 import {template} from '@babel/core';
 import {NodePath} from '@babel/traverse';
 import {cloneNode, Identifier, ObjectExpression, Statement} from '@babel/types';
-import {DecorableClass} from '../../../../src/utils';
 
 export type ElementDecoratorOptions = {
   extends: string;
