@@ -17,6 +17,10 @@ describe('@ast-decorators/core', () => {
     it('compiles decorators imported as namespace', async () => {
       await compare('namespace', 'class');
     });
+
+    it('compiles decorators with params', async () => {
+      await compare('params', 'class');
+    });
   });
 
   describe('class-member', () => {
