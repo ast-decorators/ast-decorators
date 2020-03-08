@@ -1,3 +1,4 @@
+import {ASTDecoratorPluginOptions} from '@ast-decorators/utils/src/commonTypes';
 import {NodePath} from '@babel/core';
 import {
   Decorator,
@@ -10,29 +11,25 @@ import {
   isVariableDeclarator,
 } from '@babel/types';
 import {dirname, resolve} from 'path';
-import DecoratorMetadata from './utils';
+import DecoratorMetadata, {PluginPass} from './utils';
 
 export type DecoratorProcessorArguments = {
   call: readonly NodePath[];
   decorator: readonly NodePath[];
 };
 
-export type DecoratorProcessorOptions = {
-  filename: string;
-};
-
 type ImportProcessorData = {
   args: DecoratorProcessorArguments;
   isCall: boolean;
   metadata: DecoratorMetadata;
-  options: DecoratorProcessorOptions;
+  options: PluginPass<ASTDecoratorPluginOptions>;
 };
 
 const processImportDeclaration = ({
   args,
   isCall,
   metadata,
-  options: {filename},
+  options: {filename, opts},
 }: ImportProcessorData): void => {
   if (!filename) {
     throw new Error(
@@ -56,13 +53,13 @@ const processImportDeclaration = ({
     : mod[(importSpecifier.get('imported') as NodePath<Identifier>).node.name];
 
   const decorator = isCall ? fn(...args.call) : fn;
-  decorator(...args.decorator);
+  decorator(...args.decorator, opts);
 };
 
 const processDecorator = (
   decorator: NodePath<Decorator>,
   args: readonly NodePath[],
-  options: DecoratorProcessorOptions,
+  options: PluginPass<ASTDecoratorPluginOptions>,
 ): void => {
   const expression = decorator.get('expression');
   const isCall = isCallExpression(expression);

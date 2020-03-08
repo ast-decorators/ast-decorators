@@ -1,16 +1,20 @@
-import {DecorableClass, DecorableClassMember} from '@ast-decorators/typings';
+import {
+  DecorableClass,
+  DecorableClassMember,
+} from '@ast-decorators/utils/lib/commonTypes';
+import {ASTDecoratorPluginOptions} from '@ast-decorators/utils/src/commonTypes';
 import {NodePath} from '@babel/core';
 import {Decorator} from '@babel/types';
 import processClassDecorator from './class';
-import {DecoratorProcessorOptions} from './processor';
 import processClassMemberDecorator from './property';
+import {PluginPass} from './utils';
 
 const processEachDecorator = (
   path: NodePath<DecorableClass | DecorableClassMember>,
-  opts: DecoratorProcessorOptions,
+  opts: PluginPass<ASTDecoratorPluginOptions>,
   processor: (
     decorator: NodePath<Decorator>,
-    options: DecoratorProcessorOptions,
+    options: PluginPass<ASTDecoratorPluginOptions>,
   ) => void,
 ): void => {
   if (path.node.decorators?.length > 0) {
@@ -34,13 +38,13 @@ const babelPluginAstDecorators = (): object => ({
   visitor: {
     'ClassDeclaration|ClassExpression'(
       path: NodePath<DecorableClass>,
-      opts: DecoratorProcessorOptions,
+      opts: PluginPass<ASTDecoratorPluginOptions>,
     ) {
       processEachDecorator(path, opts, processClassDecorator);
     },
     'ClassProperty|ClassMethod|ClassPrivateProperty|ClassPrivateMethod'(
       path: NodePath<DecorableClassMember>,
-      opts: DecoratorProcessorOptions,
+      opts: PluginPass<ASTDecoratorPluginOptions>,
     ) {
       processEachDecorator(path, opts, processClassMemberDecorator);
     },

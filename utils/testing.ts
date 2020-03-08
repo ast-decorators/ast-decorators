@@ -1,20 +1,40 @@
 import {transformFileAsync} from '@babel/core';
 import {resolve} from 'path';
 
-const getOptions = (dir: string, fixture: string, type: string): object =>
+const getOptions = (
+  dir: string,
+  type: string,
+  fixture: string,
+  file: string = 'options',
+): object => {
   // eslint-disable-next-line global-require
-  require(resolve(dir, 'fixtures', type, fixture, 'options'));
+  const optionsOrModule = require(resolve(
+    dir,
+    'fixtures',
+    type,
+    fixture,
+    file,
+  ));
+
+  return optionsOrModule.__esModule ? optionsOrModule.default : optionsOrModule;
+};
 
 export const compare = async (
   dir: string,
-  fixture: string,
   type: string,
-  options: object = getOptions(dir, fixture, type),
+  fixture: string,
+  options?: object | string,
 ): Promise<void> => {
+  const finalOptions =
+    typeof options === 'object'
+      ? options
+      : getOptions(dir, type, fixture, options);
+
   const fixtureDir = resolve(dir, 'fixtures', type, fixture);
 
   const {code: inputCode} =
-    (await transformFileAsync(resolve(fixtureDir, 'input.ts'), options)) ?? {};
+    (await transformFileAsync(resolve(fixtureDir, 'input.ts'), finalOptions)) ??
+    {};
 
   expect(inputCode).toMatchSnapshot();
 };

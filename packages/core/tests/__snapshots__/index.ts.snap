@@ -47,6 +47,22 @@ console.log('foo is 1');
 console.log('bar is 0');"
 `;
 
+exports[`@ast-decorators/core class options compiles if privacy set to "hard" 1`] = `
+"\\"use strict\\";
+
+class Link extends HTMLAnchorElement {
+  #_bar = 'baz';
+}"
+`;
+
+exports[`@ast-decorators/core class options compiles if privacy set to "none" 1`] = `
+"\\"use strict\\";
+
+class Link extends HTMLAnchorElement {
+  _bar = 'baz';
+}"
+`;
+
 exports[`@ast-decorators/core class-member compiles decorator for a private method 1`] = `
 "\\"use strict\\";
 

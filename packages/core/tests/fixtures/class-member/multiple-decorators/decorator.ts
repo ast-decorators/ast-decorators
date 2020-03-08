@@ -1,4 +1,4 @@
-import {DecorableClass} from '@ast-decorators/typings';
+import {DecorableClass} from '@ast-decorators/utils/lib/commonTypes';
 import {NodePath, template} from '@babel/core';
 import {
   BlockStatement,
