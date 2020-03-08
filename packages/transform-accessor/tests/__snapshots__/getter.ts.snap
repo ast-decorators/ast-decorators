@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@ast-decorators/transform-accessor @getter compiles for decorator without properties 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  #_bar
+
+  get bar() {
+    return this.#_bar;
+  }
+
+}"
+`;
