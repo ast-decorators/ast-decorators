@@ -1,1 +1,1 @@
-tests/fixtures/**/*
+packages/*/tests/fixtures/**/*

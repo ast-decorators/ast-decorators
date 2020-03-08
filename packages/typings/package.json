@@ -1,0 +1,9 @@
+{
+  "name": "@ast-decorators/typings",
+  "version": "0.1.0",
+  "description": "AST Decorators core plugin",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}
