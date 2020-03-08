@@ -13,14 +13,14 @@ import {
   MemberExpression,
 } from '@babel/types';
 
-const $args = Symbol();
-const $binding = Symbol();
-const $id = Symbol();
-const $object = Symbol();
+const $args = Symbol('args');
+const $binding = Symbol('binding');
+const $id = Symbol('id');
+const $object = Symbol('object');
 
-const $handleDecoratorWithArgs = Symbol();
-const $handleDecoratorWithoutArgs = Symbol();
-const $handleMemberDecorator = Symbol();
+const $handleDecoratorWithArgs = Symbol('handleDecoratorWithArgs');
+const $handleDecoratorWithoutArgs = Symbol('handleDecoratorWithoutArgs');
+const $handleMemberDecorator = Symbol('handleMemberDecorator');
 
 export default class DecoratorMetadata {
   private [$args]?: readonly NodePath[];
@@ -47,7 +47,7 @@ export default class DecoratorMetadata {
   }
 
   public get args(): readonly NodePath[] {
-    return this[$args] || [];
+    return this[$args] ?? [];
   }
 
   public get binding(): Binding | undefined {

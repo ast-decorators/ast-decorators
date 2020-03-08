@@ -14,7 +14,9 @@ const processEachDecorator = (
   ) => void,
 ): void => {
   if (path.node.decorators?.length > 0) {
-    const decorators = path.get('decorators') as Array<NodePath<Decorator>>;
+    const decorators = path.get('decorators') as ReadonlyArray<
+      NodePath<Decorator>
+    >;
 
     // Decorators apply in the reverse order of their storing
     for (let i = decorators.length - 1; i >= 0; i--) {
