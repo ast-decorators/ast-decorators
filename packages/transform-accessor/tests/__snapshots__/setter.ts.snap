@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@ast-decorators/transform-accessor @setter compiles for decorator with inline arrow function interceptor 1`] = `
+"\\"use strict\\";
+
+const _setInterceptor = value => {
+  console.log(value);
+  return value;
+};
+
+class Foo {
+  #_bar
+
+  set bar(_value) {
+    this.#_bar = _setInterceptor(_value);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter compiles for decorator with inline function interceptor 1`] = `
+"\\"use strict\\";
+
+const _setInterceptor = function (value) {
+  console.log(value);
+  return value;
+};
+
+class Foo {
+  #_bar
+
+  set bar(_value) {
+    this.#_bar = _setInterceptor(_value);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter compiles for decorator with interceptor declared somewhere else 1`] = `
+"\\"use strict\\";
+
+const set = value => {
+  console.log(value);
+  return value;
+};
+
+class Foo {
+  #_bar
+
+  set bar(_value) {
+    this.#_bar = set(_value);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter compiles for decorator without interceptor 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  #_bar
+
+  set bar(_value) {
+    this.#_bar = _value;
+  }
+
+}"
+`;

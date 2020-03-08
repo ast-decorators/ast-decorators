@@ -19,7 +19,7 @@ import {
 } from '@babel/types';
 import {
   AccessorInterceptor,
-  AccessorInterseptorNode,
+  AccessorInterceptorNode,
   createAccessorDecorator,
   DecoratorImplementation,
   generateAccessorInterceptor,
@@ -28,10 +28,10 @@ import {
 export const _setter: DecoratorImplementation = (
   klass,
   member,
-  get,
+  set,
   storage,
 ): ClassMethod | ClassPrivateMethod => {
-  const setId = generateAccessorInterceptor(klass, get);
+  const setId = generateAccessorInterceptor(klass, set, 'set');
 
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const valueId = classBody.scope.generateUidIdentifier('value');
@@ -63,10 +63,10 @@ export const _setter: DecoratorImplementation = (
   );
 };
 
-const setter = (set: AccessorInterceptor): PropertyDecorator =>
+const setter = (set?: AccessorInterceptor): PropertyDecorator =>
   createAccessorDecorator(
     'setter',
-    (set as unknown) as NodePath<AccessorInterseptorNode>,
+    (set as unknown) as NodePath<AccessorInterceptorNode> | undefined,
     _setter,
   ) as any;
 

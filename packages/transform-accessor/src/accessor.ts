@@ -1,41 +1,41 @@
-import {DecorableClass, DecorableClassMember} from '@ast-decorators/typings';
+import {DecorableClass} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {_getter} from './getter';
 import {_setter} from './setter';
 import {
   AccessorAllowedMember,
   AccessorInterceptor,
-  AccessorInterseptorNode,
+  AccessorInterceptorNode,
   assert,
   createStorage,
 } from './utils';
 
 const accessor = (
-  get: AccessorInterceptor,
-  set: AccessorInterceptor,
+  get?: AccessorInterceptor,
+  set?: AccessorInterceptor,
 ): PropertyDecorator =>
   ((
     klass: NodePath<DecorableClass>,
-    member: NodePath<DecorableClassMember>,
+    member: NodePath<AccessorAllowedMember>,
   ) => {
-    assert('accessor', member as NodePath<AccessorAllowedMember>);
+    assert('accessor', member, [
+      (get as unknown) as NodePath<AccessorInterceptorNode>,
+      (set as unknown) as NodePath<AccessorInterceptorNode>,
+    ]);
 
-    const storage = createStorage(
-      klass,
-      member as NodePath<AccessorAllowedMember>,
-    );
+    const storage = createStorage(klass, member);
 
     const getter = _getter(
       klass,
-      member as NodePath<AccessorAllowedMember>,
-      (get as unknown) as NodePath<AccessorInterseptorNode>,
+      member,
+      (get as unknown) as NodePath<AccessorInterceptorNode>,
       storage,
     );
 
     const setter = _setter(
       klass,
-      member as NodePath<AccessorAllowedMember>,
-      (set as unknown) as NodePath<AccessorInterseptorNode>,
+      member,
+      (set as unknown) as NodePath<AccessorInterceptorNode>,
       storage,
     );
 

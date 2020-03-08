@@ -17,7 +17,7 @@ import {
 } from '@babel/types';
 import {
   AccessorInterceptor,
-  AccessorInterseptorNode,
+  AccessorInterceptorNode,
   createAccessorDecorator,
   DecoratorImplementation,
   generateAccessorInterceptor,
@@ -29,7 +29,7 @@ export const _getter: DecoratorImplementation = (
   get,
   storage,
 ): ClassMethod | ClassPrivateMethod => {
-  const getId = generateAccessorInterceptor(klass, get);
+  const getId = generateAccessorInterceptor(klass, get, 'get');
 
   const value = memberExpression(thisExpression(), storage);
 
@@ -52,7 +52,7 @@ export const _getter: DecoratorImplementation = (
 const getter = (get?: AccessorInterceptor): PropertyDecorator =>
   createAccessorDecorator(
     'getter',
-    (get as unknown) as NodePath<AccessorInterseptorNode> | undefined,
+    (get as unknown) as NodePath<AccessorInterceptorNode> | undefined,
     _getter,
   ) as any;
 

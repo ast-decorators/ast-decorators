@@ -5,21 +5,21 @@ const compare = async (fixture: string, type: string): Promise<void> =>
   _compare(__dirname, fixture, type, options);
 
 describe('@ast-decorators/transform-accessor', () => {
-  describe('@getter', () => {
+  describe('@setter', () => {
     it('compiles for decorator without interceptor', async () => {
-      await compare('default', 'getter');
+      await compare('default', 'setter');
     });
 
     it('compiles for decorator with inline arrow function interceptor', async () => {
-      await compare('inline-arrow', 'getter');
+      await compare('inline-arrow', 'setter');
     });
 
     it('compiles for decorator with inline function interceptor', async () => {
-      await compare('inline-function', 'getter');
+      await compare('inline-function', 'setter');
     });
 
     it('compiles for decorator with interceptor declared somewhere else', async () => {
-      await compare('var', 'getter');
+      await compare('var', 'setter');
     });
   });
 });

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   comments: false,
   presets: [require('@babel/preset-typescript')],
   plugins: [
