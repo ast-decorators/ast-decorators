@@ -1,11 +1,16 @@
-import {DecorableClass, DecorableClassMember} from '@ast-decorators/typings';
+import {
+  DecorableClass,
+  DecorableClassMember,
+} from '@ast-decorators/utils/lib/commonTypes';
+import {ASTDecoratorPluginOptions} from '@ast-decorators/utils/src/commonTypes';
 import {NodePath} from '@babel/core';
 import {Decorator, isClassDeclaration, isClassExpression} from '@babel/types';
-import processDecorator, {DecoratorProcessorOptions} from './processor';
+import processDecorator from './processor';
+import {PluginPass} from './utils';
 
 const processClassMemberDecorator = (
   decorator: NodePath<Decorator>,
-  options: DecoratorProcessorOptions,
+  options: PluginPass<ASTDecoratorPluginOptions>,
 ): void => {
   const member = decorator.parentPath as NodePath<DecorableClassMember>;
 

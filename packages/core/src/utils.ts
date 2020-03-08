@@ -1,4 +1,4 @@
-import {NodePath} from '@babel/core';
+import {BabelFileResult, NodePath} from '@babel/core';
 import {Binding} from '@babel/traverse';
 import {
   CallExpression,
@@ -12,6 +12,14 @@ import {
   isMemberExpression,
   MemberExpression,
 } from '@babel/types';
+
+export type PluginPass<T> = Readonly<{
+  cwd: string;
+  file: BabelFileResult;
+  filename?: string;
+  key: string;
+  opts?: T;
+}>;
 
 const $args = Symbol('args');
 const $binding = Symbol('binding');
