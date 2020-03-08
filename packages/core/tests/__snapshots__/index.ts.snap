@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AST Decorators class compiles decorator for a class 1`] = `
+exports[`@ast-decorators/core class compiles decorator for a class 1`] = `
 "\\"use strict\\";
 
 class Link extends HTMLAnchorElement {}
@@ -15,7 +15,7 @@ customElements.define('x-test', {
 });"
 `;
 
-exports[`AST Decorators class compiles decorators imported as namespace 1`] = `
+exports[`@ast-decorators/core class compiles decorators imported as namespace 1`] = `
 "\\"use strict\\";
 
 class Link extends HTMLAnchorElement {}
@@ -24,7 +24,7 @@ console.log('foo is 1');
 console.log('bar is 0');"
 `;
 
-exports[`AST Decorators class compiles multiple decorators for a class 1`] = `
+exports[`@ast-decorators/core class compiles multiple decorators for a class 1`] = `
 "\\"use strict\\";
 
 class Link extends HTMLAnchorElement {}
@@ -33,7 +33,7 @@ console.log('foo is 1');
 console.log('bar is 0');"
 `;
 
-exports[`AST Decorators class-member compiles decorator for a private method 1`] = `
+exports[`@ast-decorators/core class-member compiles decorator for a private method 1`] = `
 "\\"use strict\\";
 
 class Foo {
@@ -46,7 +46,7 @@ class Foo {
 }"
 `;
 
-exports[`AST Decorators class-member compiles decorator for a private property 1`] = `
+exports[`@ast-decorators/core class-member compiles decorator for a private property 1`] = `
 "\\"use strict\\";
 
 class Foo {
@@ -57,7 +57,7 @@ class Foo {
 }"
 `;
 
-exports[`AST Decorators class-member compiles decorator for a public method 1`] = `
+exports[`@ast-decorators/core class-member compiles decorator for a public method 1`] = `
 "\\"use strict\\";
 
 class Foo {
@@ -70,7 +70,7 @@ class Foo {
 }"
 `;
 
-exports[`AST Decorators class-member compiles decorator for a public property 1`] = `
+exports[`@ast-decorators/core class-member compiles decorator for a public property 1`] = `
 "\\"use strict\\";
 
 function _barObserver(value) {
@@ -93,7 +93,7 @@ class Foo {
 }"
 `;
 
-exports[`AST Decorators class-member compiles decorators imported as a namespace for a method 1`] = `
+exports[`@ast-decorators/core class-member compiles decorators imported as a namespace for a method 1`] = `
 "\\"use strict\\";
 
 class Foo {
@@ -119,7 +119,7 @@ console.log('bar is 3');
 console.log('foo is 2');"
 `;
 
-exports[`AST Decorators class-member compiles multiple decorators for a method 1`] = `
+exports[`@ast-decorators/core class-member compiles multiple decorators for a method 1`] = `
 "\\"use strict\\";
 
 class Foo {

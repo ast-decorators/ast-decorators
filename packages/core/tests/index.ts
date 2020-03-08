@@ -3,7 +3,7 @@ import {compare as _compare} from '../../../utils/testing';
 const compare = async (fixture: string, type: string): Promise<void> =>
   _compare(__dirname, fixture, type);
 
-describe('AST Decorators', () => {
+describe('@ast-decorators/core', () => {
   describe('class', () => {
     it('compiles decorator for a class', async () => {
       await compare('default', 'class');
