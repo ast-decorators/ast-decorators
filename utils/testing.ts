@@ -9,8 +9,8 @@ export const compare = async (
   dir: string,
   fixture: string,
   type: string,
+  options: object = getOptions(dir, fixture, type),
 ): Promise<void> => {
-  const options = getOptions(dir, fixture, type);
   const fixtureDir = resolve(dir, 'fixtures', type, fixture);
 
   const {code: inputCode} =
