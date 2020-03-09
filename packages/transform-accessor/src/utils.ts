@@ -4,6 +4,8 @@ import {
   DecorableClass,
 } from '@ast-decorators/typings';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
+import getMemberName from '@ast-decorators/utils/lib/getMemberName';
+import getOverridableOption from '@ast-decorators/utils/lib/getOverridableOption';
 import {NodePath, template} from '@babel/core';
 import {
   ArrowFunctionExpression,
@@ -18,8 +20,6 @@ import {
   isClassProperty,
   isFunctionExpression,
   isIdentifier,
-  isNumericLiteral,
-  isStringLiteral,
   PrivateName,
 } from '@babel/types';
 
@@ -66,28 +66,21 @@ export const assert = (
   }
 };
 
-export const getKeyName = (node: AccessorAllowedMember): string | undefined => {
-  if (isClassProperty(node)) {
-    return isIdentifier(node.key)
-      ? node.key.name
-      : isStringLiteral(node.key) || isNumericLiteral(node.key)
-      ? String(node.key.value)
-      : undefined;
-  }
-
-  return node.key.id.name;
-};
-
 export const createStorage = (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
-  {privacy = 'hard', override}: ASTDecoratorPluginOptions = {},
+  options?: ASTDecoratorPluginOptions,
 ): AccessorAllowedMember => {
-  const finalPrivacy = override?.[PLUGIN_NAME]?.privacy ?? privacy;
+  const finalPrivacy = getOverridableOption(
+    options,
+    'privacy',
+    PLUGIN_NAME,
+    'hard',
+  );
 
   return createPropertyByPrivacy(
     finalPrivacy,
-    getKeyName(member.node),
+    String(getMemberName(member.node)),
     member.node.value,
     klass,
   );
