@@ -161,7 +161,8 @@ export const injectInterceptor = (
 ): CallExpression => {
   const interceptorId = generateInterceptor(klass, interceptor, type);
 
-  return isArrowFunctionExpression(interceptor) || !allowThisContext
+  return isArrowFunctionExpression(interceptor) ||
+    (isIdentifier(interceptor) && !allowThisContext)
     ? callExpression(interceptorId, [value])
     : callExpression(memberExpression(interceptorId, identifier('call')), [
         thisExpression(),
