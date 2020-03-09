@@ -16,17 +16,17 @@ export type DecorableClassMember =
   | ClassPrivateMethod;
 
 export type ASTDecoratorPluginOptions = Readonly<{
-  privacy: 'hard' | 'soft' | 'none';
-  override: Record<string, Omit<ASTDecoratorPluginOptions, 'override'>>;
+  privacy?: 'hard' | 'soft' | 'none';
+  override?: Record<string, Omit<ASTDecoratorPluginOptions, 'override'>>;
 }>;
 
 export type ASTClassDecorator = (
   klass: NodePath<DecorableClass>,
-  opts: ASTDecoratorPluginOptions,
+  opts?: ASTDecoratorPluginOptions,
 ) => void;
 
 export type ASTClassMemberDecorator = (
   klass: NodePath<DecorableClass>,
   member: NodePath<DecorableClassMember>,
-  opts: ASTDecoratorPluginOptions,
+  opts?: ASTDecoratorPluginOptions,
 ) => void;
