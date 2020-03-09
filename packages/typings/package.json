@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "AST Decorators core plugin",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit"
   }

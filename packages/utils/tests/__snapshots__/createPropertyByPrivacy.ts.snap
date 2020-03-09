@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@ast-decorators/utils createPropertyByPrivacy compiles for decorator with hard privacy option 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  #_bar = \\"baz\\";
+  bar;
+}"
+`;
+
+exports[`@ast-decorators/utils createPropertyByPrivacy compiles for decorator with none privacy option 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  _bar = \\"baz\\";
+  bar;
+}"
+`;
+
+exports[`@ast-decorators/utils createPropertyByPrivacy compiles for decorator with soft privacy option 1`] = `
+"\\"use strict\\";
+
+const _bar = Symbol();
+
+class Foo {
+  [_bar] = \\"baz\\";
+  bar;
+}"
+`;
