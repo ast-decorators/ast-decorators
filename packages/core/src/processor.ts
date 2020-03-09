@@ -1,4 +1,4 @@
-import {ASTDecoratorPluginOptions} from '@ast-decorators/utils/src/commonTypes';
+import {ASTDecoratorPluginOptions} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   Decorator,
@@ -13,7 +13,7 @@ import {
 import {dirname, resolve} from 'path';
 import DecoratorMetadata, {PluginPass} from './utils';
 
-export type DecoratorProcessorArguments = {
+type DecoratorProcessorArguments = {
   call: readonly NodePath[];
   decorator: readonly NodePath[];
 };

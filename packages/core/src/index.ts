@@ -1,8 +1,8 @@
 import {
+  ASTDecoratorPluginOptions,
   DecorableClass,
   DecorableClassMember,
-} from '@ast-decorators/utils/lib/commonTypes';
-import {ASTDecoratorPluginOptions} from '@ast-decorators/utils/src/commonTypes';
+} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {Decorator} from '@babel/types';
 import processClassDecorator from './class';

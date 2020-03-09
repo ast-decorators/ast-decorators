@@ -20,11 +20,16 @@
     "stripInternal": true,
     "target": "esnext"
   },
-  "include": ["packages/**/*", "utils/**/*", "jest.config.js"],
+  "include": [
+    "packages/**/*",
+    "packages/typings/lib/**/*",
+    "utils/**/*",
+    "jest.config.js"
+  ],
   "exclude": [
     "node_modules/!(@open-wc)",
     "packages/*/tests/fixtures/**/*",
-    "packages/*/lib/**/*",
+    "packages/!(typings)/lib/**/*",
     "packages/*/node_modules/**/*"
   ]
 }
