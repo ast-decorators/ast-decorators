@@ -1,8 +1,12 @@
-import {DecorableClass} from '@ast-decorators/typings';
+import {
+  ASTClassMemberDecorator,
+  ASTDecoratorPluginOptions,
+  DecorableClass,
+} from '@ast-decorators/typings';
+import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import {NodePath, template} from '@babel/core';
 import {
   ArrowFunctionExpression,
-  ClassBody,
   ClassMethod,
   ClassPrivateMethod,
   ClassPrivateProperty,
@@ -16,9 +20,10 @@ import {
   isIdentifier,
   isNumericLiteral,
   isStringLiteral,
-  privateName,
   PrivateName,
 } from '@babel/types';
+
+const PLUGIN_NAME = '@ast-decorators/transform-accessor';
 
 export type AccessorAllowedMember = ClassProperty | ClassPrivateProperty;
 
@@ -33,7 +38,7 @@ export type DecoratorImplementation = (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
-  storage: PrivateName,
+  storage: Identifier | PrivateName,
 ) => ClassMethod | ClassPrivateMethod;
 
 export const assert = (
@@ -43,8 +48,7 @@ export const assert = (
 ): void => {
   if (!isClassProperty(member) && !isClassPrivateProperty(member)) {
     throw new Error(
-      `Applying @${decorator} decorator to something other than property is` +
-        ' not allowed',
+      `Applying @${decorator} decorator to something other than property is not allowed`,
     );
   }
 
@@ -56,7 +60,7 @@ export const assert = (
       !isIdentifier(accessor)
     ) {
       throw new Error(
-        'Accessor interceptor can be only function or a variable identifier',
+        'Accessor interceptor can only be function or a variable identifier',
       );
     }
   }
@@ -77,12 +81,17 @@ export const getKeyName = (node: AccessorAllowedMember): string | undefined => {
 export const createStorage = (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
-): PrivateName =>
-  privateName(
-    (klass.get('body') as NodePath<ClassBody>).scope.generateUidIdentifier(
-      getKeyName(member.node),
-    ),
+  {privacy = 'hard', override}: ASTDecoratorPluginOptions = {},
+): AccessorAllowedMember => {
+  const finalPrivacy = override?.[PLUGIN_NAME]?.privacy ?? privacy;
+
+  return createPropertyByPrivacy(
+    finalPrivacy,
+    getKeyName(member.node),
+    member.node.value,
+    klass,
   );
+};
 
 const declarator = template(`const VAR = FUNCTION`);
 
@@ -90,9 +99,9 @@ export const generateAccessorInterceptor = (
   klass: NodePath<DecorableClass>,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
   type: 'get' | 'set',
-): Identifier | undefined => {
+): Identifier | null => {
   if (!accessor) {
-    return undefined;
+    return null;
   }
 
   let accessorId: Identifier;
@@ -118,14 +127,21 @@ export const createAccessorDecorator = (
   decorator: string,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
   impl: DecoratorImplementation,
-) => (
+): ASTClassMemberDecorator => (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
+  options?: ASTDecoratorPluginOptions,
 ): void => {
   assert(decorator, member, [accessor]);
 
-  const storage = createStorage(klass, member);
-  const method = impl(klass, member, accessor, storage);
+  const storage = createStorage(klass, member, options);
+
+  const method = impl(
+    klass,
+    member,
+    accessor,
+    storage.key as Identifier | PrivateName,
+  );
 
   member.replaceWithMultiple([storage, method]);
 };

@@ -49,11 +49,9 @@ export const _getter: DecoratorImplementation = (
   );
 };
 
-const getter = (get?: AccessorInterceptor): PropertyDecorator =>
-  createAccessorDecorator(
-    'getter',
-    (get as unknown) as NodePath<AccessorInterceptorNode> | undefined,
-    _getter,
-  ) as any;
+export type GetterDecorator = (get?: AccessorInterceptor) => PropertyDecorator;
+
+const getter: GetterDecorator = ((get?: NodePath<AccessorInterceptorNode>) =>
+  createAccessorDecorator('getter', get, _getter)) as any;
 
 export default getter;

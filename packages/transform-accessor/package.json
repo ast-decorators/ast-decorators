@@ -1,7 +1,7 @@
 {
   "name": "@ast-decorators/transform-accessor",
   "version": "0.1.0",
-  "description": "AST Decorators core plugin",
+  "description": "Transforms a property to an accessor with interceptors",
   "main": "lib/index.js",
   "scripts": {
     "build": "npm run build:remove && run-p build:js build:dts",
@@ -13,6 +13,8 @@
   "dependencies": {
     "@ast-decorators/core": "^0.1.0",
     "@ast-decorators/typings": "^0.1.0",
+    "@ast-decorators/utils": "^0.1.0",
+    "@babel/template": "^7",
     "@babel/types": "^7"
   }
 }

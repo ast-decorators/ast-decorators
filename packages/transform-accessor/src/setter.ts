@@ -63,11 +63,9 @@ export const _setter: DecoratorImplementation = (
   );
 };
 
-const setter = (set?: AccessorInterceptor): PropertyDecorator =>
-  createAccessorDecorator(
-    'setter',
-    (set as unknown) as NodePath<AccessorInterceptorNode> | undefined,
-    _setter,
-  ) as any;
+export type SetterDecorator = (set?: AccessorInterceptor) => PropertyDecorator;
+
+const setter: SetterDecorator = ((set?: NodePath<AccessorInterceptorNode>) =>
+  createAccessorDecorator('setter', set, _setter)) as any;
 
 export default setter;

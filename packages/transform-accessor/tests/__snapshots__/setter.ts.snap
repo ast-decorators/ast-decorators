@@ -1,5 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`@ast-decorators/transform-accessor @setter compiles for decorator on private property 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  #_bar;
+
+  set #bar(_value) {
+    this.#_bar = _value;
+  }
+
+}"
+`;
+
 exports[`@ast-decorators/transform-accessor @setter compiles for decorator with inline arrow function interceptor 1`] = `
 "\\"use strict\\";
 
@@ -9,7 +22,7 @@ const _setInterceptor = value => {
 };
 
 class Foo {
-  #_bar
+  #_bar;
 
   set bar(_value) {
     this.#_bar = _setInterceptor(_value);
@@ -27,7 +40,7 @@ const _setInterceptor = function (value) {
 };
 
 class Foo {
-  #_bar
+  #_bar;
 
   set bar(_value) {
     this.#_bar = _setInterceptor(_value);
@@ -45,7 +58,7 @@ const set = value => {
 };
 
 class Foo {
-  #_bar
+  #_bar;
 
   set bar(_value) {
     this.#_bar = set(_value);
@@ -58,7 +71,7 @@ exports[`@ast-decorators/transform-accessor @setter compiles for decorator witho
 "\\"use strict\\";
 
 class Foo {
-  #_bar
+  #_bar;
 
   set bar(_value) {
     this.#_bar = _value;
