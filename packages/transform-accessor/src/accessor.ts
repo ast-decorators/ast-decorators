@@ -2,8 +2,8 @@ import {ASTClassMemberDecorator} from '@ast-decorators/typings';
 import {PrivateName} from '@ast-decorators/utils/node_modules/@babel/types';
 import {NodePath} from '@babel/core';
 import {Identifier} from '@babel/types';
-import {_getter} from './getter';
-import {_setter} from './setter';
+import {createGetterMethod} from './getter';
+import {createSetterMethod} from './setter';
 import {
   AccessorAllowedMember,
   AccessorInterceptor,
@@ -28,13 +28,13 @@ const accessor: AccessorDecorator = ((
   assert('accessor', member, [get, set]);
 
   const storage = createStorage(klass, member, options);
-  const getter = _getter(
+  const getter = createGetterMethod(
     klass,
     member,
     get,
     storage.key as Identifier | PrivateName,
   );
-  const setter = _setter(
+  const setter = createSetterMethod(
     klass,
     member,
     set,

@@ -21,18 +21,17 @@ import {
   AccessorInterceptor,
   AccessorInterceptorNode,
   createAccessorDecorator,
-  DecoratorImplementation,
+  AccessorMethodCreator,
   generateAccessorInterceptor,
 } from './utils';
 
-export const _setter: DecoratorImplementation = (
+export const createSetterMethod: AccessorMethodCreator = (
   klass,
   member,
-  set,
-  storage,
+  interceptor,
+  storageProperty,
 ): ClassMethod | ClassPrivateMethod => {
-  const setId = generateAccessorInterceptor(klass, set, 'set');
-
+  const interceptorId = generateAccessorInterceptor(klass, interceptor, 'set');
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const valueId = classBody.scope.generateUidIdentifier('value');
 
@@ -40,8 +39,8 @@ export const _setter: DecoratorImplementation = (
     expressionStatement(
       assignmentExpression(
         '=',
-        memberExpression(thisExpression(), storage),
-        setId ? callExpression(setId, [valueId]) : valueId,
+        memberExpression(thisExpression(), storageProperty),
+        interceptorId ? callExpression(interceptorId, [valueId]) : valueId,
       ),
     ),
   ]);
@@ -66,6 +65,6 @@ export const _setter: DecoratorImplementation = (
 export type SetterDecorator = (set?: AccessorInterceptor) => PropertyDecorator;
 
 const setter: SetterDecorator = ((set?: NodePath<AccessorInterceptorNode>) =>
-  createAccessorDecorator('setter', set, _setter)) as any;
+  createAccessorDecorator('setter', set, createSetterMethod)) as any;
 
 export default setter;

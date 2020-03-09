@@ -26,15 +26,13 @@ import {
 const PLUGIN_NAME = '@ast-decorators/transform-accessor';
 
 export type AccessorAllowedMember = ClassProperty | ClassPrivateProperty;
-
 export type AccessorInterceptor = (value: any) => any;
-
 export type AccessorInterceptorNode =
   | FunctionExpression
   | ArrowFunctionExpression
   | Identifier;
 
-export type DecoratorImplementation = (
+export type AccessorMethodCreator = (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
@@ -119,7 +117,7 @@ export const generateAccessorInterceptor = (
 export const createAccessorDecorator = (
   decorator: string,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
-  impl: DecoratorImplementation,
+  impl: AccessorMethodCreator,
 ): ASTClassMemberDecorator => (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,

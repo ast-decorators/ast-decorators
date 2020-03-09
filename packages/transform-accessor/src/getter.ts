@@ -19,22 +19,23 @@ import {
   AccessorInterceptor,
   AccessorInterceptorNode,
   createAccessorDecorator,
-  DecoratorImplementation,
+  AccessorMethodCreator,
   generateAccessorInterceptor,
 } from './utils';
 
-export const _getter: DecoratorImplementation = (
+export const createGetterMethod: AccessorMethodCreator = (
   klass,
   member,
-  get,
-  storage,
+  interceptor,
+  storageProperty,
 ): ClassMethod | ClassPrivateMethod => {
-  const getId = generateAccessorInterceptor(klass, get, 'get');
-
-  const value = memberExpression(thisExpression(), storage);
+  const interceptorId = generateAccessorInterceptor(klass, interceptor, 'get');
+  const value = memberExpression(thisExpression(), storageProperty);
 
   const body = blockStatement([
-    returnStatement(getId ? callExpression(getId, [value]) : value),
+    returnStatement(
+      interceptorId ? callExpression(interceptorId, [value]) : value,
+    ),
   ]);
 
   if (isClassPrivateProperty(member)) {
@@ -52,6 +53,6 @@ export const _getter: DecoratorImplementation = (
 export type GetterDecorator = (get?: AccessorInterceptor) => PropertyDecorator;
 
 const getter: GetterDecorator = ((get?: NodePath<AccessorInterceptorNode>) =>
-  createAccessorDecorator('getter', get, _getter)) as any;
+  createAccessorDecorator('getter', get, createGetterMethod)) as any;
 
 export default getter;
