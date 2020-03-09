@@ -1,4 +1,4 @@
-import {DecorableClass} from '@ast-decorators/utils/lib/commonTypes';
+import {DecorableClass} from '@ast-decorators/typings';
 import {template} from '@babel/core';
 import {NodePath} from '@babel/traverse';
 import {
@@ -18,7 +18,7 @@ export type ElementDecorator = (
   options?: ElementDecoratorOptions,
 ) => ClassDecorator;
 
-const element: ElementDecorator = ((
+export const element: ElementDecorator = ((
   name: NodePath<StringLiteral>,
   options?: NodePath<ObjectExpression>,
 ) => (klass: NodePath<DecorableClass>) => {
@@ -38,5 +38,3 @@ const element: ElementDecorator = ((
 
   klass.replaceWithMultiple([cloneNode(klass.node), ...customElementNodes]);
 }) as any;
-
-export default element;

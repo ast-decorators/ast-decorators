@@ -1,4 +1,4 @@
-import {foo, bar} from './decorator';
+import {foo, bar} from './decorators';
 
 // @ts-ignore
 class Foo {

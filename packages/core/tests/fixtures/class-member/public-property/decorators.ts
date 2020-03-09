@@ -1,4 +1,4 @@
-import {DecorableClass} from '@ast-decorators/utils/lib/commonTypes';
+import {DecorableClass} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   assignmentExpression,
@@ -23,7 +23,7 @@ export type ObserveDecorator = (
   observer: (value: any) => void,
 ) => PropertyDecorator;
 
-const observe: ObserveDecorator = ((
+export const observe: ObserveDecorator = ((
   observer: NodePath<FunctionExpression>,
 ) => (
   klass: NodePath<DecorableClass>,
@@ -83,5 +83,3 @@ const observe: ObserveDecorator = ((
   klass.insertBefore(outerObserver);
   property.replaceWithMultiple([privateProperty, getter, setter]);
 }) as any;
-
-export default observe;

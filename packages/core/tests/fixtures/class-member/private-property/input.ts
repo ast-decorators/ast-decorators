@@ -1,5 +1,5 @@
 // @ts-ignore
-import readonly from './decorator';
+import {readonly} from './decorators';
 
 // @ts-ignore
 class Foo {

@@ -1,4 +1,4 @@
-import {DecorableClass} from '@ast-decorators/utils/lib/commonTypes';
+import {DecorableClass} from '@ast-decorators/typings';
 import {template} from '@babel/core';
 import {NodePath} from '@babel/traverse';
 import {Statement} from '@babel/types';
