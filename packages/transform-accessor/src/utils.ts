@@ -9,18 +9,25 @@ import getOverridableOption from '@ast-decorators/utils/lib/getOverridableOption
 import {NodePath, template} from '@babel/core';
 import {
   ArrowFunctionExpression,
+  callExpression,
+  CallExpression,
   ClassMethod,
   ClassPrivateMethod,
   ClassPrivateProperty,
   ClassProperty,
+  functionDeclaration,
   FunctionExpression,
+  identifier,
   Identifier,
   isArrowFunctionExpression,
   isClassPrivateProperty,
   isClassProperty,
   isFunctionExpression,
   isIdentifier,
+  memberExpression,
+  MemberExpression,
   PrivateName,
+  thisExpression,
 } from '@babel/types';
 
 const PLUGIN_NAME = '@ast-decorators/transform-accessor';
@@ -37,6 +44,7 @@ export type AccessorMethodCreator = (
   member: NodePath<AccessorAllowedMember>,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
   storage: Identifier | PrivateName,
+  allowThisContext: boolean,
 ) => ClassMethod | ClassPrivateMethod;
 
 export const assert = (
@@ -86,29 +94,34 @@ export const createStorage = (
 
 const declarator = template(`const VAR = FUNCTION`);
 
-export const generateAccessorInterceptor = (
+export const generateInterceptor = (
   klass: NodePath<DecorableClass>,
-  accessor: NodePath<AccessorInterceptorNode> | undefined,
+  interceptor: AccessorInterceptorNode,
   type: 'get' | 'set',
-): Identifier | null => {
-  if (!accessor) {
-    return null;
-  }
+): Identifier => {
+  const isArrow = isArrowFunctionExpression(interceptor);
+  const isRegular = isFunctionExpression(interceptor);
 
-  let accessorId: Identifier;
+  const accessorId =
+    isArrow || isRegular
+      ? klass.parentPath.scope.generateUidIdentifier(`${type}Interceptor`)
+      : (interceptor as Identifier);
 
-  if (isFunctionExpression(accessor) || isArrowFunctionExpression(accessor)) {
-    accessorId = klass.parentPath.scope.generateUidIdentifier(
-      `${type}Interceptor`,
-    );
+  if (isArrow) {
     klass.insertBefore(
       declarator({
-        FUNCTION: accessor.node,
+        FUNCTION: interceptor,
         VAR: accessorId,
       }),
     );
-  } else {
-    accessorId = accessor.node as Identifier;
+  } else if (isRegular) {
+    klass.insertBefore(
+      functionDeclaration(
+        accessorId,
+        (interceptor as FunctionExpression).params,
+        (interceptor as FunctionExpression).body,
+      ),
+    );
   }
 
   return accessorId;
@@ -132,7 +145,26 @@ export const createAccessorDecorator = (
     member,
     accessor,
     storage.key as Identifier | PrivateName,
+    // TODO: Add option to set up context
+    true,
   );
 
   member.replaceWithMultiple([storage, method]);
+};
+
+export const injectInterceptor = (
+  klass: NodePath<DecorableClass>,
+  interceptor: AccessorInterceptorNode,
+  value: MemberExpression | Identifier,
+  type: 'get' | 'set',
+  allowThisContext: boolean,
+): CallExpression => {
+  const interceptorId = generateInterceptor(klass, interceptor, type);
+
+  return isArrowFunctionExpression(interceptor) || !allowThisContext
+    ? callExpression(interceptorId, [value])
+    : callExpression(memberExpression(interceptorId, identifier('call')), [
+        thisExpression(),
+        value,
+      ]);
 };

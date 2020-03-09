@@ -2,7 +2,6 @@ import {NodePath} from '@babel/core';
 import {
   assignmentExpression,
   blockStatement,
-  callExpression,
   ClassBody,
   classMethod,
   ClassMethod,
@@ -20,9 +19,9 @@ import {
 import {
   AccessorInterceptor,
   AccessorInterceptorNode,
-  createAccessorDecorator,
   AccessorMethodCreator,
-  generateAccessorInterceptor,
+  createAccessorDecorator,
+  injectInterceptor,
 } from './utils';
 
 export const createSetterMethod: AccessorMethodCreator = (
@@ -30,8 +29,8 @@ export const createSetterMethod: AccessorMethodCreator = (
   member,
   interceptor,
   storageProperty,
+  allowThisContext,
 ): ClassMethod | ClassPrivateMethod => {
-  const interceptorId = generateAccessorInterceptor(klass, interceptor, 'set');
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const valueId = classBody.scope.generateUidIdentifier('value');
 
@@ -40,7 +39,15 @@ export const createSetterMethod: AccessorMethodCreator = (
       assignmentExpression(
         '=',
         memberExpression(thisExpression(), storageProperty),
-        interceptorId ? callExpression(interceptorId, [valueId]) : valueId,
+        interceptor
+          ? injectInterceptor(
+              klass,
+              interceptor.node,
+              valueId,
+              'set',
+              allowThisContext,
+            )
+          : valueId,
       ),
     ),
   ]);
