@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@ast-decorators/transform-accessor @getter compiles for decorator on private property 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  #_bar;
+
+  get #bar() {
+    return this.#_bar;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter compiles for decorator with inline arrow function interceptor 1`] = `
+"\\"use strict\\";
+
+const _getInterceptor = value => {
+  console.log(value);
+  return value;
+};
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    return _getInterceptor(this.#_bar);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter compiles for decorator with inline function interceptor 1`] = `
+"\\"use strict\\";
+
+const _getInterceptor = function (value) {
+  console.log(value);
+  return value;
+};
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    return _getInterceptor(this.#_bar);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter compiles for decorator with interceptor declared somewhere else 1`] = `
+"\\"use strict\\";
+
+const get = value => {
+  console.log(value);
+  return value;
+};
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    return get(this.#_bar);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter compiles for decorator without interceptor 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    return this.#_bar;
+  }
+
+}"
+`;
