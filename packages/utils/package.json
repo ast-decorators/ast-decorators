@@ -9,5 +9,12 @@
     "build:dts": "tsc -p tsconfig.build.json --emitDeclarationOnly",
     "build:remove": "rimraf lib",
     "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@ast-decorators/typings": "^0.1.0",
+    "@babel/types": "^7"
+  },
+  "devDependencies": {
+    "@ast-decorators/core": "^0.1.0"
   }
 }
