@@ -1,1 +1,3 @@
 packages/*/tests/fixtures/**/*
+packages/*/node_modules
+packages/*/lib
