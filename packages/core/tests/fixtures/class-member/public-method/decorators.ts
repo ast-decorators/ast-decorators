@@ -1,20 +1,20 @@
-import {DecorableClass} from '@ast-decorators/utils/lib/commonTypes';
+import {DecorableClass} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   assignmentExpression,
   blockStatement,
   callExpression,
+  ClassMethod,
   classMethod,
-  ClassPrivateMethod,
   expressionStatement,
   identifier,
   memberExpression,
   thisExpression,
 } from '@babel/types';
 
-const bind: PropertyDecorator = ((
+export const bind: PropertyDecorator = ((
   _: NodePath<DecorableClass>,
-  property: NodePath<ClassPrivateMethod>,
+  property: NodePath<ClassMethod>,
 ) => {
   const constructor = classMethod(
     'constructor',
@@ -39,5 +39,3 @@ const bind: PropertyDecorator = ((
 
   property.insertBefore(constructor);
 }) as any;
-
-export default bind;

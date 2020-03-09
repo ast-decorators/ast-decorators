@@ -10,6 +10,7 @@
     "lint-staged": "lint-staged",
     "test": "jest -c jest.config.js",
     "test:update": "npm run test -- --updateSnapshot",
+    "test:coverage": "npm run test -- --coverage",
     "typecheck": "tsc --noEmit"
   },
   "repository": {

@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@ast-decorators/core options compiles if privacy set to "hard" 1`] = `
+"\\"use strict\\";
+
+class Link extends HTMLAnchorElement {
+  #_bar = 'baz';
+}"
+`;
+
+exports[`@ast-decorators/core options compiles if privacy set to "none" 1`] = `
+"\\"use strict\\";
+
+class Link extends HTMLAnchorElement {
+  _bar = 'baz';
+}"
+`;

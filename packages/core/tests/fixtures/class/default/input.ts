@@ -1,4 +1,4 @@
-import element from './decorator';
+import {element} from './decorators';
 
 @element('x-test', {extends: 'a'})
 // @ts-ignore

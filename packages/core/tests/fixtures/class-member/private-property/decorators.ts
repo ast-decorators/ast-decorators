@@ -1,4 +1,4 @@
-import {DecorableClass} from '@ast-decorators/utils/lib/commonTypes';
+import {DecorableClass} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   blockStatement,
@@ -7,7 +7,7 @@ import {
   returnStatement,
 } from '@babel/types';
 
-const readonly: PropertyDecorator = ((
+export const readonly: PropertyDecorator = ((
   _: NodePath<DecorableClass>,
   property: NodePath<ClassPrivateProperty>,
 ) => {
@@ -20,5 +20,3 @@ const readonly: PropertyDecorator = ((
 
   property.replaceWith(getter);
 }) as any;
-
-export default readonly;

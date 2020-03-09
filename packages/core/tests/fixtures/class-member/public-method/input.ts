@@ -1,4 +1,4 @@
-import bind from './decorator';
+import {bind} from './decorators';
 
 // @ts-ignore
 class Foo {
