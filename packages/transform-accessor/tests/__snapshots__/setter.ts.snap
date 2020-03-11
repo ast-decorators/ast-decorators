@@ -34,16 +34,16 @@ class Foo {
 exports[`@ast-decorators/transform-accessor @setter compiles for decorator with inline function interceptor 1`] = `
 "\\"use strict\\";
 
-const _setInterceptor = function (value) {
+function _setInterceptor(value) {
   console.log(value);
   return value;
-};
+}
 
 class Foo {
   #_bar;
 
   set bar(_value) {
-    this.#_bar = _setInterceptor(_value);
+    this.#_bar = _setInterceptor.call(this, _value);
   }
 
 }"
@@ -61,7 +61,7 @@ class Foo {
   #_bar;
 
   set bar(_value) {
-    this.#_bar = set(_value);
+    this.#_bar = set.call(this, _value);
   }
 
 }"

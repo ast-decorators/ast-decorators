@@ -33,12 +33,16 @@ const accessor: AccessorDecorator = ((
     member,
     get,
     storage.key as Identifier | PrivateName,
+    // TODO: Add option to set up context
+    true,
   );
   const setter = createSetterMethod(
     klass,
     member,
     set,
     storage.key as Identifier | PrivateName,
+    // TODO: Add option to set up context
+    true,
   );
 
   member.replaceWithMultiple([storage, getter, setter]);

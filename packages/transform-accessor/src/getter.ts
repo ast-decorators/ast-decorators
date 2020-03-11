@@ -1,7 +1,6 @@
 import {NodePath} from '@babel/core';
 import {
   blockStatement,
-  callExpression,
   classMethod,
   ClassMethod,
   classPrivateMethod,
@@ -18,9 +17,9 @@ import {
 import {
   AccessorInterceptor,
   AccessorInterceptorNode,
-  createAccessorDecorator,
   AccessorMethodCreator,
-  generateAccessorInterceptor,
+  createAccessorDecorator,
+  injectInterceptor,
 } from './utils';
 
 export const createGetterMethod: AccessorMethodCreator = (
@@ -28,13 +27,21 @@ export const createGetterMethod: AccessorMethodCreator = (
   member,
   interceptor,
   storageProperty,
+  allowThisContext,
 ): ClassMethod | ClassPrivateMethod => {
-  const interceptorId = generateAccessorInterceptor(klass, interceptor, 'get');
   const value = memberExpression(thisExpression(), storageProperty);
 
   const body = blockStatement([
     returnStatement(
-      interceptorId ? callExpression(interceptorId, [value]) : value,
+      interceptor
+        ? injectInterceptor(
+            klass,
+            interceptor.node,
+            value,
+            'get',
+            allowThisContext,
+          )
+        : value,
     ),
   ]);
 
