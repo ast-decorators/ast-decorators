@@ -18,6 +18,10 @@ describe('@ast-decorators/core', () => {
       await compare('namespace');
     });
 
+    it('compiles renamed decorators', async () => {
+      await compare('rename');
+    });
+
     it('compiles decorators with params', async () => {
       await compare('params');
     });
