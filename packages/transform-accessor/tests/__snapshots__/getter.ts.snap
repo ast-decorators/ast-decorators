@@ -13,6 +13,19 @@ class Foo {
 }"
 `;
 
+exports[`@ast-decorators/transform-accessor @getter compiles for decorator on property with assignment 1`] = `
+"\\"use strict\\";
+
+class Foo {
+  #_bar = 'baz';
+
+  get bar() {
+    return this.#_bar;
+  }
+
+}"
+`;
+
 exports[`@ast-decorators/transform-accessor @getter compiles for decorator with inline arrow function interceptor 1`] = `
 "\\"use strict\\";
 
