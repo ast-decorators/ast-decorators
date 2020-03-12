@@ -7,6 +7,7 @@ import {
   ClassMethod,
   classPrivateMethod,
   ClassPrivateMethod,
+  ClassProperty,
   expressionStatement,
   Identifier,
   isClassPrivateProperty,
@@ -66,6 +67,7 @@ export const createSetterMethod: AccessorMethodCreator = (
     member.node.key as Identifier | StringLiteral | NumericLiteral,
     [valueId],
     body,
+    (member.node as ClassProperty).computed,
   );
 };
 

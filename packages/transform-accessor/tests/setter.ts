@@ -30,6 +30,10 @@ describe('@ast-decorators/transform-accessor', () => {
       await compare('property-assigning');
     });
 
+    it('compiles for decorator on computed property', async () => {
+      await compare('computed-property');
+    });
+
     it('throws an error if applied to something else than property', async () => {
       await expect(compare('assert-property-type')).rejects.toThrowError(
         'Applying @setter decorator to something other than property is not allowed',
