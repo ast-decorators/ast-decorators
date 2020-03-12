@@ -5,6 +5,7 @@ import {
   ClassMethod,
   classPrivateMethod,
   ClassPrivateMethod,
+  ClassProperty,
   Identifier,
   isClassPrivateProperty,
   memberExpression,
@@ -54,6 +55,7 @@ export const createGetterMethod: AccessorMethodCreator = (
     member.node.key as Identifier | StringLiteral | NumericLiteral,
     [],
     body,
+    (member.node as ClassProperty).computed,
   );
 };
 

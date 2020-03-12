@@ -1,5 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`@ast-decorators/transform-accessor @getter compiles for decorator on computed property 1`] = `
+"\\"use strict\\";
+
+const $bar = Symbol();
+
+class Foo {
+  #_$bar;
+
+  get [$bar]() {
+    return this.#_$bar;
+  }
+
+}"
+`;
+
 exports[`@ast-decorators/transform-accessor @getter compiles for decorator on private property 1`] = `
 "\\"use strict\\";
 
