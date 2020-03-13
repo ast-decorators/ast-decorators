@@ -61,7 +61,7 @@ type ImportProcessorData = {
 const processImportDeclaration = ({
   args,
   metadata,
-  options: {filename, opts: {exclude, plugins} = {}},
+  options: {filename, opts: {exclude, transformers} = {}},
 }: ImportProcessorData): void => {
   if (!filename) {
     throw new Error(
@@ -88,7 +88,7 @@ const processImportDeclaration = ({
   metadata.removeBinding();
 
   const decorator = metadata.isCall ? fn(...args.call) : fn;
-  decorator(...args.decorator, plugins);
+  decorator(...args.decorator, transformers);
 };
 
 const processDecorator = (

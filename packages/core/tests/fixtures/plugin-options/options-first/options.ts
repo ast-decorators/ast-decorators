@@ -5,8 +5,8 @@ export default {
     [
       require('../../../../src'),
       {
-        plugins: {
-          'privacy-plugin': {privacy: 'hard'},
+        transformers: {
+          'privacy-transformer': {privacy: 'hard'},
         },
       },
     ],

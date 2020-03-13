@@ -1,5 +1,5 @@
 import {
-  ASTDecoratorPluginOptions,
+  ASTDecoratorTransformerOptions,
   DecorableClass,
   DecorableClassMember,
 } from '@ast-decorators/typings';
@@ -11,10 +11,10 @@ import {PluginPass} from './utils';
 
 const processEachDecorator = (
   path: NodePath<DecorableClass | DecorableClassMember>,
-  opts: PluginPass<ASTDecoratorPluginOptions>,
+  opts: PluginPass<ASTDecoratorTransformerOptions>,
   processor: (
     decorator: NodePath<Decorator>,
-    options: PluginPass<ASTDecoratorPluginOptions>,
+    options: PluginPass<ASTDecoratorTransformerOptions>,
   ) => void,
 ): void => {
   if (path.node.decorators?.length > 0) {
@@ -38,13 +38,13 @@ const babelPluginAstDecorators = (): object => ({
   visitor: {
     'ClassDeclaration|ClassExpression'(
       path: NodePath<DecorableClass>,
-      opts: PluginPass<ASTDecoratorPluginOptions>,
+      opts: PluginPass<ASTDecoratorTransformerOptions>,
     ) {
       processEachDecorator(path, opts, processClassDecorator);
     },
     'ClassProperty|ClassMethod|ClassPrivateProperty|ClassPrivateMethod'(
       path: NodePath<DecorableClassMember>,
-      opts: PluginPass<ASTDecoratorPluginOptions>,
+      opts: PluginPass<ASTDecoratorTransformerOptions>,
     ) {
       processEachDecorator(path, opts, processClassMemberDecorator);
     },

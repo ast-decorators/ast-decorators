@@ -1,4 +1,4 @@
-import {ASTDecoratorPluginOptions} from '@ast-decorators/typings';
+import {ASTDecoratorTransformerOptions} from '@ast-decorators/typings';
 import {BabelFileResult, NodePath} from '@babel/core';
 import {Binding} from '@babel/traverse';
 import {
@@ -22,7 +22,7 @@ export type ASTDecoratorExclusionOptions = {
 
 export type ASTDecoratorCoreOptions = Readonly<{
   exclude?: ASTDecoratorExclusionOptions;
-  plugins?: ASTDecoratorPluginOptions;
+  transformers?: ASTDecoratorTransformerOptions;
 }>;
 
 export type PluginPass<T> = Readonly<{

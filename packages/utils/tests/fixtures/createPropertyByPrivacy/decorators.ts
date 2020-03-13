@@ -1,6 +1,7 @@
 import {
-  ASTDecoratorPluginOptions,
+  ASTDecoratorTransformerOptions,
   DecorableClass,
+  PrivacyType,
 } from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
@@ -11,11 +12,22 @@ import {
 } from '@babel/types';
 import createPropertyByPrivacy from '../../../src/createPropertyByPrivacy';
 
+const TRANSFORMER_NAME = 'privacy-test';
+
+type PrivacyTestOptions = {
+  privacy: PrivacyType;
+};
+
 const foo: PropertyDecorator = ((
   klass: NodePath<DecorableClass>,
   member: NodePath<ClassProperty>,
-  {privacy = 'hard'}: ASTDecoratorPluginOptions = {},
+  options?: ASTDecoratorTransformerOptions<
+    typeof TRANSFORMER_NAME,
+    PrivacyTestOptions
+  >,
 ) => {
+  const privacy = options?.[TRANSFORMER_NAME]?.privacy ?? 'hard';
+
   const storage = createPropertyByPrivacy(
     privacy,
     (member.node.key as Identifier).name,
