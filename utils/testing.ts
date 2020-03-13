@@ -7,16 +7,16 @@ const getOptions = (
   fixture: string,
   file: string = 'options',
 ): object => {
-  // eslint-disable-next-line global-require
-  const optionsOrModule = require(resolve(
-    dir,
-    'fixtures',
-    type,
-    fixture,
-    file,
-  ));
+  const optionsPath = resolve(dir, 'fixtures', type, fixture, file);
 
-  return optionsOrModule.__esModule ? optionsOrModule.default : optionsOrModule;
+  // eslint-disable-next-line global-require
+  const optionsOrModule = require(optionsPath);
+
+  return {
+    babelrc: false,
+    configFile: false,
+    ...(optionsOrModule.__esModule ? optionsOrModule.default : optionsOrModule),
+  };
 };
 
 export const compare = async (
