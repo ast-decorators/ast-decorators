@@ -6,7 +6,7 @@ export default {
       require('../../../../src'),
       {
         exclude: {
-          names: /\$\w+/
+          names: ['bar', /\$\w+/]
         }
       },
     ],

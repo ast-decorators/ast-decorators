@@ -6,10 +6,9 @@ import {
   isImportDefaultSpecifier,
   isImportNamespaceSpecifier,
   isVariableDeclarator,
-  StringLiteral,
 } from '@babel/types';
 import minimatch from 'minimatch';
-import {dirname, resolve, join} from 'path';
+import {dirname, join, resolve} from 'path';
 import DecoratorMetadata, {
   ASTDecoratorCoreOptions,
   ASTDecoratorExclusionOptions,
@@ -18,30 +17,49 @@ import DecoratorMetadata, {
 
 const cwd = process.cwd();
 
-const resolveSource = (
-  importSource: NodePath<StringLiteral>,
-  filename: string,
-): string => resolve(dirname(filename), importSource.node.value);
+const checkNodeModule = (source: string): boolean =>
+  !source.startsWith('./') &&
+  !source.startsWith('../') &&
+  !source.startsWith('/');
 
 const shouldExcludeDecorator = (
-  {paths, names}: ASTDecoratorExclusionOptions,
+  {names, nodeModules, paths}: ASTDecoratorExclusionOptions,
   metadata: DecoratorMetadata,
   filename: string,
 ): boolean => {
-  const importSpecifier = metadata.importSpecifier!;
-  const name: string = importSpecifier.get('local').node.name;
+  const {importSpecifier, importSource} = metadata;
+  const name: string = importSpecifier!.get('local').node.name;
+  const isNodeModule = checkNodeModule(importSource!.node.value);
 
   if (
     names &&
-    (Array.isArray(names) ? names.includes(name) : names.test(name))
+    names.some(rule =>
+      typeof rule === 'string' ? rule === name : rule.test(name),
+    )
   ) {
     return true;
   }
 
-  if (paths) {
-    const filepath = resolveSource(metadata.importSource!, filename);
+  if (paths && !isNodeModule) {
+    const sourcePath = resolve(dirname(filename), importSource!.node.value);
 
-    return paths.some(path => minimatch(filepath, join(cwd, path)));
+    if (paths.some(rule => minimatch(sourcePath, join(cwd, rule)))) {
+      return true;
+    }
+  }
+
+  if (nodeModules && isNodeModule) {
+    const sourcePath = importSource!.node.value;
+
+    if (
+      nodeModules.some(rule =>
+        typeof rule === 'string'
+          ? sourcePath.startsWith(rule)
+          : rule.test(sourcePath),
+      )
+    ) {
+      return true;
+    }
   }
 
   return false;
@@ -74,7 +92,11 @@ const processImportDeclaration = ({
   }
 
   const {importSource, importSpecifier} = metadata;
-  const filepath = resolveSource(importSource!, filename);
+  const source = importSource!.node.value;
+  const filepath = checkNodeModule(source)
+    ? source
+    : resolve(dirname(filename), source);
+
   // eslint-disable-next-line @typescript-eslint/no-require-imports,global-require
   const mod = require(filepath);
 

@@ -6,8 +6,11 @@ export default {
       require('../../../../src'),
       {
         exclude: {
-          names: ['bar']
-        }
+          nodeModules: [
+            'ignored-module',
+            /other-ignored-module(\/\w+)*\/somefile/,
+          ],
+        },
       },
     ],
     [require('@babel/plugin-syntax-decorators'), {legacy: true}],

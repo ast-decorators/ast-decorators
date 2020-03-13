@@ -12,28 +12,34 @@ exports[`@ast-decorators/core plugin-options compiles in one way if option has o
 }"
 `;
 
-exports[`@ast-decorators/core plugin-options ignores decorator if its name fits an "exclude" regular expression 1`] = `
-"import { $bar, $baz } from './other';
+exports[`@ast-decorators/core plugin-options ignores decorator if its name is specified in "names" exclusion options 1`] = `
+"import { bar } from './other';
+import { $bar, $baz } from './other-two';
 import { $fuzz } from './fuzz';
 
 @$bar
 @$baz
 @$fuzz
-class Foo {
-  #_bar = 'baz';
-}"
-`;
-
-exports[`@ast-decorators/core plugin-options ignores decorator if its name is specified in "exclude" string array 1`] = `
-"import { bar } from './other';
-
 @bar
 class Foo {
   #_bar = 'baz';
 }"
 `;
 
-exports[`@ast-decorators/core plugin-options ignores decorator if path it is imported from is specified in "paths" exclude option 1`] = `
+exports[`@ast-decorators/core plugin-options ignores decorator if node module it is imported from is specified in "nodeModules" exclusion option 1`] = `
+"import { bar } from 'ignored-module/path/to/file';
+import { baz } from 'ignored-module';
+import { fuzz } from 'other-ignored-module/path/to/dir/somefile';
+
+@fuzz
+@baz
+@bar
+class Foo {
+  #_bar = 'baz';
+}"
+`;
+
+exports[`@ast-decorators/core plugin-options ignores decorator if path it is imported from is specified in "paths" exclusion option 1`] = `
 "import { bar } from './path/to/decorator';
 import { baz } from '../decorator.ignore';
 

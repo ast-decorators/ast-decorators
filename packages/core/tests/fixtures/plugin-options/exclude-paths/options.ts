@@ -6,8 +6,8 @@ export default {
       require('../../../../src'),
       {
         exclude: {
-          paths: ['**/*.ignore', 'packages/**/*/exclude-paths/**/*']
-        }
+          paths: ['**/*.ignore', 'packages/**/*/exclude-paths/**/*'],
+        },
       },
     ],
     [require('@babel/plugin-syntax-decorators'), {legacy: true}],

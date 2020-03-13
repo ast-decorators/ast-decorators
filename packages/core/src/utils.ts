@@ -15,10 +15,11 @@ import {
   StringLiteral,
 } from '@babel/types';
 
-export type ASTDecoratorExclusionOptions = {
-  paths?: string[];
-  names?: RegExp | string[];
-};
+export type ASTDecoratorExclusionOptions = Readonly<{
+  names?: ReadonlyArray<RegExp | string>;
+  nodeModules?: ReadonlyArray<RegExp | string>;
+  paths?: readonly string[];
+}>;
 
 export type ASTDecoratorCoreOptions = Readonly<{
   exclude?: ASTDecoratorExclusionOptions;

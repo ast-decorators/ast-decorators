@@ -13,16 +13,16 @@ describe('@ast-decorators/core', () => {
       await compare('options-second');
     });
 
-    it('ignores decorator if its name is specified in "exclude" string array', async () => {
-      await compare('exclude-name-string');
+    it('ignores decorator if its name is specified in "names" exclusion options', async () => {
+      await compare('exclude-names');
     });
 
-    it('ignores decorator if its name fits an "exclude" regular expression', async () => {
-      await compare('exclude-name-regexp');
-    });
-
-    it('ignores decorator if path it is imported from is specified in "paths" exclude option', async () => {
+    it('ignores decorator if path it is imported from is specified in "paths" exclusion option', async () => {
       await compare('exclude-paths');
+    });
+
+    it('ignores decorator if node module it is imported from is specified in "nodeModules" exclusion option', async () => {
+      await compare('exclude-node-modules');
     });
   });
 });
