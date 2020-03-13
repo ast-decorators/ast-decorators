@@ -2,10 +2,10 @@ import {
   ASTClassMemberDecorator,
   ASTDecoratorPluginOptions,
   DecorableClass,
+  PrivacyType,
 } from '@ast-decorators/typings';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
-import getOverridableOption from '@ast-decorators/utils/lib/getOverridableOption';
 import {NodePath, template} from '@babel/core';
 import {
   ArrowFunctionExpression,
@@ -72,20 +72,22 @@ export const assert = (
   }
 };
 
+export type TransformAccessorPluginOptions = {
+  privacy?: PrivacyType;
+};
+
 export const createStorage = (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
-  options?: ASTDecoratorPluginOptions,
+  options?: ASTDecoratorPluginOptions<
+    typeof PLUGIN_NAME,
+    TransformAccessorPluginOptions
+  >,
 ): AccessorAllowedMember => {
-  const finalPrivacy = getOverridableOption(
-    options,
-    'privacy',
-    PLUGIN_NAME,
-    'hard',
-  );
+  const privacy = options?.[PLUGIN_NAME]?.privacy ?? 'hard';
 
   return createPropertyByPrivacy(
-    finalPrivacy,
+    privacy,
     String(getMemberName(member.node)),
     member.node.value,
     klass,
