@@ -1,3 +1,8 @@
+import {
+  ASTDecoratorCoreOptions,
+  ASTDecoratorExclusionOptions,
+  PluginPass,
+} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   Decorator,
@@ -9,11 +14,7 @@ import {
 } from '@babel/types';
 import minimatch from 'minimatch';
 import {dirname, join, resolve} from 'path';
-import DecoratorMetadata, {
-  ASTDecoratorCoreOptions,
-  ASTDecoratorExclusionOptions,
-  PluginPass,
-} from './utils';
+import DecoratorMetadata from './utils';
 
 const cwd = process.cwd();
 

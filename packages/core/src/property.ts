@@ -2,11 +2,11 @@ import {
   ASTDecoratorTransformerOptions,
   DecorableClass,
   DecorableClassMember,
+  PluginPass,
 } from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {Decorator, isClassDeclaration, isClassExpression} from '@babel/types';
 import processDecorator from './processor';
-import {PluginPass} from './utils';
 
 const processClassMemberDecorator = (
   decorator: NodePath<Decorator>,

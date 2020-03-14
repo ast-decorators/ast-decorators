@@ -1,5 +1,4 @@
-import {ASTDecoratorTransformerOptions} from '@ast-decorators/typings';
-import {BabelFileResult, NodePath} from '@babel/core';
+import {NodePath} from '@babel/core';
 import {Binding} from '@babel/traverse';
 import {
   CallExpression,
@@ -14,25 +13,6 @@ import {
   MemberExpression,
   StringLiteral,
 } from '@babel/types';
-
-export type ASTDecoratorExclusionOptions = Readonly<{
-  names?: ReadonlyArray<RegExp | string>;
-  nodeModules?: ReadonlyArray<RegExp | string>;
-  paths?: readonly string[];
-}>;
-
-export type ASTDecoratorCoreOptions = Readonly<{
-  exclude?: ASTDecoratorExclusionOptions;
-  transformers?: ASTDecoratorTransformerOptions;
-}>;
-
-export type PluginPass<T> = Readonly<{
-  cwd: string;
-  file: BabelFileResult;
-  filename?: string;
-  key: string;
-  opts?: T;
-}>;
 
 const $args = Symbol('args');
 const $binding = Symbol('binding');
