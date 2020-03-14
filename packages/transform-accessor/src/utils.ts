@@ -30,7 +30,12 @@ import {
   thisExpression,
 } from '@babel/types';
 
-const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
+export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
+
+export type TransformAccessorOptions = Readonly<{
+  preserveDecoratorsForBothAccessors?: boolean;
+  privacy?: PrivacyType;
+}>;
 
 export type AccessorAllowedMember = ClassProperty | ClassPrivateProperty;
 export type AccessorInterceptor = (value: any) => any;
@@ -39,12 +44,16 @@ export type AccessorInterceptorNode =
   | ArrowFunctionExpression
   | Identifier;
 
+export type AccessorMethodCreatorOptions = Readonly<{
+  allowThisContext: boolean;
+  preserveDecorators: boolean;
+}>;
 export type AccessorMethodCreator = (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
   storage: Identifier | PrivateName,
-  allowThisContext: boolean,
+  options: AccessorMethodCreatorOptions,
 ) => ClassMethod | ClassPrivateMethod;
 
 export const assert = (
@@ -70,10 +79,6 @@ export const assert = (
       );
     }
   }
-};
-
-export type TransformAccessorOptions = {
-  privacy?: PrivacyType;
 };
 
 export const createStorage = (
@@ -147,8 +152,11 @@ export const createAccessorDecorator = (
     member,
     accessor,
     storage.key as Identifier | PrivateName,
-    // TODO: Add option to set up context
-    true,
+    {
+      // TODO: Add option to set up context
+      allowThisContext: true,
+      preserveDecorators: true,
+    },
   );
 
   member.replaceWithMultiple([storage, method]);

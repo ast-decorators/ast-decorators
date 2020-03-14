@@ -30,7 +30,7 @@ export const createSetterMethod: AccessorMethodCreator = (
   member,
   interceptor,
   storageProperty,
-  allowThisContext,
+  {allowThisContext, preserveDecorators},
 ): ClassMethod | ClassPrivateMethod => {
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const valueId = classBody.scope.generateUidIdentifier('value');
@@ -53,22 +53,21 @@ export const createSetterMethod: AccessorMethodCreator = (
     ),
   ]);
 
-  if (isClassPrivateProperty(member)) {
-    return classPrivateMethod(
-      'set',
-      member.node.key as PrivateName,
-      [valueId],
-      body,
-    );
+  const method = isClassPrivateProperty(member)
+    ? classPrivateMethod('set', member.node.key as PrivateName, [valueId], body)
+    : classMethod(
+        'set',
+        member.node.key as Identifier | StringLiteral | NumericLiteral,
+        [valueId],
+        body,
+        (member.node as ClassProperty).computed,
+      );
+
+  if (preserveDecorators) {
+    method.decorators = member.node.decorators;
   }
 
-  return classMethod(
-    'set',
-    member.node.key as Identifier | StringLiteral | NumericLiteral,
-    [valueId],
-    body,
-    (member.node as ClassProperty).computed,
-  );
+  return method;
 };
 
 export type SetterDecorator = (set?: AccessorInterceptor) => PropertyDecorator;

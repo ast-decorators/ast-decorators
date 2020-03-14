@@ -10,6 +10,8 @@ import {
   AccessorInterceptorNode,
   assert,
   createStorage,
+  TransformAccessorOptions,
+  TRANSFORMER_NAME,
 } from './utils';
 
 export type AccessorDecorator = (
@@ -20,12 +22,14 @@ export type AccessorDecorator = (
 const accessor: AccessorDecorator = ((
   get?: NodePath<AccessorInterceptorNode>,
   set?: NodePath<AccessorInterceptorNode>,
-): ASTClassMemberDecorator => (
-  klass,
-  member: NodePath<AccessorAllowedMember>,
-  options,
-) => {
+): ASTClassMemberDecorator<
+  typeof TRANSFORMER_NAME,
+  TransformAccessorOptions
+> => (klass, member: NodePath<AccessorAllowedMember>, options) => {
   assert('accessor', member, [get, set]);
+
+  const preserveDecoratorsForBothAccessors =
+    options?.[TRANSFORMER_NAME]?.preserveDecoratorsForBothAccessors ?? true;
 
   const storage = createStorage(klass, member, options);
   const getter = createGetterMethod(
@@ -33,16 +37,22 @@ const accessor: AccessorDecorator = ((
     member,
     get,
     storage.key as Identifier | PrivateName,
-    // TODO: Add option to set up context
-    true,
+    {
+      // TODO: Add option to set up context
+      allowThisContext: true,
+      preserveDecorators: true,
+    },
   );
   const setter = createSetterMethod(
     klass,
     member,
     set,
     storage.key as Identifier | PrivateName,
-    // TODO: Add option to set up context
-    true,
+    {
+      // TODO: Add option to set up context
+      allowThisContext: true,
+      preserveDecorators: preserveDecoratorsForBothAccessors,
+    },
   );
 
   member.replaceWithMultiple([storage, getter, setter]);
