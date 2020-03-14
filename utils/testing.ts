@@ -1,7 +1,16 @@
-import {transformFileAsync} from '@babel/core';
+import {parseAsync, transformFileAsync, TransformOptions} from '@babel/core';
+import {promises} from 'fs';
 import {resolve} from 'path';
 
-const getOptions = (
+const {readFile} = promises;
+
+const fixOptions = (options: TransformOptions): TransformOptions => ({
+  babelrc: false,
+  configFile: false,
+  ...options,
+});
+
+const loadOptions = (
   dir: string,
   type: string,
   fixture: string,
@@ -12,11 +21,7 @@ const getOptions = (
   // eslint-disable-next-line global-require
   const optionsOrModule = require(optionsPath);
 
-  return {
-    babelrc: false,
-    configFile: false,
-    ...(optionsOrModule.__esModule ? optionsOrModule.default : optionsOrModule),
-  };
+  return optionsOrModule.__esModule ? optionsOrModule.default : optionsOrModule;
 };
 
 export const compare = async (
@@ -28,13 +33,32 @@ export const compare = async (
   const finalOptions =
     typeof options === 'object'
       ? options
-      : getOptions(dir, type, fixture, options);
+      : loadOptions(dir, type, fixture, options);
 
   const fixtureDir = resolve(dir, 'fixtures', type, fixture);
 
   const {code: inputCode} =
-    (await transformFileAsync(resolve(fixtureDir, 'input.ts'), finalOptions)) ??
-    {};
+    (await transformFileAsync(
+      resolve(fixtureDir, 'input.ts'),
+      fixOptions(finalOptions),
+    )) ?? {};
 
   expect(inputCode).toMatchSnapshot();
+};
+
+export const parse = async (
+  dir: string,
+  type: string,
+  fixture: string,
+  options?: object | string,
+): ReturnType<typeof parseAsync> => {
+  const finalOptions =
+    typeof options === 'object'
+      ? options
+      : loadOptions(dir, type, fixture, options);
+
+  const fixtureDir = resolve(dir, 'fixtures', type, fixture);
+  const content = await readFile(resolve(fixtureDir, 'input.ts'), 'utf8');
+
+  return parseAsync(content, fixOptions(finalOptions));
 };
