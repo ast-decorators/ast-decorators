@@ -15,18 +15,26 @@ export type DecorableClassMember =
   | ClassMethod
   | ClassPrivateMethod;
 
-export type ASTDecoratorPluginOptions = Readonly<{
-  privacy?: 'hard' | 'soft' | 'none';
-  override?: Record<string, Omit<ASTDecoratorPluginOptions, 'override'>>;
-}>;
+export type ASTDecoratorTransformerOptions<
+  N extends string = string,
+  O extends object = object
+> = Partial<Readonly<Record<N, O>>>;
 
-export type ASTClassDecorator = (
+export type PrivacyType = 'hard' | 'soft' | 'none';
+
+export type ASTClassDecorator<
+  N extends string = string,
+  O extends object = object
+> = (
   klass: NodePath<DecorableClass>,
-  opts?: ASTDecoratorPluginOptions,
+  opts?: ASTDecoratorTransformerOptions<N, O>,
 ) => void;
 
-export type ASTClassMemberDecorator = (
+export type ASTClassMemberDecorator<
+  N extends string = string,
+  O extends object = object
+> = (
   klass: NodePath<DecorableClass>,
   member: NodePath<DecorableClassMember>,
-  opts?: ASTDecoratorPluginOptions,
+  opts?: ASTDecoratorTransformerOptions<N, O>,
 ) => void;

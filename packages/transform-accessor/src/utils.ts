@@ -1,11 +1,11 @@
 import {
   ASTClassMemberDecorator,
-  ASTDecoratorPluginOptions,
+  ASTDecoratorTransformerOptions,
   DecorableClass,
+  PrivacyType,
 } from '@ast-decorators/typings';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
-import getOverridableOption from '@ast-decorators/utils/lib/getOverridableOption';
 import {NodePath, template} from '@babel/core';
 import {
   ArrowFunctionExpression,
@@ -30,7 +30,7 @@ import {
   thisExpression,
 } from '@babel/types';
 
-const PLUGIN_NAME = '@ast-decorators/transform-accessor';
+const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
 
 export type AccessorAllowedMember = ClassProperty | ClassPrivateProperty;
 export type AccessorInterceptor = (value: any) => any;
@@ -72,20 +72,22 @@ export const assert = (
   }
 };
 
+export type TransformAccessorOptions = {
+  privacy?: PrivacyType;
+};
+
 export const createStorage = (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
-  options?: ASTDecoratorPluginOptions,
+  options?: ASTDecoratorTransformerOptions<
+    typeof TRANSFORMER_NAME,
+    TransformAccessorOptions
+  >,
 ): AccessorAllowedMember => {
-  const finalPrivacy = getOverridableOption(
-    options,
-    'privacy',
-    PLUGIN_NAME,
-    'hard',
-  );
+  const privacy = options?.[TRANSFORMER_NAME]?.privacy ?? 'hard';
 
   return createPropertyByPrivacy(
-    finalPrivacy,
+    privacy,
     String(getMemberName(member.node)),
     member.node.value,
     klass,
@@ -134,7 +136,7 @@ export const createAccessorDecorator = (
 ): ASTClassMemberDecorator => (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
-  options?: ASTDecoratorPluginOptions,
+  options?: ASTDecoratorTransformerOptions,
 ): void => {
   assert(decorator, member, [accessor]);
 

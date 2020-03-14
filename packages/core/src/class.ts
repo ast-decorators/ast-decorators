@@ -1,5 +1,5 @@
 import {
-  ASTDecoratorPluginOptions,
+  ASTDecoratorTransformerOptions,
   DecorableClass,
 } from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
@@ -9,7 +9,7 @@ import {PluginPass} from './utils';
 
 const processClassDecorator = (
   decorator: NodePath<Decorator>,
-  options: PluginPass<ASTDecoratorPluginOptions>,
+  options: PluginPass<ASTDecoratorTransformerOptions>,
 ): void => {
   const klass = decorator.parentPath as NodePath<DecorableClass>;
 

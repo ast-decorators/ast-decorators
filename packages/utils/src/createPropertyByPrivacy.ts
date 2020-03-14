@@ -1,7 +1,4 @@
-import {
-  ASTDecoratorPluginOptions,
-  DecorableClass,
-} from '@ast-decorators/typings';
+import {DecorableClass, PrivacyType} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import template from '@babel/template';
 import {
@@ -17,7 +14,7 @@ import {
 const createSymbolAssignment = template.statement(`const VAR = Symbol()`);
 
 const createPropertyByPrivacy = (
-  privacy: ASTDecoratorPluginOptions['privacy'],
+  privacy: PrivacyType,
   name: string | undefined,
   value: Expression | null,
   klass: NodePath<DecorableClass>,

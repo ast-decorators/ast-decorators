@@ -1,3 +1,4 @@
+import {ASTDecoratorTransformerOptions} from '@ast-decorators/typings';
 import {BabelFileResult, NodePath} from '@babel/core';
 import {Binding} from '@babel/traverse';
 import {
@@ -11,7 +12,19 @@ import {
   isCallExpression,
   isMemberExpression,
   MemberExpression,
+  StringLiteral,
 } from '@babel/types';
+
+export type ASTDecoratorExclusionOptions = Readonly<{
+  names?: ReadonlyArray<RegExp | string>;
+  nodeModules?: ReadonlyArray<RegExp | string>;
+  paths?: readonly string[];
+}>;
+
+export type ASTDecoratorCoreOptions = Readonly<{
+  exclude?: ASTDecoratorExclusionOptions;
+  transformers?: ASTDecoratorTransformerOptions;
+}>;
 
 export type PluginPass<T> = Readonly<{
   cwd: string;
@@ -23,7 +36,9 @@ export type PluginPass<T> = Readonly<{
 
 const $args = Symbol('args');
 const $binding = Symbol('binding');
+const $decorator = Symbol('decorators');
 const $id = Symbol('id');
+const $isCall = Symbol('isCall');
 const $object = Symbol('object');
 
 const $handleDecoratorWithArgs = Symbol('handleDecoratorWithArgs');
@@ -33,13 +48,18 @@ const $handleMemberDecorator = Symbol('handleMemberDecorator');
 export default class DecoratorMetadata {
   private [$args]?: readonly NodePath[];
   private [$binding]?: Binding;
-  private [$id]?: NodePath<Identifier>;
+  private [$decorator]: NodePath<Decorator>;
+  private [$id]: NodePath<Identifier>;
+  private [$isCall]: boolean;
   private [$object]?: NodePath<Identifier>;
 
   public constructor(decorator: NodePath<Decorator>) {
+    this[$decorator] = decorator;
     const expression = decorator.get('expression');
 
-    if (isCallExpression(expression)) {
+    this[$isCall] = isCallExpression(expression);
+
+    if (this[$isCall]) {
       this[$handleDecoratorWithArgs](expression as NodePath<CallExpression>);
     } else {
       this[$handleDecoratorWithoutArgs](
@@ -63,7 +83,7 @@ export default class DecoratorMetadata {
   }
 
   public get bindingId(): NodePath<Identifier> {
-    return this.isFree ? this[$id]! : this[$object]!;
+    return this.isFree ? this[$id] : this[$object]!;
   }
 
   public get importSpecifier():
@@ -74,12 +94,37 @@ export default class DecoratorMetadata {
     return this[$binding] ? (this[$binding]!.path as any) : undefined;
   }
 
+  public get importSource(): NodePath<StringLiteral> | undefined {
+    const {importSpecifier} = this;
+
+    if (!importSpecifier) {
+      return undefined;
+    }
+
+    const declaration = importSpecifier.parentPath as NodePath<
+      ImportDeclaration
+    >;
+
+    return declaration.get('source');
+  }
+
+  public get isCall(): boolean {
+    return this[$isCall];
+  }
+
+  /**
+   * Is decorator identifier a part of MemberExpression?
+   */
   public get isFree(): boolean {
     return !this[$object];
   }
 
   public get property(): string | undefined {
-    return this.isFree ? undefined : this[$id]!.node.name;
+    return this.isFree ? undefined : this[$id].node.name;
+  }
+
+  public removeDecorator(): void {
+    this[$decorator].remove();
   }
 
   public removeBinding(): void {

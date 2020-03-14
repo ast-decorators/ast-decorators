@@ -1,5 +1,5 @@
 import {
-  ASTDecoratorPluginOptions,
+  ASTDecoratorTransformerOptions,
   DecorableClass,
   DecorableClassMember,
 } from '@ast-decorators/typings';
@@ -10,7 +10,7 @@ import {PluginPass} from './utils';
 
 const processClassMemberDecorator = (
   decorator: NodePath<Decorator>,
-  options: PluginPass<ASTDecoratorPluginOptions>,
+  options: PluginPass<ASTDecoratorTransformerOptions>,
 ): void => {
   const member = decorator.parentPath as NodePath<DecorableClassMember>;
 
