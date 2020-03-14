@@ -54,7 +54,7 @@ const shouldExcludeDecorator = (
     if (
       nodeModules.some(rule =>
         typeof rule === 'string'
-          ? sourcePath.startsWith(rule)
+          ? sourcePath.startsWith(rule) || minimatch(sourcePath, rule)
           : rule.test(sourcePath),
       )
     ) {

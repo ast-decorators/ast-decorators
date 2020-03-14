@@ -4,8 +4,11 @@ import {bar} from 'ignored-module/path/to/file';
 // @ts-ignore
 import {baz} from 'ignored-module';
 // @ts-ignore
-import {fuzz} from 'other-ignored-module/path/to/dir/somefile';
+import {fuzz} from 'ignored-module-second/path/to/dir/somefile';
+// @ts-ignore
+import {buzz} from 'ignored-module-third/path/to/file.decorator';
 
+@buzz
 @fuzz
 @baz
 @bar

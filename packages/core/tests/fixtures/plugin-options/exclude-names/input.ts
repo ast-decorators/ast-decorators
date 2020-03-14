@@ -2,7 +2,7 @@ import {foo} from '../decorators';
 // @ts-ignore
 import {bar} from './other';
 // @ts-ignore
-import {$bar, $baz} from './other-two';
+import {$bar, baz as $baz} from './other-two';
 // @ts-ignore
 import {$fuzz} from './fuzz';
 

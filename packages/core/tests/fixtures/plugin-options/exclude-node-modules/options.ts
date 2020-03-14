@@ -8,7 +8,8 @@ export default {
         exclude: {
           nodeModules: [
             'ignored-module',
-            /other-ignored-module(\/\w+)*\/somefile/,
+            /ignored-module-second(\/\w+)*\/somefile/,
+            'ignored-module-third/**/*.decorator'
           ],
         },
       },
