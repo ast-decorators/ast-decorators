@@ -2,18 +2,7 @@ export default {
   comments: false,
   presets: [require('@babel/preset-typescript')],
   plugins: [
-    [require('@babel/plugin-transform-modules-commonjs')],
-    [
-      require('@ast-decorators/core'),
-      {
-        transformers: {
-          'privacy-test': {
-            privacy: 'hard',
-          },
-        },
-      },
-    ],
-    [require('@babel/plugin-syntax-decorators'), {legacy: true}],
+    [require('../plugin'), {privacy: 'hard'}],
     require('@babel/plugin-syntax-class-properties'),
   ],
 };
