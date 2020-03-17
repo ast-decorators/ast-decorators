@@ -28,8 +28,8 @@ describe('@ast-decorators/utils', () => {
           expect(metadata.importSpecifier!.get('local').node.name).toBe('bar');
           expect(metadata.importSource!.node.value).toBe('decorators');
           expect(metadata.binding).toBe(path.scope.getBinding('bar'));
-          expect(isIdentifier(metadata.bindingId)).toBeTruthy();
-          expect(metadata.bindingId.node.name).toEqual('bar');
+          expect(isIdentifier(metadata.identifier)).toBeTruthy();
+          expect(metadata.identifier.node.name).toEqual('bar');
           expect(metadata.isCall).not.toBeTruthy();
           expect(metadata.isFree).toBeTruthy();
           expect(metadata.property).toBeUndefined();
@@ -64,7 +64,7 @@ describe('@ast-decorators/utils', () => {
         Decorator(path: NodePath<Decorator>) {
           const metadata = new DecoratorMetadata(path);
 
-          expect(metadata.bindingId.node.name).toEqual('decorators');
+          expect(metadata.identifier.node.name).toEqual('decorators');
           expect(isIdentifier(metadata.property)).toBeTruthy();
           expect(metadata.property!.node.name).toBe('bar');
           expect(metadata.isFree).not.toBeTruthy();

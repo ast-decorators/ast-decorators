@@ -62,7 +62,7 @@ export default class DecoratorMetadata {
     return this[$binding];
   }
 
-  public get bindingId(): NodePath<Identifier> {
+  public get identifier(): NodePath<Identifier> {
     return this.isFree ? this[$id] : this[$object]!;
   }
 
@@ -113,7 +113,7 @@ export default class DecoratorMetadata {
     }
 
     this[$binding]!.referencePaths = this[$binding]!.referencePaths.filter(
-      p => p !== this.bindingId,
+      p => p !== this.identifier,
     );
 
     if (this[$binding]!.referencePaths.length === 0) {
