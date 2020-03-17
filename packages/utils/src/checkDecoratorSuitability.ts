@@ -1,14 +1,10 @@
-import {
-  ImportDefaultSpecifier,
-  ImportNamespaceSpecifier,
-  ImportSpecifier,
-  StringLiteral,
-} from '@babel/types';
 import minimatch from 'minimatch';
 import {dirname, join, resolve} from 'path';
 import checkNodeModule from './checkNodeModule';
 
 const cwd = process.cwd();
+
+export class NotFileEnvironmentError extends Error {}
 
 export type DecoratorSuitabilityFactors = Readonly<{
   names?: ReadonlyArray<RegExp | string>;
@@ -16,20 +12,18 @@ export type DecoratorSuitabilityFactors = Readonly<{
   paths?: readonly string[];
 }>;
 
-const checkDecoratorSuitability = (
-  specifierNode:
-    | ImportSpecifier
-    | ImportDefaultSpecifier
-    | ImportNamespaceSpecifier,
-  sourceNode: StringLiteral,
-  filename: string,
-  {names, nodeModules, paths}: DecoratorSuitabilityFactors,
-): boolean => {
-  const {name} = specifierNode.local;
-  const source = sourceNode.value;
-  const isNodeModule = checkNodeModule(source);
+export type DecoratorInfo = Readonly<{
+  name?: string;
+  source?: string;
+}>;
 
+const checkDecoratorSuitability = (
+  {name, source}: DecoratorInfo,
+  {names, nodeModules, paths}: DecoratorSuitabilityFactors,
+  filename?: string,
+): boolean => {
   if (
+    name &&
     names &&
     names.some(rule =>
       typeof rule === 'string' ? rule === name : rule.test(name),
@@ -38,7 +32,17 @@ const checkDecoratorSuitability = (
     return true;
   }
 
+  if (!source) {
+    return false;
+  }
+
+  const isNodeModule = checkNodeModule(source);
+
   if (paths && !isNodeModule) {
+    if (!filename) {
+      throw new NotFileEnvironmentError();
+    }
+
     const fullPath = resolve(dirname(filename), source);
 
     if (paths.some(rule => minimatch(fullPath, join(cwd, rule)))) {
