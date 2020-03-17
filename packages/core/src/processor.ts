@@ -1,4 +1,8 @@
-import {ASTDecoratorCoreOptions, PluginPass} from '@ast-decorators/typings';
+import {
+  ASTDecoratorCoreOptions,
+  ASTDecoratorTransformerOptions,
+  PluginPass,
+} from '@ast-decorators/typings';
 import checkDecoratorSuitability from '@ast-decorators/utils/lib/checkDecoratorSuitability';
 import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
 import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
@@ -21,14 +25,16 @@ type DecoratorProcessorArguments = {
 type ImportProcessorData = {
   args: DecoratorProcessorArguments;
   metadata: DecoratorMetadata;
-  options: PluginPass<ASTDecoratorCoreOptions>;
+  options: PluginPass<ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>>;
 };
 
 const processImportDeclaration = ({
   args,
   metadata,
-  options: {filename, opts: {exclude, transformers} = {}},
+  options,
 }: ImportProcessorData): void => {
+  const {filename, opts} = options;
+
   if (!filename) {
     throw new Error(
       'Current transformation is not based on files and is unable to handle imports',
@@ -38,12 +44,14 @@ const processImportDeclaration = ({
   const {importSpecifier, importSource} = metadata;
 
   if (
-    exclude &&
+    opts?.exclude &&
     checkDecoratorSuitability(
-      importSpecifier!.node,
-      importSource!.node,
+      {
+        name: importSpecifier!.node.local.name,
+        source: importSource!.node.value,
+      },
+      opts.exclude,
       filename,
-      exclude,
     )
   ) {
     return;
@@ -67,13 +75,13 @@ const processImportDeclaration = ({
   metadata.removeBinding();
 
   const decorator = metadata.isCall ? fn(...args.call) : fn;
-  decorator(...args.decorator, transformers);
+  decorator(...args.decorator, options);
 };
 
 const processDecorator = (
   decorator: NodePath<Decorator>,
   args: readonly NodePath[],
-  options: PluginPass<ASTDecoratorCoreOptions>,
+  options: PluginPass<ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>>,
 ): void => {
   const metadata = new DecoratorMetadata(decorator);
 
@@ -89,7 +97,7 @@ const processDecorator = (
   const binding = metadata.binding;
 
   if (!binding) {
-    throw new Error(`${metadata.bindingId.node.name} is not defined`);
+    throw new Error(`${metadata.identifier.node.name} is not defined`);
   }
 
   if (

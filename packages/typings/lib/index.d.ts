@@ -22,32 +22,15 @@ export type ASTDecoratorTransformerOptions<
 
 export type PrivacyType = 'hard' | 'soft' | 'none';
 
-export type ASTClassDecorator<
-  N extends string = string,
-  O extends object = object
-> = (
-  klass: NodePath<DecorableClass>,
-  options?: ASTDecoratorTransformerOptions<N, O>,
-) => void;
-
-export type ASTClassMemberDecorator<
-  N extends string = string,
-  O extends object = object
-> = (
-  klass: NodePath<DecorableClass>,
-  member: NodePath<DecorableClassMember>,
-  options?: ASTDecoratorTransformerOptions<N, O>,
-) => void;
-
 export type ASTDecoratorExclusionOptions = Readonly<{
   names?: ReadonlyArray<RegExp | string>;
   nodeModules?: ReadonlyArray<RegExp | string>;
   paths?: readonly string[];
 }>;
 
-export type ASTDecoratorCoreOptions = Readonly<{
+export type ASTDecoratorCoreOptions<T> = Readonly<{
   exclude?: ASTDecoratorExclusionOptions;
-  transformers?: ASTDecoratorTransformerOptions;
+  transformers?: T;
 }>;
 
 export type PluginPass<T> = Readonly<{
@@ -57,3 +40,24 @@ export type PluginPass<T> = Readonly<{
   key: string;
   opts?: T;
 }>;
+
+export type ASTClassDecorator<
+  N extends string = string,
+  O extends object = object
+> = (
+  klass: NodePath<DecorableClass>,
+  options?: PluginPass<
+    ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions<N, O>>
+  >,
+) => void;
+
+export type ASTClassMemberDecorator<
+  N extends string = string,
+  O extends object = object
+> = (
+  klass: NodePath<DecorableClass>,
+  member: NodePath<DecorableClassMember>,
+  options: PluginPass<
+    ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions<N, O>>
+  >,
+) => void;

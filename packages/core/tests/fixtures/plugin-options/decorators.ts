@@ -1,6 +1,7 @@
 import {
   ASTDecoratorTransformerOptions,
   DecorableClass,
+  PluginPass,
 } from '@ast-decorators/typings';
 import {NodePath} from '@babel/traverse';
 import {
@@ -24,12 +25,16 @@ export const foo: FooDecorator = ((
   value: NodePath<StringLiteral>,
 ) => (
   klass: NodePath<DecorableClass>,
-  options?: ASTDecoratorTransformerOptions<
-    typeof TRANSFORMER_NAME,
-    PrivacyTransformerOptions
+  {
+    opts,
+  }: PluginPass<
+    ASTDecoratorTransformerOptions<
+      typeof TRANSFORMER_NAME,
+      PrivacyTransformerOptions
+    >
   >,
 ) => {
-  const privacy = options?.[TRANSFORMER_NAME]?.privacy ?? 'hard';
+  const privacy = opts?.[TRANSFORMER_NAME]?.privacy ?? 'hard';
 
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const id = classBody.scope.generateUidIdentifier(name.node.value);

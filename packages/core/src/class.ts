@@ -1,4 +1,5 @@
 import {
+  ASTDecoratorCoreOptions,
   ASTDecoratorTransformerOptions,
   DecorableClass,
   PluginPass,
@@ -9,7 +10,7 @@ import processDecorator from './processor';
 
 const processClassDecorator = (
   decorator: NodePath<Decorator>,
-  options: PluginPass<ASTDecoratorTransformerOptions>,
+  options: PluginPass<ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>>,
 ): void => {
   const klass = decorator.parentPath as NodePath<DecorableClass>;
 
