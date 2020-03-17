@@ -10,7 +10,9 @@ export default {
         },
         transformers: {
           '@ast-decorators/transform-accessor': {
-            preserveDecoratorsForBothAccessors: false,
+            singleAccessorDecorators: {
+              nodeModules: ['decorators']
+            },
           },
         },
       },

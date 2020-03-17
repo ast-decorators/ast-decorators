@@ -8,6 +8,7 @@ import {
   classPrivateMethod,
   ClassPrivateMethod,
   ClassProperty,
+  Decorator,
   expressionStatement,
   Identifier,
   isClassPrivateProperty,
@@ -30,7 +31,7 @@ export const createSetterMethod: AccessorMethodCreator = (
   member,
   interceptor,
   storageProperty,
-  {allowThisContext, preserveDecorators},
+  {allowThisContext, preservingDecorators},
 ): ClassMethod | ClassPrivateMethod => {
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const valueId = classBody.scope.generateUidIdentifier('value');
@@ -63,9 +64,7 @@ export const createSetterMethod: AccessorMethodCreator = (
         (member.node as ClassProperty).computed,
       );
 
-  if (preserveDecorators) {
-    method.decorators = member.node.decorators;
-  }
+  method.decorators = preservingDecorators as Decorator[];
 
   return method;
 };

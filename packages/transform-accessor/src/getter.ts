@@ -6,6 +6,7 @@ import {
   classPrivateMethod,
   ClassPrivateMethod,
   ClassProperty,
+  Decorator,
   Identifier,
   isClassPrivateProperty,
   memberExpression,
@@ -28,7 +29,7 @@ export const createGetterMethod: AccessorMethodCreator = (
   member,
   interceptor,
   storageProperty,
-  {allowThisContext, preserveDecorators},
+  {allowThisContext, preservingDecorators},
 ): ClassMethod | ClassPrivateMethod => {
   const value = memberExpression(thisExpression(), storageProperty);
 
@@ -56,9 +57,7 @@ export const createGetterMethod: AccessorMethodCreator = (
         (member.node as ClassProperty).computed,
       );
 
-  if (preserveDecorators) {
-    method.decorators = member.node.decorators;
-  }
+  method.decorators = preservingDecorators as Decorator[];
 
   return method;
 };
