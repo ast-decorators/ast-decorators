@@ -36,7 +36,7 @@ export type ASTDecoratorCoreOptions<T> = Readonly<{
 export type PluginPass<T> = Readonly<{
   cwd: string;
   file: BabelFileResult;
-  filename?: string;
+  filename: string;
   key: string;
   opts?: T;
 }>;

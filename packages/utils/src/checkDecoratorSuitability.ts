@@ -4,8 +4,6 @@ import checkNodeModule from './checkNodeModule';
 
 const cwd = process.cwd();
 
-export class NotFileEnvironmentError extends Error {}
-
 export type DecoratorSuitabilityFactors = Readonly<{
   names?: ReadonlyArray<RegExp | string>;
   nodeModules?: ReadonlyArray<RegExp | string>;
@@ -20,7 +18,7 @@ export type DecoratorInfo = Readonly<{
 const checkDecoratorSuitability = (
   {name, source}: DecoratorInfo,
   {names, nodeModules, paths}: DecoratorSuitabilityFactors,
-  filename?: string,
+  filename: string,
 ): boolean => {
   if (
     name &&
@@ -39,10 +37,6 @@ const checkDecoratorSuitability = (
   const isNodeModule = checkNodeModule(source);
 
   if (paths && !isNodeModule) {
-    if (!filename) {
-      throw new NotFileEnvironmentError();
-    }
-
     const fullPath = resolve(dirname(filename), source);
 
     if (paths.some(rule => minimatch(fullPath, join(cwd, rule)))) {

@@ -1,4 +1,9 @@
-import {parseAsync, transformFileAsync, TransformOptions} from '@babel/core';
+import {
+  parseAsync,
+  transformFileAsync,
+  TransformOptions,
+  transformAsync,
+} from '@babel/core';
 import {promises} from 'fs';
 import {resolve} from 'path';
 
@@ -61,4 +66,21 @@ export const parse = async (
   const content = await readFile(resolve(fixtureDir, 'input.ts'), 'utf8');
 
   return parseAsync(content, fixOptions(finalOptions));
+};
+
+export const transform = async (
+  dir: string,
+  type: string,
+  fixture: string,
+  options?: object | string,
+): ReturnType<typeof transformAsync> => {
+  const finalOptions =
+    typeof options === 'object'
+      ? options
+      : loadOptions(dir, type, fixture, options);
+
+  const fixtureDir = resolve(dir, 'fixtures', type, fixture);
+  const content = await readFile(resolve(fixtureDir, 'input.ts'), 'utf8');
+
+  return transformAsync(content, fixOptions(finalOptions));
 };

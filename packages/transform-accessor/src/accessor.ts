@@ -1,7 +1,5 @@
 import {ASTClassMemberDecorator} from '@ast-decorators/typings';
-import checkDecoratorSuitability, {
-  NotFileEnvironmentError,
-} from '@ast-decorators/utils/lib/checkDecoratorSuitability';
+import checkDecoratorSuitability from '@ast-decorators/utils/lib/checkDecoratorSuitability';
 import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
 import {PrivateName} from '@ast-decorators/utils/node_modules/@babel/types';
 import {NodePath} from '@babel/core';
@@ -55,44 +53,33 @@ const accessor: AccessorDecorator = ((
     },
   );
 
-  try {
-    const bothAccessorsDecorators = decorators?.filter(decorator => {
-      const {identifier, importSource} = new DecoratorMetadata(decorator);
+  const bothAccessorsDecorators = decorators?.filter(decorator => {
+    const {identifier, importSource} = new DecoratorMetadata(decorator);
 
-      return !checkDecoratorSuitability(
-        {
-          name: identifier.node.name,
-          source: importSource?.node.value,
-        },
-        singleAccessorDecorators,
-        filename,
-      );
-    });
-
-    const setter = createSetterMethod(
-      klass,
-      member,
-      set,
-      storage.key as Identifier | PrivateName,
+    return !checkDecoratorSuitability(
       {
-        // TODO: Add option to set up context
-        allowThisContext: true,
-        preservingDecorators:
-          bothAccessorsDecorators?.map(({node}) => node) ?? null,
+        name: identifier.node.name,
+        source: importSource?.node.value,
       },
+      singleAccessorDecorators,
+      filename,
     );
+  });
 
-    member.replaceWithMultiple([storage, getter, setter]);
-  } catch (e) {
-    if (e instanceof NotFileEnvironmentError) {
-      throw new Error(
-        'Using "singleAccessorDecorators" with "paths" option in a non-file ' +
-          'environment is not allowed',
-      );
-    }
+  const setter = createSetterMethod(
+    klass,
+    member,
+    set,
+    storage.key as Identifier | PrivateName,
+    {
+      // TODO: Add option to set up context
+      allowThisContext: true,
+      preservingDecorators:
+        bothAccessorsDecorators?.map(({node}) => node) ?? null,
+    },
+  );
 
-    throw e;
-  }
+  member.replaceWithMultiple([storage, getter, setter]);
 }) as any;
 
 export default accessor;

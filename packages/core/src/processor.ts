@@ -34,13 +34,6 @@ const processImportDeclaration = ({
   options,
 }: ImportProcessorData): void => {
   const {filename, opts} = options;
-
-  if (!filename) {
-    throw new Error(
-      'Current transformation is not based on files and is unable to handle imports',
-    );
-  }
-
   const {importSpecifier, importSource} = metadata;
 
   if (
