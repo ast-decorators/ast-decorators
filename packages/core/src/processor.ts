@@ -1,3 +1,11 @@
+import {
+  ASTDecoratorCoreOptions,
+  ASTDecoratorTransformerOptions,
+  PluginPass,
+} from '@ast-decorators/typings';
+import checkDecoratorSuitability from '@ast-decorators/utils/lib/checkDecoratorSuitability';
+import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
+import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
 import {NodePath} from '@babel/core';
 import {
   Decorator,
@@ -7,63 +15,7 @@ import {
   isImportNamespaceSpecifier,
   isVariableDeclarator,
 } from '@babel/types';
-import minimatch from 'minimatch';
-import {dirname, join, resolve} from 'path';
-import DecoratorMetadata, {
-  ASTDecoratorCoreOptions,
-  ASTDecoratorExclusionOptions,
-  PluginPass,
-} from './utils';
-
-const cwd = process.cwd();
-
-const checkNodeModule = (source: string): boolean =>
-  !source.startsWith('./') &&
-  !source.startsWith('../') &&
-  !source.startsWith('/');
-
-const shouldExcludeDecorator = (
-  {names, nodeModules, paths}: ASTDecoratorExclusionOptions,
-  metadata: DecoratorMetadata,
-  filename: string,
-): boolean => {
-  const {importSpecifier, importSource} = metadata;
-  const name: string = importSpecifier!.get('local').node.name;
-  const isNodeModule = checkNodeModule(importSource!.node.value);
-
-  if (
-    names &&
-    names.some(rule =>
-      typeof rule === 'string' ? rule === name : rule.test(name),
-    )
-  ) {
-    return true;
-  }
-
-  if (paths && !isNodeModule) {
-    const sourcePath = resolve(dirname(filename), importSource!.node.value);
-
-    if (paths.some(rule => minimatch(sourcePath, join(cwd, rule)))) {
-      return true;
-    }
-  }
-
-  if (nodeModules && isNodeModule) {
-    const sourcePath = importSource!.node.value;
-
-    if (
-      nodeModules.some(rule =>
-        typeof rule === 'string'
-          ? sourcePath.startsWith(rule) || minimatch(sourcePath, rule)
-          : rule.test(sourcePath),
-      )
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-};
+import {dirname, resolve} from 'path';
 
 type DecoratorProcessorArguments = {
   call: readonly NodePath[];
@@ -73,25 +25,31 @@ type DecoratorProcessorArguments = {
 type ImportProcessorData = {
   args: DecoratorProcessorArguments;
   metadata: DecoratorMetadata;
-  options: PluginPass<ASTDecoratorCoreOptions>;
+  options: PluginPass<ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>>;
 };
 
 const processImportDeclaration = ({
   args,
   metadata,
-  options: {filename, opts: {exclude, transformers} = {}},
+  options,
 }: ImportProcessorData): void => {
-  if (!filename) {
-    throw new Error(
-      'Current transformation is not based on files and is unable to handle imports',
-    );
-  }
+  const {filename, opts} = options;
+  const {importSpecifier, importSource} = metadata;
 
-  if (exclude && shouldExcludeDecorator(exclude, metadata, filename)) {
+  if (
+    opts?.exclude &&
+    checkDecoratorSuitability(
+      {
+        name: importSpecifier!.node.local.name,
+        source: importSource!.node.value,
+      },
+      opts.exclude,
+      filename,
+    )
+  ) {
     return;
   }
 
-  const {importSource, importSpecifier} = metadata;
   const source = importSource!.node.value;
   const filepath = checkNodeModule(source)
     ? source
@@ -103,20 +61,20 @@ const processImportDeclaration = ({
   const fn = isImportDefaultSpecifier(importSpecifier)
     ? mod.default
     : isImportNamespaceSpecifier(importSpecifier)
-    ? mod[metadata.property!]
+    ? mod[metadata.property!.node.name]
     : mod[(importSpecifier!.get('imported') as NodePath<Identifier>).node.name];
 
   metadata.removeDecorator();
   metadata.removeBinding();
 
   const decorator = metadata.isCall ? fn(...args.call) : fn;
-  decorator(...args.decorator, transformers);
+  decorator(...args.decorator, options);
 };
 
 const processDecorator = (
   decorator: NodePath<Decorator>,
   args: readonly NodePath[],
-  options: PluginPass<ASTDecoratorCoreOptions>,
+  options: PluginPass<ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>>,
 ): void => {
   const metadata = new DecoratorMetadata(decorator);
 
@@ -132,7 +90,7 @@ const processDecorator = (
   const binding = metadata.binding;
 
   if (!binding) {
-    throw new Error(`${metadata.bindingId.node.name} is not defined`);
+    throw new Error(`${metadata.identifier.node.name} is not defined`);
   }
 
   if (

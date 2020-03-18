@@ -1,5 +1,4 @@
-import {ASTDecoratorTransformerOptions} from '@ast-decorators/typings';
-import {BabelFileResult, NodePath} from '@babel/core';
+import {NodePath} from '@babel/core';
 import {Binding} from '@babel/traverse';
 import {
   CallExpression,
@@ -14,25 +13,6 @@ import {
   MemberExpression,
   StringLiteral,
 } from '@babel/types';
-
-export type ASTDecoratorExclusionOptions = Readonly<{
-  names?: ReadonlyArray<RegExp | string>;
-  nodeModules?: ReadonlyArray<RegExp | string>;
-  paths?: readonly string[];
-}>;
-
-export type ASTDecoratorCoreOptions = Readonly<{
-  exclude?: ASTDecoratorExclusionOptions;
-  transformers?: ASTDecoratorTransformerOptions;
-}>;
-
-export type PluginPass<T> = Readonly<{
-  cwd: string;
-  file: BabelFileResult;
-  filename?: string;
-  key: string;
-  opts?: T;
-}>;
 
 const $args = Symbol('args');
 const $binding = Symbol('binding');
@@ -82,7 +62,7 @@ export default class DecoratorMetadata {
     return this[$binding];
   }
 
-  public get bindingId(): NodePath<Identifier> {
+  public get identifier(): NodePath<Identifier> {
     return this.isFree ? this[$id] : this[$object]!;
   }
 
@@ -113,14 +93,14 @@ export default class DecoratorMetadata {
   }
 
   /**
-   * Is decorator identifier a part of MemberExpression?
+   * Is decorator identifier or a part of MemberExpression?
    */
   public get isFree(): boolean {
     return !this[$object];
   }
 
-  public get property(): string | undefined {
-    return this.isFree ? undefined : this[$id].node.name;
+  public get property(): NodePath<Identifier> | undefined {
+    return this.isFree ? undefined : this[$id];
   }
 
   public removeDecorator(): void {
@@ -133,7 +113,7 @@ export default class DecoratorMetadata {
     }
 
     this[$binding]!.referencePaths = this[$binding]!.referencePaths.filter(
-      p => p !== this.bindingId,
+      p => p !== this.identifier,
     );
 
     if (this[$binding]!.referencePaths.length === 0) {

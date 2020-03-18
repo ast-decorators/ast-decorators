@@ -6,6 +6,7 @@ import {
   classPrivateMethod,
   ClassPrivateMethod,
   ClassProperty,
+  Decorator,
   Identifier,
   isClassPrivateProperty,
   memberExpression,
@@ -28,7 +29,7 @@ export const createGetterMethod: AccessorMethodCreator = (
   member,
   interceptor,
   storageProperty,
-  allowThisContext,
+  {allowThisContext, preservingDecorators},
 ): ClassMethod | ClassPrivateMethod => {
   const value = memberExpression(thisExpression(), storageProperty);
 
@@ -46,17 +47,19 @@ export const createGetterMethod: AccessorMethodCreator = (
     ),
   ]);
 
-  if (isClassPrivateProperty(member)) {
-    return classPrivateMethod('get', member.node.key as PrivateName, [], body);
-  }
+  const method = isClassPrivateProperty(member)
+    ? classPrivateMethod('get', member.node.key as PrivateName, [], body)
+    : classMethod(
+        'get',
+        member.node.key as Identifier | StringLiteral | NumericLiteral,
+        [],
+        body,
+        (member.node as ClassProperty).computed,
+      );
 
-  return classMethod(
-    'get',
-    member.node.key as Identifier | StringLiteral | NumericLiteral,
-    [],
-    body,
-    (member.node as ClassProperty).computed,
-  );
+  method.decorators = preservingDecorators as Decorator[];
+
+  return method;
 };
 
 export type GetterDecorator = (get?: AccessorInterceptor) => PropertyDecorator;

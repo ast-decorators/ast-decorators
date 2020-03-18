@@ -1,7 +1,9 @@
 import {ASTClassMemberDecorator} from '@ast-decorators/typings';
+import checkDecoratorSuitability from '@ast-decorators/utils/lib/checkDecoratorSuitability';
+import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
 import {PrivateName} from '@ast-decorators/utils/node_modules/@babel/types';
 import {NodePath} from '@babel/core';
-import {Identifier} from '@babel/types';
+import {Decorator, Identifier} from '@babel/types';
 import {createGetterMethod} from './getter';
 import {createSetterMethod} from './setter';
 import {
@@ -10,6 +12,9 @@ import {
   AccessorInterceptorNode,
   assert,
   createStorage,
+  extractOptions,
+  TransformAccessorOptions,
+  TRANSFORMER_NAME,
 } from './utils';
 
 export type AccessorDecorator = (
@@ -20,29 +25,58 @@ export type AccessorDecorator = (
 const accessor: AccessorDecorator = ((
   get?: NodePath<AccessorInterceptorNode>,
   set?: NodePath<AccessorInterceptorNode>,
-): ASTClassMemberDecorator => (
-  klass,
-  member: NodePath<AccessorAllowedMember>,
-  options,
-) => {
+): ASTClassMemberDecorator<
+  typeof TRANSFORMER_NAME,
+  TransformAccessorOptions
+> => (klass, member: NodePath<AccessorAllowedMember>, {filename, opts}) => {
   assert('accessor', member, [get, set]);
 
-  const storage = createStorage(klass, member, options);
+  const transformerOptions = extractOptions(opts);
+
+  const singleAccessorDecorators =
+    transformerOptions.singleAccessorDecorators ?? {};
+
+  const decorators = member.node.decorators
+    ? (member.get('decorators') as ReadonlyArray<NodePath<Decorator>>)
+    : null;
+
+  const storage = createStorage(klass, member, transformerOptions);
   const getter = createGetterMethod(
     klass,
     member,
     get,
     storage.key as Identifier | PrivateName,
-    // TODO: Add option to set up context
-    true,
+    {
+      // TODO: Add option to set up context
+      allowThisContext: true,
+      preservingDecorators: decorators?.map(({node}) => node) ?? null,
+    },
   );
+
+  const bothAccessorsDecorators = decorators?.filter(decorator => {
+    const {identifier, importSource} = new DecoratorMetadata(decorator);
+
+    return !checkDecoratorSuitability(
+      {
+        name: identifier.node.name,
+        source: importSource?.node.value,
+      },
+      singleAccessorDecorators,
+      filename,
+    );
+  });
+
   const setter = createSetterMethod(
     klass,
     member,
     set,
     storage.key as Identifier | PrivateName,
-    // TODO: Add option to set up context
-    true,
+    {
+      // TODO: Add option to set up context
+      allowThisContext: true,
+      preservingDecorators:
+        bothAccessorsDecorators?.map(({node}) => node) ?? null,
+    },
   );
 
   member.replaceWithMultiple([storage, getter, setter]);

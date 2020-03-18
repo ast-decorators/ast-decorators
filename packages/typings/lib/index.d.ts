@@ -6,7 +6,7 @@ import {
   ClassPrivateProperty,
   ClassProperty,
 } from '@babel/types';
-import {NodePath} from '@babel/core';
+import {BabelFileResult, NodePath} from '@babel/core';
 
 export type DecorableClass = ClassDeclaration | ClassExpression;
 export type DecorableClassMember =
@@ -22,12 +22,33 @@ export type ASTDecoratorTransformerOptions<
 
 export type PrivacyType = 'hard' | 'soft' | 'none';
 
+export type ASTDecoratorExclusionOptions = Readonly<{
+  names?: ReadonlyArray<RegExp | string>;
+  nodeModules?: ReadonlyArray<RegExp | string>;
+  paths?: readonly string[];
+}>;
+
+export type ASTDecoratorCoreOptions<T> = Readonly<{
+  exclude?: ASTDecoratorExclusionOptions;
+  transformers?: T;
+}>;
+
+export type PluginPass<T> = Readonly<{
+  cwd: string;
+  file: BabelFileResult;
+  filename: string;
+  key: string;
+  opts?: T;
+}>;
+
 export type ASTClassDecorator<
   N extends string = string,
   O extends object = object
 > = (
   klass: NodePath<DecorableClass>,
-  opts?: ASTDecoratorTransformerOptions<N, O>,
+  options?: PluginPass<
+    ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions<N, O>>
+  >,
 ) => void;
 
 export type ASTClassMemberDecorator<
@@ -36,5 +57,7 @@ export type ASTClassMemberDecorator<
 > = (
   klass: NodePath<DecorableClass>,
   member: NodePath<DecorableClassMember>,
-  opts?: ASTDecoratorTransformerOptions<N, O>,
+  options: PluginPass<
+    ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions<N, O>>
+  >,
 ) => void;

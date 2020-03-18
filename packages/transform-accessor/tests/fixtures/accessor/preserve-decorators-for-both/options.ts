@@ -3,17 +3,14 @@ export default {
   presets: [require('@babel/preset-typescript')],
   plugins: [
     [
-      require('../../../../src'),
+      require('@ast-decorators/core'),
       {
         exclude: {
-          nodeModules: [
-            'ignored-module',
-            /ignored-module-second(\/\w+)*\/somefile/,
-            'ignored-module-third/**/*.decorator'
-          ],
+          nodeModules: ['decorators'],
         },
       },
     ],
     [require('@babel/plugin-syntax-decorators'), {legacy: true}],
+    require('@babel/plugin-syntax-class-properties'),
   ],
 };

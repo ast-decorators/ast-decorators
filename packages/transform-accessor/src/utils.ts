@@ -1,9 +1,11 @@
 import {
   ASTClassMemberDecorator,
+  ASTDecoratorCoreOptions,
   ASTDecoratorTransformerOptions,
   DecorableClass,
   PrivacyType,
 } from '@ast-decorators/typings';
+import {DecoratorSuitabilityFactors} from '@ast-decorators/utils/lib/checkDecoratorSuitability';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
 import {NodePath, template} from '@babel/core';
@@ -15,6 +17,7 @@ import {
   ClassPrivateMethod,
   ClassPrivateProperty,
   ClassProperty,
+  Decorator,
   functionDeclaration,
   FunctionExpression,
   identifier,
@@ -30,7 +33,12 @@ import {
   thisExpression,
 } from '@babel/types';
 
-const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
+export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
+
+export type TransformAccessorOptions = Readonly<{
+  singleAccessorDecorators?: DecoratorSuitabilityFactors;
+  privacy?: PrivacyType;
+}>;
 
 export type AccessorAllowedMember = ClassProperty | ClassPrivateProperty;
 export type AccessorInterceptor = (value: any) => any;
@@ -39,12 +47,17 @@ export type AccessorInterceptorNode =
   | ArrowFunctionExpression
   | Identifier;
 
+export type AccessorMethodCreatorOptions = Readonly<{
+  allowThisContext: boolean;
+  preservingDecorators: Decorator[] | null;
+}>;
+
 export type AccessorMethodCreator = (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
   storage: Identifier | PrivateName,
-  allowThisContext: boolean,
+  options: AccessorMethodCreatorOptions,
 ) => ClassMethod | ClassPrivateMethod;
 
 export const assert = (
@@ -72,19 +85,21 @@ export const assert = (
   }
 };
 
-export type TransformAccessorOptions = {
-  privacy?: PrivacyType;
-};
+export const extractOptions = (
+  opts?: ASTDecoratorCoreOptions<
+    ASTDecoratorTransformerOptions<
+      typeof TRANSFORMER_NAME,
+      TransformAccessorOptions
+    >
+  >,
+): TransformAccessorOptions => opts?.transformers?.[TRANSFORMER_NAME] ?? {};
 
 export const createStorage = (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
-  options?: ASTDecoratorTransformerOptions<
-    typeof TRANSFORMER_NAME,
-    TransformAccessorOptions
-  >,
+  options?: TransformAccessorOptions,
 ): AccessorAllowedMember => {
-  const privacy = options?.[TRANSFORMER_NAME]?.privacy ?? 'hard';
+  const privacy = options?.privacy ?? 'hard';
 
   return createPropertyByPrivacy(
     privacy,
@@ -133,22 +148,28 @@ export const createAccessorDecorator = (
   decorator: string,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
   impl: AccessorMethodCreator,
-): ASTClassMemberDecorator => (
+): ASTClassMemberDecorator<
+  typeof TRANSFORMER_NAME,
+  TransformAccessorOptions
+> => (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
-  options?: ASTDecoratorTransformerOptions,
+  {opts},
 ): void => {
   assert(decorator, member, [accessor]);
 
-  const storage = createStorage(klass, member, options);
+  const storage = createStorage(klass, member, extractOptions(opts));
 
   const method = impl(
     klass,
     member,
     accessor,
     storage.key as Identifier | PrivateName,
-    // TODO: Add option to set up context
-    true,
+    {
+      // TODO: Add option to set up context
+      allowThisContext: true,
+      preservingDecorators: member.node.decorators,
+    },
   );
 
   member.replaceWithMultiple([storage, method]);
