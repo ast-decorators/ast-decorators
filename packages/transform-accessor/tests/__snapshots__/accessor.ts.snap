@@ -51,22 +51,3 @@ class Foo {
 
 }"
 `;
-
-exports[`@ast-decorators/transform-accessor @accessor preserves following decorators only for getter 2`] = `
-"import { other } from 'decorators';
-
-class Foo {
-  #_bar;
-
-  @other()
-  get bar() {
-    return this.#_bar;
-  }
-
-  @other()
-  set bar(_value) {
-    this.#_bar = _value;
-  }
-
-}"
-`;

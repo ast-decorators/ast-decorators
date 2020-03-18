@@ -2,7 +2,7 @@
 
 exports[`@ast-decorators/core plugin-options compiles in another way if option has different state 1`] = `
 "class Link extends HTMLAnchorElement {
-  _bar = 'baz';
+  #_bar = 'baz';
 }"
 `;
 

@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`@ast-decorators/core class-member compiles decorator for a private method 1`] = `
-"\\"use strict\\";
-
-class Foo {
+"class Foo {
   constructor() {
     this.#bar = this.#bar.bind(this);
   }
@@ -14,9 +12,7 @@ class Foo {
 `;
 
 exports[`@ast-decorators/core class-member compiles decorator for a private property 1`] = `
-"\\"use strict\\";
-
-class Foo {
+"class Foo {
   get #bar() {
     return 50;
   }
@@ -25,9 +21,7 @@ class Foo {
 `;
 
 exports[`@ast-decorators/core class-member compiles decorator for a public method 1`] = `
-"\\"use strict\\";
-
-class Foo {
+"class Foo {
   constructor() {
     this.bar = this.bar.bind(this);
   }
@@ -38,9 +32,7 @@ class Foo {
 `;
 
 exports[`@ast-decorators/core class-member compiles decorator for a public property 1`] = `
-"\\"use strict\\";
-
-function _barObserver(value) {
+"function _barObserver(value) {
   this.observed = value;
 }
 
@@ -61,9 +53,7 @@ class Foo {
 `;
 
 exports[`@ast-decorators/core class-member compiles decorators imported as a namespace for a method 1`] = `
-"\\"use strict\\";
-
-class Foo {
+"class Foo {
   get baz() {
     console.log('The last is foo');
     return 100;
@@ -87,9 +77,7 @@ console.log('foo is 2');"
 `;
 
 exports[`@ast-decorators/core class-member compiles multiple decorators for a method 1`] = `
-"\\"use strict\\";
-
-class Foo {
+"class Foo {
   get baz() {
     console.log('The last is foo');
     return 100;

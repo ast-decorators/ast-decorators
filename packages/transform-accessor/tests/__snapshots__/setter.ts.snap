@@ -1,9 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`@ast-decorators/transform-accessor @setter compiles for decorator on computed property 1`] = `
-"\\"use strict\\";
-
-const $bar = Symbol();
+"const $bar = Symbol();
 
 class Foo {
   #_$bar;
@@ -16,9 +14,7 @@ class Foo {
 `;
 
 exports[`@ast-decorators/transform-accessor @setter compiles for decorator on private property 1`] = `
-"\\"use strict\\";
-
-class Foo {
+"class Foo {
   #_bar;
 
   set #bar(_value) {
@@ -29,9 +25,7 @@ class Foo {
 `;
 
 exports[`@ast-decorators/transform-accessor @setter compiles for decorator on property with assignment 1`] = `
-"\\"use strict\\";
-
-class Foo {
+"class Foo {
   #_bar = 'baz';
 
   set bar(_value) {
@@ -42,9 +36,7 @@ class Foo {
 `;
 
 exports[`@ast-decorators/transform-accessor @setter compiles for decorator with inline arrow function interceptor 1`] = `
-"\\"use strict\\";
-
-const _setInterceptor = value => {
+"const _setInterceptor = value => {
   console.log(value);
   return value;
 };
@@ -60,9 +52,7 @@ class Foo {
 `;
 
 exports[`@ast-decorators/transform-accessor @setter compiles for decorator with inline function interceptor 1`] = `
-"\\"use strict\\";
-
-function _setInterceptor(value) {
+"function _setInterceptor(value) {
   console.log(value);
   return value;
 }
@@ -78,9 +68,7 @@ class Foo {
 `;
 
 exports[`@ast-decorators/transform-accessor @setter compiles for decorator with interceptor declared somewhere else 1`] = `
-"\\"use strict\\";
-
-const set = value => {
+"const set = value => {
   console.log(value);
   return value;
 };
@@ -96,9 +84,7 @@ class Foo {
 `;
 
 exports[`@ast-decorators/transform-accessor @setter compiles for decorator without interceptor 1`] = `
-"\\"use strict\\";
-
-class Foo {
+"class Foo {
   #_bar;
 
   set bar(_value) {
