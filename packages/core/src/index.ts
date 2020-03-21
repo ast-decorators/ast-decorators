@@ -1,6 +1,7 @@
+/* eslint-disable global-require */
 import {
   ASTDecoratorCoreOptions,
-  ASTDecoratorTransformerOptions,
+  ASTDecoratorTransformer,
   DecorableClass,
   DecorableClassMember,
   PluginPass,
@@ -9,27 +10,31 @@ import {NodePath} from '@babel/core';
 import {Decorator} from '@babel/types';
 import processClassDecorator from './class';
 import processClassMemberDecorator from './property';
+import {
+  ASTDecoratorsError,
+  Mutable,
+  TransformerMap,
+  TransformerMapItem,
+} from './utils';
 
-type UncheckedPluginPass<T> = Omit<PluginPass<T>, 'filename'> &
+type UncheckedPluginPass<T = object> = Omit<PluginPass<T>, 'filename'> &
   Readonly<{
     filename?: string;
   }>;
 
 const processEachDecorator = (
   path: NodePath<DecorableClass | DecorableClassMember>,
-  opts: UncheckedPluginPass<
-    ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>
-  >,
+  opts: UncheckedPluginPass,
+  transformerMap: TransformerMap,
   processor: (
     decorator: NodePath<Decorator>,
-    options: PluginPass<
-      ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>
-    >,
+    transformerMap: TransformerMap,
+    options: PluginPass,
   ) => void,
 ): void => {
   if (!opts.filename) {
-    throw new Error(
-      '[AST Decorators]: AST Decorators system requires filename to be set',
+    throw new ASTDecoratorsError(
+      'AST Decorators system requires filename to be set',
     );
   }
 
@@ -40,12 +45,7 @@ const processEachDecorator = (
 
     // Decorators apply in the reverse order of their storing
     for (let i = decorators.length - 1; i >= 0; i--) {
-      processor(
-        decorators[i],
-        opts as PluginPass<
-          ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>
-        >,
-      );
+      processor(decorators[i], transformerMap, opts as PluginPass);
 
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (!path.node) {
@@ -55,25 +55,61 @@ const processEachDecorator = (
   }
 };
 
-const babelPluginAstDecorators = (): object => ({
-  visitor: {
-    'ClassDeclaration|ClassExpression'(
-      path: NodePath<DecorableClass>,
-      opts: UncheckedPluginPass<
-        ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>
-      >,
-    ) {
-      processEachDecorator(path, opts, processClassDecorator);
-    },
-    'ClassProperty|ClassMethod|ClassPrivateProperty|ClassPrivateMethod'(
-      path: NodePath<DecorableClassMember>,
-      opts: UncheckedPluginPass<
-        ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>
-      >,
-    ) {
-      processEachDecorator(path, opts, processClassMemberDecorator);
-    },
-  },
-});
+const prepareTransformerMap = (
+  transformers: Required<ASTDecoratorCoreOptions>['transformers'],
+): TransformerMap =>
+  transformers.reduce<Mutable<TransformerMap>>((acc, item) => {
+    if (!Array.isArray(item)) {
+      const imported: Record<string, ASTDecoratorTransformer> =
+        typeof item === 'string' ? require(item) : item;
 
-export default babelPluginAstDecorators;
+      acc.push(...Object.values(imported));
+    } else {
+      const [transformer, options] = item;
+      const imported: Record<string, ASTDecoratorTransformer> =
+        typeof transformer === 'string' ? require(transformer) : transformer;
+
+      acc.push(
+        ...Object.values(imported).map<TransformerMapItem>(
+          ([detector, decorator]) => [detector, decorator, options],
+        ),
+      );
+    }
+
+    return acc;
+  }, []);
+
+const babelPluginAstDecoratorsCore = (
+  _: object,
+  {transformers}: ASTDecoratorCoreOptions,
+): object => {
+  if (!transformers) {
+    throw new ASTDecoratorsError('No transformers provided');
+  }
+
+  const transformerMap = prepareTransformerMap(transformers);
+
+  return {
+    visitor: {
+      'ClassDeclaration|ClassExpression'(
+        path: NodePath<DecorableClass>,
+        opts: UncheckedPluginPass,
+      ) {
+        processEachDecorator(path, opts, transformerMap, processClassDecorator);
+      },
+      'ClassProperty|ClassMethod|ClassPrivateProperty|ClassPrivateMethod'(
+        path: NodePath<DecorableClassMember>,
+        opts: UncheckedPluginPass,
+      ) {
+        processEachDecorator(
+          path,
+          opts,
+          transformerMap,
+          processClassMemberDecorator,
+        );
+      },
+    },
+  };
+};
+
+export default babelPluginAstDecoratorsCore;

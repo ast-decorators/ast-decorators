@@ -1,6 +1,4 @@
 import {
-  ASTDecoratorCoreOptions,
-  ASTDecoratorTransformerOptions,
   DecorableClass,
   DecorableClassMember,
   PluginPass,
@@ -8,10 +6,12 @@ import {
 import {NodePath} from '@babel/core';
 import {Decorator, isClassDeclaration, isClassExpression} from '@babel/types';
 import processDecorator from './processor';
+import {TransformerMap} from './utils';
 
 const processClassMemberDecorator = (
   decorator: NodePath<Decorator>,
-  options: PluginPass<ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>>,
+  transformerMap: TransformerMap,
+  options: PluginPass,
 ): void => {
   const member = decorator.parentPath as NodePath<DecorableClassMember>;
 
@@ -19,7 +19,7 @@ const processClassMemberDecorator = (
     path => isClassDeclaration(path) || isClassExpression(path),
   ) as NodePath<DecorableClass>;
 
-  processDecorator(decorator, [klass, member], options);
+  processDecorator(decorator, [klass, member], transformerMap, options);
 };
 
 export default processClassMemberDecorator;

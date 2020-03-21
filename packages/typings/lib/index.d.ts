@@ -15,25 +15,7 @@ export type DecorableClassMember =
   | ClassMethod
   | ClassPrivateMethod;
 
-export type ASTDecoratorTransformerOptions<
-  N extends string = string,
-  O extends object = object
-> = Partial<Readonly<Record<N, O>>>;
-
-export type PrivacyType = 'hard' | 'soft' | 'none';
-
-export type ASTDecoratorExclusionOptions = Readonly<{
-  names?: ReadonlyArray<RegExp | string>;
-  nodeModules?: ReadonlyArray<RegExp | string>;
-  paths?: readonly string[];
-}>;
-
-export type ASTDecoratorCoreOptions<T> = Readonly<{
-  exclude?: ASTDecoratorExclusionOptions;
-  transformers?: T;
-}>;
-
-export type PluginPass<T> = Readonly<{
+export type PluginPass<T = object> = Readonly<{
   cwd: string;
   file: BabelFileResult;
   filename: string;
@@ -41,23 +23,54 @@ export type PluginPass<T> = Readonly<{
   opts?: T;
 }>;
 
-export type ASTClassDecorator<
-  N extends string = string,
-  O extends object = object
-> = (
+export type ASTDecoratorOptions<T extends object> = {
+  corePlugin: PluginPass<ASTDecoratorCoreOptions>;
+} & T;
+
+export type PrivacyType = 'hard' | 'soft' | 'none';
+
+export type ASTClassDecorator<O extends object = object> = (
   klass: NodePath<DecorableClass>,
-  options?: PluginPass<
-    ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions<N, O>>
-  >,
+  options?: ASTDecoratorOptions<O>,
 ) => void;
 
-export type ASTClassMemberDecorator<
-  N extends string = string,
-  O extends object = object
-> = (
+export type ASTClassMemberDecorator<O extends object = object> = (
   klass: NodePath<DecorableClass>,
   member: NodePath<DecorableClassMember>,
-  options: PluginPass<
-    ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions<N, O>>
-  >,
+  options: ASTDecoratorOptions<O>,
 ) => void;
+
+export type ASTClassCallableDecorator = (...args: any[]) => ASTClassDecorator;
+export type ASTClassMemberCallableDecorator = (
+  ...args: any[]
+) => ASTClassMemberCallableDecorator;
+
+export type ASTSimpleDecorator = ASTClassDecorator | ASTClassMemberDecorator;
+export type ASTCallableDecorator =
+  | ASTClassCallableDecorator
+  | ASTClassMemberCallableDecorator;
+
+export type ASTDecorator = ASTSimpleDecorator | ASTCallableDecorator;
+
+export type ASTDecoratorDetector = (
+  name: string,
+  path: string,
+  options: PluginPass,
+) => boolean;
+
+export type ASTDecoratorTransformer = [ASTDecorator, ASTDecoratorDetector];
+
+export type ASTDecoratorExclusionOptions = Readonly<{
+  names?: ReadonlyArray<RegExp | string>;
+  nodeModules?: ReadonlyArray<RegExp | string>;
+  paths?: readonly string[];
+}>;
+
+export type ASTDecoratorCoreOptions = Readonly<{
+  transformers?: ReadonlyArray<
+    | string
+    | ASTDecoratorTransformer
+    | [string, object]
+    | [ASTDecoratorTransformer, object]
+  >;
+}>;
