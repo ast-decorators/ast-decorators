@@ -3,21 +3,14 @@
 exports[`@ast-decorators/core class compiles decorator for a class 1`] = `
 "class Link extends HTMLAnchorElement {}
 
-const {
-  extends: _temp
-} = {
-  extends: 'a'
-};
-customElements.define('x-test', {
-  extends: _temp
-});"
+customElements.define('x-test', Link);"
 `;
 
 exports[`@ast-decorators/core class compiles decorators imported as namespace 1`] = `
 "class Link extends HTMLAnchorElement {}
 
-console.log('foo is 1');
-console.log('bar is 0');"
+console.log('foo is 3');
+console.log('bar is 2');"
 `;
 
 exports[`@ast-decorators/core class compiles decorators with params 1`] = `

@@ -23,32 +23,39 @@ export type PluginPass<T = object> = Readonly<{
   opts?: T;
 }>;
 
-export type ASTDecoratorOptions<T extends object> = {
-  corePlugin: PluginPass<ASTDecoratorCoreOptions>;
-} & T;
-
 export type PrivacyType = 'hard' | 'soft' | 'none';
 
 export type ASTClassDecorator<O extends object = object> = (
   klass: NodePath<DecorableClass>,
-  options?: ASTDecoratorOptions<O>,
+  transformerOptions: O | undefined,
+  babelOptions: PluginPass<ASTDecoratorCoreOptions>,
 ) => void;
 
 export type ASTClassMemberDecorator<O extends object = object> = (
   klass: NodePath<DecorableClass>,
   member: NodePath<DecorableClassMember>,
-  options: ASTDecoratorOptions<O>,
+  transformerOptions: O | undefined,
+  babelOptions: PluginPass<ASTDecoratorCoreOptions>,
 ) => void;
 
-export type ASTClassCallableDecorator = (...args: any[]) => ASTClassDecorator;
-export type ASTClassMemberCallableDecorator = (
-  ...args: any[]
-) => ASTClassMemberCallableDecorator;
+export type ASTClassCallableDecorator<
+  A extends any[] = any[],
+  O extends object = object
+> = (...args: A) => ASTClassDecorator<O>;
 
-export type ASTSimpleDecorator = ASTClassDecorator | ASTClassMemberDecorator;
-export type ASTCallableDecorator =
-  | ASTClassCallableDecorator
-  | ASTClassMemberCallableDecorator;
+export type ASTClassMemberCallableDecorator<
+  A extends any[] = any[],
+  O extends object = object
+> = (...args: A) => ASTClassMemberDecorator<O>;
+
+export type ASTSimpleDecorator<O extends object = object> =
+  | ASTClassDecorator<O>
+  | ASTClassMemberDecorator<O>;
+
+export type ASTCallableDecorator<
+  A extends any[] = any[],
+  O extends object = object
+> = ASTClassCallableDecorator<A, O> | ASTClassMemberCallableDecorator<A, O>;
 
 export type ASTDecorator = ASTSimpleDecorator | ASTCallableDecorator;
 
@@ -58,7 +65,10 @@ export type ASTDecoratorDetector = (
   options: PluginPass,
 ) => boolean;
 
-export type ASTDecoratorTransformer = [ASTDecorator, ASTDecoratorDetector];
+export type ASTDecoratorTransformer = (
+  babel: object,
+  transformerOptions?: object,
+) => ReadonlyArray<readonly [ASTDecorator, ASTDecoratorDetector]>;
 
 export type ASTDecoratorExclusionOptions = Readonly<{
   names?: ReadonlyArray<RegExp | string>;

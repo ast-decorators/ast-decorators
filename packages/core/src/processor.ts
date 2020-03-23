@@ -41,14 +41,14 @@ const calculateSource = (
   checkNodeModule(value) ? value : resolve(dirname(filename), value);
 
 const processImportDeclaration = (
-  {args, metadata, options}: ImportProcessorData,
+  {args, metadata, options: babelOptions}: ImportProcessorData,
   transformerMap: TransformerMap,
 ): void => {
-  const {filename} = options;
+  const {filename} = babelOptions;
   const {importSpecifier, importSource} = metadata;
 
   const name = isImportDefaultSpecifier(importSpecifier)
-    ? null
+    ? 'default'
     : isImportNamespaceSpecifier(importSpecifier)
     ? metadata.property!.node.name
     : (importSpecifier!.get('imported') as NodePath<Identifier>).node.name;
@@ -56,14 +56,14 @@ const processImportDeclaration = (
   const source = calculateSource(importSource!, filename);
 
   const transformer = transformerMap.find(([, detector]) =>
-    detector(name, source, options),
+    detector(name, source, babelOptions),
   );
 
   if (!transformer) {
     return;
   }
 
-  const [decoratorFn, , opts] = transformer;
+  const [decoratorFn, , transformerOptions] = transformer;
 
   metadata.removeDecorator();
   metadata.removeBinding();
@@ -72,10 +72,8 @@ const processImportDeclaration = (
     ? (decoratorFn as ASTCallableDecorator)(...args.call)
     : (decoratorFn as ASTSimpleDecorator);
 
-  const decoratorOptions = {corePlugin: options, ...opts};
-
   // @ts-ignore
-  decorator(...args.decorator, decoratorOptions);
+  decorator(...args.decorator, transformerOptions, babelOptions);
 };
 
 const processDecorator = (

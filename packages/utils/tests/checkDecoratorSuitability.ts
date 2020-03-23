@@ -7,6 +7,16 @@ describe('@ast-decorators/utils', () => {
   describe('checkDecoratorSuitability', () => {
     const filename = resolve(__dirname, 'input.ts');
 
+    it('allows to omit factors', () => {
+      expect(
+        checkDecoratorSuitability(
+          {name: 'bar', source: 'foo'},
+          undefined,
+          filename,
+        ),
+      ).toBeFalsy();
+    });
+
     describe('names', () => {
       it('detects if import specifier is listed in "names" factor in a string form', () => {
         const check = (name: string): boolean =>

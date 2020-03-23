@@ -17,13 +17,12 @@ export type DecoratorInfo = Readonly<{
 
 const checkDecoratorSuitability = (
   {name, source}: DecoratorInfo,
-  {names, nodeModules, paths}: DecoratorSuitabilityFactors,
+  {names, nodeModules, paths}: DecoratorSuitabilityFactors = {},
   filename: string,
 ): boolean => {
   if (
     name &&
-    names &&
-    names.some(rule =>
+    names?.some(rule =>
       typeof rule === 'string' ? rule === name : rule.test(name),
     )
   ) {

@@ -6,16 +6,13 @@ import {
   DecorableClassMember,
   PluginPass,
 } from '@ast-decorators/typings';
+import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
 import {NodePath} from '@babel/core';
 import {Decorator} from '@babel/types';
 import processClassDecorator from './class';
 import processClassMemberDecorator from './property';
-import {
-  ASTDecoratorsError,
-  Mutable,
-  TransformerMap,
-  TransformerMapItem,
-} from './utils';
+import {ASTDecoratorsError, Mutable, TransformerMap} from './utils';
+import {resolve} from 'path';
 
 type UncheckedPluginPass<T = object> = Omit<PluginPass<T>, 'filename'> &
   Readonly<{
@@ -55,23 +52,41 @@ const processEachDecorator = (
   }
 };
 
+type TransformerModule = {
+  default: ASTDecoratorTransformer;
+};
+
+/* istanbul ignore next */
+const interop = (obj: any): TransformerModule =>
+  obj && obj.__esModule ? obj : {default: obj};
+
+const cwd = process.cwd();
+
+const calculateImport = (path: string): string =>
+  checkNodeModule(path) ? path : resolve(cwd, path);
+
 const prepareTransformerMap = (
   transformers: Required<ASTDecoratorCoreOptions>['transformers'],
+  babel: object,
 ): TransformerMap =>
   transformers.reduce<Mutable<TransformerMap>>((acc, item) => {
     if (!Array.isArray(item)) {
-      const imported: Record<string, ASTDecoratorTransformer> =
-        typeof item === 'string' ? require(item) : item;
+      const {default: transformer}: TransformerModule = interop(
+        typeof item === 'string' ? require(calculateImport(item)) : item,
+      );
 
-      acc.push(...Object.values(imported));
+      acc.push(...transformer(babel));
     } else {
-      const [transformer, options] = item;
-      const imported: Record<string, ASTDecoratorTransformer> =
-        typeof transformer === 'string' ? require(transformer) : transformer;
+      const [pathOrTransformer, options] = item;
+      const {default: transformer}: TransformerModule = interop(
+        typeof pathOrTransformer === 'string'
+          ? require(calculateImport(pathOrTransformer))
+          : pathOrTransformer,
+      );
 
       acc.push(
-        ...Object.values(imported).map<TransformerMapItem>(
-          ([detector, decorator]) => [detector, decorator, options],
+        ...transformer(babel, options).map(
+          ([detector, decorator]) => [detector, decorator, options] as const,
         ),
       );
     }
@@ -80,14 +95,14 @@ const prepareTransformerMap = (
   }, []);
 
 const babelPluginAstDecoratorsCore = (
-  _: object,
+  babel: object,
   {transformers}: ASTDecoratorCoreOptions,
 ): object => {
   if (!transformers) {
     throw new ASTDecoratorsError('No transformers provided');
   }
 
-  const transformerMap = prepareTransformerMap(transformers);
+  const transformerMap = prepareTransformerMap(transformers, babel);
 
   return {
     visitor: {

@@ -1,10 +1,9 @@
 import {compare as _compare} from '../../../utils/testing';
-import options from './fixtures/options';
 
 describe('@ast-decorators/core', () => {
   describe('class-member', () => {
     const compare = async (fixture: string): Promise<void> =>
-      _compare(__dirname, 'class-member', fixture, options);
+      _compare(__dirname, 'class-member', fixture);
 
     it('compiles decorator for a public property', async () => {
       await compare('public-property');
