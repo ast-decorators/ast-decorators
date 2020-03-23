@@ -1,3 +1,4 @@
+import {ASTClassMemberCallableDecorator} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   assignmentExpression,
@@ -19,7 +20,6 @@ import {
   thisExpression,
 } from '@babel/types';
 import {
-  AccessorInterceptor,
   AccessorInterceptorNode,
   AccessorMethodCreator,
   createAccessorDecorator,
@@ -69,9 +69,8 @@ export const createSetterMethod: AccessorMethodCreator = (
   return method;
 };
 
-export type SetterDecorator = (set?: AccessorInterceptor) => PropertyDecorator;
-
-const setter: SetterDecorator = ((set?: NodePath<AccessorInterceptorNode>) =>
-  createAccessorDecorator('setter', set, createSetterMethod)) as any;
+const setter: ASTClassMemberCallableDecorator = (
+  set?: NodePath<AccessorInterceptorNode>,
+) => createAccessorDecorator('setter', set, createSetterMethod);
 
 export default setter;

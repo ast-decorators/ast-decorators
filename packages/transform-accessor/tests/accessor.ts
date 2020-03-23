@@ -14,7 +14,7 @@ describe('@ast-decorators/transform-accessor', () => {
     });
 
     it('preserves following decorators for both accessors', async () => {
-      await compare('preserve-decorators-for-both');
+      await compareDefault('preserve-decorators-for-both');
     });
 
     it('preserves following decorators only for getter', async () => {

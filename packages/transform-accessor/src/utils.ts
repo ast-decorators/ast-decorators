@@ -1,12 +1,11 @@
 import {
   ASTClassMemberDecorator,
-  ASTDecoratorCoreOptions,
-  ASTDecoratorTransformerOptions,
   DecorableClass,
   PrivacyType,
 } from '@ast-decorators/typings';
 import {DecoratorSuitabilityFactors} from '@ast-decorators/utils/lib/checkDecoratorSuitability';
-import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
+import createPropertyByPrivacy
+  from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
 import {NodePath, template} from '@babel/core';
 import {
@@ -33,9 +32,8 @@ import {
   thisExpression,
 } from '@babel/types';
 
-export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
-
 export type TransformAccessorOptions = Readonly<{
+  transformerPath?: string;
   singleAccessorDecorators?: DecoratorSuitabilityFactors;
   privacy?: PrivacyType;
 }>;
@@ -85,29 +83,17 @@ export const assert = (
   }
 };
 
-export const extractOptions = (
-  opts?: ASTDecoratorCoreOptions<
-    ASTDecoratorTransformerOptions<
-      typeof TRANSFORMER_NAME,
-      TransformAccessorOptions
-    >
-  >,
-): TransformAccessorOptions => opts?.transformers?.[TRANSFORMER_NAME] ?? {};
-
 export const createStorage = (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
-  options?: TransformAccessorOptions,
-): AccessorAllowedMember => {
-  const privacy = options?.privacy ?? 'hard';
-
-  return createPropertyByPrivacy(
+  privacy: PrivacyType = 'hard',
+): AccessorAllowedMember =>
+  createPropertyByPrivacy(
     privacy,
     String(getMemberName(member.node)),
     member.node.value,
     klass,
   );
-};
 
 const declarator = template(`const VAR = FUNCTION`);
 
@@ -148,17 +134,14 @@ export const createAccessorDecorator = (
   decorator: string,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
   impl: AccessorMethodCreator,
-): ASTClassMemberDecorator<
-  typeof TRANSFORMER_NAME,
-  TransformAccessorOptions
-> => (
+): ASTClassMemberDecorator<TransformAccessorOptions> => (
   klass: NodePath<DecorableClass>,
   member: NodePath<AccessorAllowedMember>,
-  {opts},
+  {privacy}: TransformAccessorOptions = {},
 ): void => {
   assert(decorator, member, [accessor]);
 
-  const storage = createStorage(klass, member, extractOptions(opts));
+  const storage = createStorage(klass, member, privacy);
 
   const method = impl(
     klass,
