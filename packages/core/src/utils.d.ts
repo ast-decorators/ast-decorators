@@ -9,9 +9,3 @@ export type TransformerMapItem = readonly [
   object?,
 ];
 export type TransformerMap = readonly TransformerMapItem[];
-
-export class ASTDecoratorsError extends Error {
-  public constructor(message) {
-    super(`[AST Decorators]: ${message}`);
-  }
-}

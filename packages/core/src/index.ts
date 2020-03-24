@@ -7,11 +7,12 @@ import {
   PluginPass,
 } from '@ast-decorators/typings';
 import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
+import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import {NodePath} from '@babel/core';
 import {Decorator} from '@babel/types';
 import processClassDecorator from './class';
 import processClassMemberDecorator from './property';
-import {ASTDecoratorsError, Mutable, TransformerMap} from './utils';
+import {Mutable, TransformerMap} from './utils';
 import {resolve} from 'path';
 
 type UncheckedPluginPass<T = object> = Omit<PluginPass<T>, 'filename'> &

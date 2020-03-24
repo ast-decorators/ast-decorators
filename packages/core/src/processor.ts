@@ -5,6 +5,7 @@ import {
   DecorableClassMember,
   PluginPass,
 } from '@ast-decorators/typings';
+import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
 import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
 import {NodePath} from '@babel/core';
@@ -96,15 +97,17 @@ const processDecorator = (
   const binding = metadata.binding;
 
   if (!binding) {
-    throw new Error(`${metadata.identifier.node.name} is not defined`);
+    throw new ASTDecoratorsError(
+      `${metadata.identifier.node.name} is not defined`,
+    );
   }
 
   if (
     isVariableDeclarator(binding.path) ||
     isFunctionDeclaration(binding.path)
   ) {
-    throw new Error(
-      'The AST decorator should be imported from a separate file',
+    throw new ASTDecoratorsError(
+      'Decorator should be imported from a separate file',
     );
   } else {
     processImportDeclaration(data, transformerMap);
