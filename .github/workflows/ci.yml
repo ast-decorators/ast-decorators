@@ -22,6 +22,8 @@ jobs:
         run: |
           npm ci
           npx lerna bootstrap
+      - name: Building
+        run: npx lerna run build
       - name: Testing
         run: npm run test:coverage
         env:
