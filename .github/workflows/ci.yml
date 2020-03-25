@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'packages/**'
+      - '!packages/**/README.md'
+      - 'scripts'
+      - 'utils/**'
+      - '.eslintignore'
+      - '.eslintrc'
+      - '.prettierrc'
+      - 'babel.config.json'
+      - 'jest.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'sonar-project.properties'
+      - 'tsconfig.json'
+  pull_request:
+    branches: [master]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'packages/**'
+      - '!packages/**/README.md'
+      - 'scripts'
+      - 'utils/**'
+      - '.eslintignore'
+      - '.eslintrc'
+      - '.prettierrc'
+      - 'babel.config.json'
+      - 'jest.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'sonar-project.properties'
+      - 'tsconfig.json'
+jobs:
+  testing:
+    name: Testing and Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout project code
+        uses: actions/checkout@v2
+      - name: Use Node.js 13.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 13.x
+      - name: Installation
+        run: |
+          npm ci
+          npx lerna bootstrap
+      - name: Building
+        run: npx lerna run build
+      - name: Testing
+        run: npm run test:coverage
+        env:
+          CI: true
+      - name: Cache Sonar Scanner
+        id: sonar-cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar
+          key: ${{ runner.os }}-sonar
+      - name: Download Sonar Scanner
+        if: steps.sonar-cache.outputs.cache-hit != 'true'
+        run: sh scripts/sonar-scanner-load.sh
+        env:
+          SONAR_VERSION: 4.2.0.1873
+      - name: Run Sonar Scanner
+        run: sh scripts/sonar-scanner-run.sh
+        env:
+          SONAR_VERSION: 4.2.0.1873
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
