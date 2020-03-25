@@ -5,16 +5,17 @@ export default {
     [
       require('@ast-decorators/core'),
       {
-        exclude: {
-          nodeModules: ['decorators'],
-        },
-        transformers: {
-          '@ast-decorators/transform-accessor': {
-            singleAccessorDecorators: {
-              nodeModules: ['decorators']
+        transformers: [
+          [
+            require('../../../../src/transformer'),
+            {
+              singleAccessorDecorators: {
+                nodeModules: ['decorators'],
+              },
+              transformerPath: '**/transform-accessor/src',
             },
-          },
-        },
+          ],
+        ],
       },
     ],
     [require('@babel/plugin-syntax-decorators'), {legacy: true}],

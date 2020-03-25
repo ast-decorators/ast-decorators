@@ -1,10 +1,12 @@
+import {
+  ASTClassMemberCallableDecorator,
+  ClassMemberMethod,
+} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   blockStatement,
   classMethod,
-  ClassMethod,
   classPrivateMethod,
-  ClassPrivateMethod,
   ClassProperty,
   Decorator,
   Identifier,
@@ -17,7 +19,6 @@ import {
   thisExpression,
 } from '@babel/types';
 import {
-  AccessorInterceptor,
   AccessorInterceptorNode,
   AccessorMethodCreator,
   createAccessorDecorator,
@@ -30,7 +31,7 @@ export const createGetterMethod: AccessorMethodCreator = (
   interceptor,
   storageProperty,
   {allowThisContext, preservingDecorators},
-): ClassMethod | ClassPrivateMethod => {
+): ClassMemberMethod => {
   const value = memberExpression(thisExpression(), storageProperty);
 
   const body = blockStatement([
@@ -62,9 +63,8 @@ export const createGetterMethod: AccessorMethodCreator = (
   return method;
 };
 
-export type GetterDecorator = (get?: AccessorInterceptor) => PropertyDecorator;
-
-const getter: GetterDecorator = ((get?: NodePath<AccessorInterceptorNode>) =>
-  createAccessorDecorator('getter', get, createGetterMethod)) as any;
+const getter: ASTClassMemberCallableDecorator = (
+  get?: NodePath<AccessorInterceptorNode>,
+) => createAccessorDecorator('getter', get, createGetterMethod);
 
 export default getter;

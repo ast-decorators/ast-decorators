@@ -3,13 +3,12 @@ export default {
   presets: [require('@babel/preset-typescript')],
   plugins: [
     [
-      require('../../../../src'),
+      require('../../../src'),
       {
-        transformers: {
-          'privacy-transformer': {privacy: 'none'},
-        },
+        transformers: [require('./transformer')],
       },
     ],
     [require('@babel/plugin-syntax-decorators'), {legacy: true}],
+    require('@babel/plugin-syntax-class-properties'),
   ],
 };

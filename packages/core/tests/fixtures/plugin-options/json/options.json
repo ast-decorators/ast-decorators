@@ -1,0 +1,20 @@
+{
+  "comments": false,
+  "presets": ["@babel/preset-typescript"],
+  "plugins": [
+    [
+      "./packages/core/src/index.ts",
+      {
+        "transformers": [
+          "./packages/core/tests/fixtures/plugin-options/json/transformer",
+          [
+            "./packages/core/tests/fixtures/plugin-options/transformer",
+            {"privacy": "none"}
+          ]
+        ]
+      }
+    ],
+    ["@babel/plugin-syntax-decorators", {"legacy": true}],
+    "@babel/plugin-syntax-class-properties"
+  ]
+}

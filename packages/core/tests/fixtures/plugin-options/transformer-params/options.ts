@@ -5,11 +5,10 @@ export default {
     [
       require('../../../../src'),
       {
-        transformers: {
-          'privacy-transformer': {privacy: 'hard'},
-        },
+        transformers: [[require('./transformer'), {privacy: 'hard'}]],
       },
     ],
     [require('@babel/plugin-syntax-decorators'), {legacy: true}],
+    require('@babel/plugin-syntax-class-properties'),
   ],
 };

@@ -1,4 +1,4 @@
-import {bar, foo} from './decorators';
+import {bar, foo} from '../decorators';
 
 @foo()
 @bar

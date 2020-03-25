@@ -1,4 +1,4 @@
-import * as decorators from './decorators';
+import * as decorators from '../decorators';
 
 @decorators.foo()
 @decorators.bar

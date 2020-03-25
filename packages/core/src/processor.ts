@@ -1,80 +1,84 @@
 import {
-  ASTDecoratorCoreOptions,
-  ASTDecoratorTransformerOptions,
+  ASTCallableDecorator,
+  ASTSimpleDecorator,
+  ClassMember,
   PluginPass,
 } from '@ast-decorators/typings';
-import checkDecoratorSuitability from '@ast-decorators/utils/lib/checkDecoratorSuitability';
+import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
 import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
 import {NodePath} from '@babel/core';
 import {
+  Class,
   Decorator,
   Identifier,
   isFunctionDeclaration,
   isImportDefaultSpecifier,
   isImportNamespaceSpecifier,
   isVariableDeclarator,
+  StringLiteral,
 } from '@babel/types';
 import {dirname, resolve} from 'path';
+import {TransformerMap} from './utils';
 
 type DecoratorProcessorArguments = {
   call: readonly NodePath[];
-  decorator: readonly NodePath[];
+  decorator: readonly [NodePath<Class>, NodePath<ClassMember>?];
 };
 
-type ImportProcessorData = {
+type ImportProcessorData = Readonly<{
   args: DecoratorProcessorArguments;
   metadata: DecoratorMetadata;
-  options: PluginPass<ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>>;
-};
+  options: PluginPass;
+}>;
 
-const processImportDeclaration = ({
-  args,
-  metadata,
-  options,
-}: ImportProcessorData): void => {
-  const {filename, opts} = options;
+const calculateSource = (
+  {node: {value}}: NodePath<StringLiteral>,
+  filename: string,
+): string =>
+  checkNodeModule(value) ? value : resolve(dirname(filename), value);
+
+const processImportDeclaration = (
+  {args, metadata, options: babelOptions}: ImportProcessorData,
+  transformerMap: TransformerMap,
+): void => {
+  const {filename} = babelOptions;
   const {importSpecifier, importSource} = metadata;
 
-  if (
-    opts?.exclude &&
-    checkDecoratorSuitability(
-      {
-        name: importSpecifier!.node.local.name,
-        source: importSource!.node.value,
-      },
-      opts.exclude,
-      filename,
-    )
-  ) {
+  const name = isImportDefaultSpecifier(importSpecifier)
+    ? 'default'
+    : isImportNamespaceSpecifier(importSpecifier)
+    ? metadata.property!.node.name
+    : (importSpecifier!.get('imported') as NodePath<Identifier>).node.name;
+
+  const source = calculateSource(importSource!, filename);
+
+  const transformer = transformerMap.find(([, detector]) =>
+    detector(name, source, babelOptions),
+  );
+
+  if (!transformer) {
     return;
   }
 
-  const source = importSource!.node.value;
-  const filepath = checkNodeModule(source)
-    ? source
-    : resolve(dirname(filename), source);
-
-  // eslint-disable-next-line @typescript-eslint/no-require-imports,global-require
-  const mod = require(filepath);
-
-  const fn = isImportDefaultSpecifier(importSpecifier)
-    ? mod.default
-    : isImportNamespaceSpecifier(importSpecifier)
-    ? mod[metadata.property!.node.name]
-    : mod[(importSpecifier!.get('imported') as NodePath<Identifier>).node.name];
+  const [decoratorFn, , transformerOptions] = transformer;
 
   metadata.removeDecorator();
   metadata.removeBinding();
 
-  const decorator = metadata.isCall ? fn(...args.call) : fn;
-  decorator(...args.decorator, options);
+  const decorator = metadata.isCall
+    ? (decoratorFn as ASTCallableDecorator)(...args.call)
+    : (decoratorFn as ASTSimpleDecorator);
+
+  // @ts-ignore
+  decorator(...args.decorator, transformerOptions, babelOptions);
 };
 
 const processDecorator = (
   decorator: NodePath<Decorator>,
-  args: readonly NodePath[],
-  options: PluginPass<ASTDecoratorCoreOptions<ASTDecoratorTransformerOptions>>,
+  args: readonly [NodePath<Class>, NodePath<ClassMember>?],
+  transformerMap: TransformerMap,
+  options: PluginPass,
 ): void => {
   const metadata = new DecoratorMetadata(decorator);
 
@@ -90,18 +94,20 @@ const processDecorator = (
   const binding = metadata.binding;
 
   if (!binding) {
-    throw new Error(`${metadata.identifier.node.name} is not defined`);
+    throw new ASTDecoratorsError(
+      `${metadata.identifier.node.name} is not defined`,
+    );
   }
 
   if (
     isVariableDeclarator(binding.path) ||
     isFunctionDeclaration(binding.path)
   ) {
-    throw new Error(
-      'The AST decorator should be imported from a separate file',
+    throw new ASTDecoratorsError(
+      'Decorator should be imported from a separate file',
     );
   } else {
-    processImportDeclaration(data);
+    processImportDeclaration(data, transformerMap);
   }
 };
 

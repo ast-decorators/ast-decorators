@@ -1,4 +1,7 @@
-import {ASTClassMemberDecorator} from '@ast-decorators/typings';
+import {
+  ASTClassMemberDecorator,
+  ClassMemberProperty,
+} from '@ast-decorators/typings';
 import checkDecoratorSuitability from '@ast-decorators/utils/lib/checkDecoratorSuitability';
 import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
 import {PrivateName} from '@ast-decorators/utils/node_modules/@babel/types';
@@ -7,40 +10,28 @@ import {Decorator, Identifier} from '@babel/types';
 import {createGetterMethod} from './getter';
 import {createSetterMethod} from './setter';
 import {
-  AccessorAllowedMember,
-  AccessorInterceptor,
   AccessorInterceptorNode,
   assert,
   createStorage,
-  extractOptions,
   TransformAccessorOptions,
-  TRANSFORMER_NAME,
 } from './utils';
 
-export type AccessorDecorator = (
-  get?: AccessorInterceptor,
-  set?: AccessorInterceptor,
-) => PropertyDecorator;
-
-const accessor: AccessorDecorator = ((
+const accessor = (
   get?: NodePath<AccessorInterceptorNode>,
   set?: NodePath<AccessorInterceptorNode>,
-): ASTClassMemberDecorator<
-  typeof TRANSFORMER_NAME,
-  TransformAccessorOptions
-> => (klass, member: NodePath<AccessorAllowedMember>, {filename, opts}) => {
+): ASTClassMemberDecorator<TransformAccessorOptions> => (
+  klass,
+  member: NodePath<ClassMemberProperty>,
+  {privacy, singleAccessorDecorators}: TransformAccessorOptions = {},
+  {filename},
+) => {
   assert('accessor', member, [get, set]);
-
-  const transformerOptions = extractOptions(opts);
-
-  const singleAccessorDecorators =
-    transformerOptions.singleAccessorDecorators ?? {};
 
   const decorators = member.node.decorators
     ? (member.get('decorators') as ReadonlyArray<NodePath<Decorator>>)
     : null;
 
-  const storage = createStorage(klass, member, transformerOptions);
+  const storage = createStorage(klass, member, privacy);
   const getter = createGetterMethod(
     klass,
     member,
@@ -80,6 +71,6 @@ const accessor: AccessorDecorator = ((
   );
 
   member.replaceWithMultiple([storage, getter, setter]);
-}) as any;
+};
 
 export default accessor;
