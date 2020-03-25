@@ -18,14 +18,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 13.x
-      - name: Cache Node.js modules
-        uses: actions/cache@v1
-        with:
-          path: ~/.npm
-          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.OS }}-node-
-            ${{ runner.OS }}-
       - name: Installation
         run: |
           npm ci
@@ -36,12 +28,6 @@ jobs:
         run: npm run test:coverage
         env:
           CI: true
-      - name: Cache Sonar Scanner
-        id: sonar-cache
-        uses: actions/cache@v1
-        with:
-          path: .sonar
-          key: ${{ runner.os }}-sonar-scanner
       - name: Download Sonar Scanner
         if: steps.sonar-cache.outputs.cache-hit != 'true'
         run: sh scripts/sonar-scanner-load.sh
