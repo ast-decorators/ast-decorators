@@ -30,6 +30,7 @@
     "node_modules/!(@open-wc)",
     "packages/*/tests/fixtures/**/*",
     "packages/!(typings)/lib/**/*",
-    "packages/*/node_modules/**/*"
+    "packages/*/node_modules/**/*",
+    "packages/*/lib/**/*"
   ]
 }
