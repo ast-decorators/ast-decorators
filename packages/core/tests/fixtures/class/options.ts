@@ -3,7 +3,7 @@ export default {
   presets: [require('@babel/preset-typescript')],
   plugins: [
     [
-      require('../../../../src'),
+      require('../../../src'),
       {
         transformers: [require('./transformer')],
       },

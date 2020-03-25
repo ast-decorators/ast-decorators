@@ -3,16 +3,34 @@ import {template} from '@babel/core';
 import {NodePath} from '@babel/traverse';
 import {Statement} from '@babel/types';
 
-let count = 0;
+const $count = Symbol('count');
+
+class Counter {
+  [$count] = 0;
+
+  get count(): number {
+    const result = this[$count];
+
+    this[$count] += 1;
+
+    if (this[$count] > 1) {
+      this[$count] = 0;
+    }
+
+    return result;
+  }
+}
+
+const counter = new Counter();
 
 const foo = () => (klass: NodePath<DecorableClass>) => {
-  const consoleTpl = template(`console.log('foo is ${count++}')`);
+  const consoleTpl = template(`console.log('foo is ${counter.count}')`);
 
   klass.insertAfter([consoleTpl() as Statement]);
 };
 
 const bar = (klass: NodePath<DecorableClass>) => {
-  const consoleTpl = template(`console.log('bar is ${count++}')`);
+  const consoleTpl = template(`console.log('bar is ${counter.count}')`);
 
   klass.insertAfter([consoleTpl() as Statement]);
 };

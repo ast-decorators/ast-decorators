@@ -5,7 +5,7 @@ export default {
     [
       require('../../../../src'),
       {
-        transformers: [require('./transformer')],
+        transformers: [[require('./transformer'), {privacy: 'hard'}]],
       },
     ],
     [require('@babel/plugin-syntax-decorators'), {legacy: true}],

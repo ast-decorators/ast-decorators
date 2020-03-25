@@ -5,8 +5,10 @@ import {
 import transformer from './fixtures/plugin-options/transformer';
 import createOptions from './fixtures/plugin-options/options';
 
-const compare = async (fixture: string, options: object): Promise<void> =>
-  _compare(__dirname, 'plugin-options', fixture, options);
+const compare = async (
+  fixture: string,
+  options?: string | object,
+): Promise<void> => _compare(__dirname, 'plugin-options', fixture, options);
 
 const transform = async (
   fixture: string,
@@ -32,6 +34,18 @@ describe('@ast-decorators/core', () => {
           transformers: [[transformer, {privacy: 'none'}]],
         }),
       );
+    });
+
+    it('sends a Babel tools object and transformer options to the transformer function', async () => {
+      await compare('transformer-params');
+    });
+
+    it('sends transformer options and Babel plugin options to a decorator', async () => {
+      await compare('decorator-params');
+    });
+
+    it('allows to specify options with JSON', async () => {
+      await compare('json', 'options.json');
     });
 
     it('throws an error if filename is not provided', async () => {
