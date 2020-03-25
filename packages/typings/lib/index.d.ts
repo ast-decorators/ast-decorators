@@ -59,7 +59,8 @@ export type ASTDecorator = ASTSimpleDecorator | ASTCallableDecorator;
 export type ASTDecoratorDetector = (
   name: string,
   path: string,
-  options: PluginPass,
+  transformerOptions: object | undefined,
+  babelOptions: PluginPass,
 ) => boolean;
 
 export type ASTDecoratorTransformer = (

@@ -53,8 +53,8 @@ const processImportDeclaration = (
 
   const source = calculateSource(importSource!, filename);
 
-  const transformer = transformerMap.find(([, detector]) =>
-    detector(name, source, babelOptions),
+  const transformer = transformerMap.find(([, detector, transformerOptions]) =>
+    detector(name, source, transformerOptions, babelOptions),
   );
 
   if (!transformer) {
