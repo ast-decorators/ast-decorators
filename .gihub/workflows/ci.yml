@@ -20,6 +20,7 @@ on:
       - 'sonar-project.properties'
       - 'tsconfig.json'
   pull_request:
+    types: [opened, edited]
     branches:
       - master
     paths:
