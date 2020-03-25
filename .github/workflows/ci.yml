@@ -3,8 +3,38 @@ name: CI
 on:
   push:
     branches: [master]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'packages/**'
+      - '!packages/**/README.md'
+      - 'scripts'
+      - 'utils/**'
+      - '.eslintignore'
+      - '.eslintrc'
+      - '.prettierrc'
+      - 'babel.config.json'
+      - 'jest.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'sonar-project.properties'
+      - 'tsconfig.json'
   pull_request:
     branches: [master]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'packages/**'
+      - '!packages/**/README.md'
+      - 'scripts'
+      - 'utils/**'
+      - '.eslintignore'
+      - '.eslintrc'
+      - '.prettierrc'
+      - 'babel.config.json'
+      - 'jest.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'sonar-project.properties'
+      - 'tsconfig.json'
 jobs:
   testing:
     name: Testing and Analysis
