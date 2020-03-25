@@ -2,8 +2,7 @@ name: CI
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
     paths:
       - '.github/workflows/ci.yml'
       - 'packages/**'
@@ -21,8 +20,7 @@ on:
       - 'tsconfig.json'
   pull_request:
     types: [opened, edited]
-    branches:
-      - master
+    branches: [master]
     paths:
       - '.github/workflows/ci.yml'
       - 'packages/**'
