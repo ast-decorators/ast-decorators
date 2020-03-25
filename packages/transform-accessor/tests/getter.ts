@@ -1,8 +1,17 @@
-import {compare as _compare} from '../../../utils/testing';
+import {getter} from '../src';
+import {
+  compare as _compare,
+  transformFile as _transformFile,
+} from '../../../utils/testing';
 import options from './fixtures/options';
 
 const compare = async (fixture: string): Promise<void> =>
   _compare(__dirname, 'getter', fixture, options);
+
+const transformFile = async (
+  fixture: string,
+): ReturnType<typeof _transformFile> =>
+  _transformFile(__dirname, 'getter', fixture, options);
 
 describe('@ast-decorators/transform-accessor', () => {
   describe('@getter', () => {
@@ -35,14 +44,24 @@ describe('@ast-decorators/transform-accessor', () => {
     });
 
     it('throws an error if applied to something else than property', async () => {
-      await expect(compare('assert-property-type')).rejects.toThrowError(
+      await expect(transformFile('assert-property-type')).rejects.toThrowError(
         'Applying @getter decorator to something other than property is not allowed',
       );
     });
 
     it('throws an error if interceptor is something else than function or identifier', async () => {
-      await expect(compare('assert-interceptor-type')).rejects.toThrowError(
+      await expect(
+        transformFile('assert-interceptor-type'),
+      ).rejects.toThrowError(
         'Accessor interceptor can only be function or a variable identifier',
+      );
+    });
+
+    it('throws an error if transformer is not plugged in', () => {
+      // @ts-ignore
+      expect(() => getter()()).toThrowError(
+        "Decorator @getter won't work because @ast-decorators/transform-accessor/lib/transformer" +
+          'is not plugged in. You have to add it to your Babel config',
       );
     });
   });
