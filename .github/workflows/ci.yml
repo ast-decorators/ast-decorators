@@ -68,10 +68,10 @@ jobs:
         if: steps.sonar-cache.outputs.cache-hit != 'true'
         run: sh scripts/sonar-scanner-load.sh
         env:
-          SONAR_VERSION: ${{ secrets.SONAR_VERSION }}
+          SONAR_VERSION: 4.2.0.1873
       - name: Run Sonar Scanner
         run: sh scripts/sonar-scanner-run.sh
         env:
-          SONAR_VERSION: ${{ secrets.SONAR_VERSION }}
+          SONAR_VERSION: 4.2.0.1873
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
