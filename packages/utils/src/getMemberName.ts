@@ -1,4 +1,4 @@
-import {DecorableClassMember} from '@ast-decorators/typings';
+import {ClassMember} from '@ast-decorators/typings';
 import {
   isClassPrivateMethod,
   isClassPrivateProperty,
@@ -7,9 +7,7 @@ import {
   isStringLiteral,
 } from '@babel/types';
 
-const getMemberName = (
-  node: DecorableClassMember,
-): string | number | undefined => {
+const getMemberName = (node: ClassMember): string | number | undefined => {
   if (isClassPrivateProperty(node) || isClassPrivateMethod(node)) {
     return node.key.id.name;
   }

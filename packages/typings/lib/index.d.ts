@@ -1,6 +1,5 @@
 import {
-  ClassDeclaration,
-  ClassExpression,
+  Class,
   ClassMethod,
   ClassPrivateMethod,
   ClassPrivateProperty,
@@ -8,12 +7,10 @@ import {
 } from '@babel/types';
 import {BabelFileResult, NodePath} from '@babel/core';
 
-export type DecorableClass = ClassDeclaration | ClassExpression;
-export type DecorableClassMember =
-  | ClassProperty
-  | ClassPrivateProperty
-  | ClassMethod
-  | ClassPrivateMethod;
+export type ClassMemberProperty = ClassProperty | ClassPrivateProperty;
+export type ClassMemberMethod = ClassMethod | ClassPrivateMethod;
+
+export type ClassMember = ClassMemberProperty | ClassMemberMethod;
 
 export type PluginPass<T = object> = Readonly<{
   cwd: string;
@@ -26,14 +23,14 @@ export type PluginPass<T = object> = Readonly<{
 export type PrivacyType = 'hard' | 'soft' | 'none';
 
 export type ASTClassDecorator<O extends object = object> = (
-  klass: NodePath<DecorableClass>,
+  klass: NodePath<Class>,
   transformerOptions: O | undefined,
   babelOptions: PluginPass<ASTDecoratorCoreOptions>,
 ) => void;
 
 export type ASTClassMemberDecorator<O extends object = object> = (
-  klass: NodePath<DecorableClass>,
-  member: NodePath<DecorableClassMember>,
+  klass: NodePath<Class>,
+  member: NodePath<ClassMember>,
   transformerOptions: O | undefined,
   babelOptions: PluginPass<ASTDecoratorCoreOptions>,
 ) => void;

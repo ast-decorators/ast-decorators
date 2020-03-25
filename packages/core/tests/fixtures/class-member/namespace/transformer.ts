@@ -1,6 +1,6 @@
-import {DecorableClass} from '@ast-decorators/typings';
 import {NodePath, template} from '@babel/core';
 import {
+  Class,
   ClassMethod,
   ClassProperty,
   isClassMethod,
@@ -12,7 +12,7 @@ import {appendConsoleLog, createGetter} from '../utils';
 let count = 0;
 
 const foo = (
-  klass: NodePath<DecorableClass>,
+  klass: NodePath<Class>,
   property: NodePath<ClassProperty | ClassMethod>,
 ) => {
   if (
@@ -30,7 +30,7 @@ const foo = (
 };
 
 const bar = (
-  klass: NodePath<DecorableClass>,
+  klass: NodePath<Class>,
   property: NodePath<ClassProperty | ClassMethod>,
 ) => {
   if (

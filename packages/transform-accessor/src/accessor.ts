@@ -1,4 +1,7 @@
-import {ASTClassMemberDecorator} from '@ast-decorators/typings';
+import {
+  ASTClassMemberDecorator,
+  ClassMemberProperty,
+} from '@ast-decorators/typings';
 import checkDecoratorSuitability from '@ast-decorators/utils/lib/checkDecoratorSuitability';
 import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
 import {PrivateName} from '@ast-decorators/utils/node_modules/@babel/types';
@@ -7,7 +10,6 @@ import {Decorator, Identifier} from '@babel/types';
 import {createGetterMethod} from './getter';
 import {createSetterMethod} from './setter';
 import {
-  AccessorAllowedMember,
   AccessorInterceptorNode,
   assert,
   createStorage,
@@ -19,7 +21,7 @@ const accessor = (
   set?: NodePath<AccessorInterceptorNode>,
 ): ASTClassMemberDecorator<TransformAccessorOptions> => (
   klass,
-  member: NodePath<AccessorAllowedMember>,
+  member: NodePath<ClassMemberProperty>,
   {privacy, singleAccessorDecorators}: TransformAccessorOptions = {},
   {filename},
 ) => {

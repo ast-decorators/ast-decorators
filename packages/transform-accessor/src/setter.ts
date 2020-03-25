@@ -1,13 +1,14 @@
-import {ASTClassMemberCallableDecorator} from '@ast-decorators/typings';
+import {
+  ASTClassMemberCallableDecorator,
+  ClassMemberMethod,
+} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   assignmentExpression,
   blockStatement,
   ClassBody,
   classMethod,
-  ClassMethod,
   classPrivateMethod,
-  ClassPrivateMethod,
   ClassProperty,
   Decorator,
   expressionStatement,
@@ -32,7 +33,7 @@ export const createSetterMethod: AccessorMethodCreator = (
   interceptor,
   storageProperty,
   {allowThisContext, preservingDecorators},
-): ClassMethod | ClassPrivateMethod => {
+): ClassMemberMethod => {
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const valueId = classBody.scope.generateUidIdentifier('value');
 

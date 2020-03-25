@@ -1,9 +1,9 @@
-import {DecorableClass} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   assignmentExpression,
   blockStatement,
   callExpression,
+  Class,
   ClassBody,
   classMethod,
   ClassProperty,
@@ -20,7 +20,7 @@ import {
 } from '@babel/types';
 
 const observe = (observer: NodePath<FunctionExpression>) => (
-  klass: NodePath<DecorableClass>,
+  klass: NodePath<Class>,
   property: NodePath<ClassProperty>,
 ) => {
   const klassBody = klass.get('body') as NodePath<ClassBody>;

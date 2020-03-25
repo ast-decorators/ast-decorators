@@ -1,7 +1,6 @@
-import {DecorableClass} from '@ast-decorators/typings';
 import {template} from '@babel/core';
 import {NodePath} from '@babel/traverse';
-import {Statement} from '@babel/types';
+import {Class, Statement} from '@babel/types';
 
 const $count = Symbol('count');
 
@@ -23,13 +22,13 @@ class Counter {
 
 const counter = new Counter();
 
-const foo = () => (klass: NodePath<DecorableClass>) => {
+const foo = () => (klass: NodePath<Class>) => {
   const consoleTpl = template(`console.log('foo is ${counter.count}')`);
 
   klass.insertAfter([consoleTpl() as Statement]);
 };
 
-const bar = (klass: NodePath<DecorableClass>) => {
+const bar = (klass: NodePath<Class>) => {
   const consoleTpl = template(`console.log('bar is ${counter.count}')`);
 
   klass.insertAfter([consoleTpl() as Statement]);

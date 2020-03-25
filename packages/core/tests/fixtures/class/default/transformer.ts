@@ -1,14 +1,12 @@
-import {ASTDecoratorTransformer, DecorableClass} from '@ast-decorators/typings';
+import {ASTDecoratorTransformer} from '@ast-decorators/typings';
 import {template} from '@babel/core';
 import {NodePath} from '@babel/traverse';
-import {StringLiteral} from '@babel/types';
+import {Class, StringLiteral} from '@babel/types';
 import minimatch from 'minimatch';
 
 const tpl = template.statements('customElements.define(NAME, CLASS)');
 
-const element = (name: NodePath<StringLiteral>) => (
-  klass: NodePath<DecorableClass>,
-) => {
+const element = (name: NodePath<StringLiteral>) => (klass: NodePath<Class>) => {
   const nodes = tpl({
     CLASS: klass.node.id,
     NAME: name.node,

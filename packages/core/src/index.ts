@@ -2,18 +2,17 @@
 import {
   ASTDecoratorCoreOptions,
   ASTDecoratorTransformer,
-  DecorableClass,
-  DecorableClassMember,
+  ClassMember,
   PluginPass,
 } from '@ast-decorators/typings';
-import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
+import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
 import {NodePath} from '@babel/core';
-import {Decorator} from '@babel/types';
+import {Class, Decorator} from '@babel/types';
+import {resolve} from 'path';
 import processClassDecorator from './class';
 import processClassMemberDecorator from './property';
 import {Mutable, TransformerMap} from './utils';
-import {resolve} from 'path';
 
 type UncheckedPluginPass<T = object> = Omit<PluginPass<T>, 'filename'> &
   Readonly<{
@@ -21,7 +20,7 @@ type UncheckedPluginPass<T = object> = Omit<PluginPass<T>, 'filename'> &
   }>;
 
 const processEachDecorator = (
-  path: NodePath<DecorableClass | DecorableClassMember>,
+  path: NodePath<Class | ClassMember>,
   opts: UncheckedPluginPass,
   transformerMap: TransformerMap,
   processor: (
@@ -108,13 +107,13 @@ const babelPluginAstDecoratorsCore = (
   return {
     visitor: {
       'ClassDeclaration|ClassExpression'(
-        path: NodePath<DecorableClass>,
+        path: NodePath<Class>,
         opts: UncheckedPluginPass,
       ) {
         processEachDecorator(path, opts, transformerMap, processClassDecorator);
       },
       'ClassProperty|ClassMethod|ClassPrivateProperty|ClassPrivateMethod'(
-        path: NodePath<DecorableClassMember>,
+        path: NodePath<ClassMember>,
         opts: UncheckedPluginPass,
       ) {
         processEachDecorator(

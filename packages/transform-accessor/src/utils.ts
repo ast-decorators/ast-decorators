@@ -1,6 +1,7 @@
 import {
   ASTClassMemberDecorator,
-  DecorableClass,
+  ClassMemberMethod,
+  ClassMemberProperty,
   PrivacyType,
 } from '@ast-decorators/typings';
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
@@ -12,10 +13,7 @@ import {
   ArrowFunctionExpression,
   callExpression,
   CallExpression,
-  ClassMethod,
-  ClassPrivateMethod,
-  ClassPrivateProperty,
-  ClassProperty,
+  Class,
   Decorator,
   functionDeclaration,
   FunctionExpression,
@@ -38,7 +36,6 @@ export type TransformAccessorOptions = Readonly<{
   privacy?: PrivacyType;
 }>;
 
-export type AccessorAllowedMember = ClassProperty | ClassPrivateProperty;
 export type AccessorInterceptor = (value: any) => any;
 export type AccessorInterceptorNode =
   | FunctionExpression
@@ -51,16 +48,16 @@ export type AccessorMethodCreatorOptions = Readonly<{
 }>;
 
 export type AccessorMethodCreator = (
-  klass: NodePath<DecorableClass>,
-  member: NodePath<AccessorAllowedMember>,
+  klass: NodePath<Class>,
+  member: NodePath<ClassMemberProperty>,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
   storage: Identifier | PrivateName,
   options: AccessorMethodCreatorOptions,
-) => ClassMethod | ClassPrivateMethod;
+) => ClassMemberMethod;
 
 export const assert = (
   decorator: string,
-  member: NodePath<AccessorAllowedMember>,
+  member: NodePath<ClassMemberProperty>,
   accessors: ReadonlyArray<NodePath<AccessorInterceptorNode> | undefined>,
 ): void => {
   if (!isClassProperty(member) && !isClassPrivateProperty(member)) {
@@ -84,10 +81,10 @@ export const assert = (
 };
 
 export const createStorage = (
-  klass: NodePath<DecorableClass>,
-  member: NodePath<AccessorAllowedMember>,
+  klass: NodePath<Class>,
+  member: NodePath<ClassMemberProperty>,
   privacy: PrivacyType = 'hard',
-): AccessorAllowedMember =>
+): ClassMemberProperty =>
   createPropertyByPrivacy(
     privacy,
     String(getMemberName(member.node)),
@@ -98,7 +95,7 @@ export const createStorage = (
 const declarator = template(`const VAR = FUNCTION`);
 
 export const generateInterceptor = (
-  klass: NodePath<DecorableClass>,
+  klass: NodePath<Class>,
   interceptor: AccessorInterceptorNode,
   type: 'get' | 'set',
 ): Identifier => {
@@ -135,8 +132,8 @@ export const createAccessorDecorator = (
   accessor: NodePath<AccessorInterceptorNode> | undefined,
   impl: AccessorMethodCreator,
 ): ASTClassMemberDecorator<TransformAccessorOptions> => (
-  klass: NodePath<DecorableClass>,
-  member: NodePath<AccessorAllowedMember>,
+  klass: NodePath<Class>,
+  member: NodePath<ClassMemberProperty>,
   {privacy}: TransformAccessorOptions = {},
 ): void => {
   assert(decorator, member, [accessor]);
@@ -159,7 +156,7 @@ export const createAccessorDecorator = (
 };
 
 export const injectInterceptor = (
-  klass: NodePath<DecorableClass>,
+  klass: NodePath<Class>,
   interceptor: AccessorInterceptorNode,
   value: MemberExpression | Identifier,
   type: 'get' | 'set',

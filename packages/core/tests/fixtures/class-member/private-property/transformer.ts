@@ -1,14 +1,14 @@
-import {DecorableClass} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import {
   blockStatement,
+  Class,
   classPrivateMethod,
   ClassPrivateProperty,
   returnStatement,
 } from '@babel/types';
 
 const readonly = (
-  _: NodePath<DecorableClass>,
+  _: NodePath<Class>,
   property: NodePath<ClassPrivateProperty>,
 ) => {
   const getter = classPrivateMethod(

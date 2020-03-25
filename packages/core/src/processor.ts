@@ -1,8 +1,7 @@
 import {
   ASTCallableDecorator,
   ASTSimpleDecorator,
-  DecorableClass,
-  DecorableClassMember,
+  ClassMember,
   PluginPass,
 } from '@ast-decorators/typings';
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
@@ -10,6 +9,7 @@ import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
 import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
 import {NodePath} from '@babel/core';
 import {
+  Class,
   Decorator,
   Identifier,
   isFunctionDeclaration,
@@ -23,10 +23,7 @@ import {TransformerMap} from './utils';
 
 type DecoratorProcessorArguments = {
   call: readonly NodePath[];
-  decorator: readonly [
-    NodePath<DecorableClass>,
-    NodePath<DecorableClassMember>?,
-  ];
+  decorator: readonly [NodePath<Class>, NodePath<ClassMember>?];
 };
 
 type ImportProcessorData = Readonly<{
@@ -79,7 +76,7 @@ const processImportDeclaration = (
 
 const processDecorator = (
   decorator: NodePath<Decorator>,
-  args: readonly [NodePath<DecorableClass>, NodePath<DecorableClassMember>?],
+  args: readonly [NodePath<Class>, NodePath<ClassMember>?],
   transformerMap: TransformerMap,
   options: PluginPass,
 ): void => {

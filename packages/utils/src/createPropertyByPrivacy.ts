@@ -1,11 +1,10 @@
-import {DecorableClass, PrivacyType} from '@ast-decorators/typings';
+import {ClassMemberProperty, PrivacyType} from '@ast-decorators/typings';
 import {NodePath} from '@babel/core';
 import template from '@babel/template';
 import {
+  Class,
   ClassBody,
   classPrivateProperty,
-  ClassPrivateProperty,
-  ClassProperty,
   classProperty,
   Expression,
   privateName,
@@ -17,8 +16,8 @@ const createPropertyByPrivacy = (
   privacy: PrivacyType,
   name: string | undefined,
   value: Expression | null,
-  klass: NodePath<DecorableClass>,
-): ClassProperty | ClassPrivateProperty => {
+  klass: NodePath<Class>,
+): ClassMemberProperty => {
   switch (privacy) {
     case 'hard': {
       const classBody = klass.get('body') as NodePath<ClassBody>;
