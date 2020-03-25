@@ -7,7 +7,7 @@ on:
     branches: [master]
 jobs:
   testing:
-    name: Testing and SonarCloud Analysis
+    name: Testing and Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
