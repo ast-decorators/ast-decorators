@@ -3,6 +3,7 @@ import {
   transformFileAsync,
   TransformOptions,
   transformAsync,
+  BabelFileResult,
 } from '@babel/core';
 import {promises} from 'fs';
 import {resolve} from 'path';
@@ -27,28 +28,6 @@ const loadOptions = (
   const optionsOrModule = require(optionsPath);
 
   return optionsOrModule.__esModule ? optionsOrModule.default : optionsOrModule;
-};
-
-export const compare = async (
-  dir: string,
-  type: string,
-  fixture: string,
-  options?: object | string,
-): Promise<void> => {
-  const finalOptions =
-    typeof options === 'object'
-      ? options
-      : loadOptions(dir, type, fixture, options);
-
-  const fixtureDir = resolve(dir, 'fixtures', type, fixture);
-
-  const {code: inputCode} =
-    (await transformFileAsync(
-      resolve(fixtureDir, 'input.ts'),
-      fixOptions(finalOptions),
-    )) ?? {};
-
-  expect(inputCode).toMatchSnapshot();
 };
 
 export const parse = async (
@@ -83,4 +62,35 @@ export const transform = async (
   const content = await readFile(resolve(fixtureDir, 'input.ts'), 'utf8');
 
   return transformAsync(content, fixOptions(finalOptions));
+};
+
+export const transformFile = async (
+  dir: string,
+  type: string,
+  fixture: string,
+  options?: object | string,
+): Promise<BabelFileResult> => {
+  const finalOptions =
+    typeof options === 'object'
+      ? options
+      : loadOptions(dir, type, fixture, options);
+
+  const fixtureDir = resolve(dir, 'fixtures', type, fixture);
+
+  return (
+    (await transformFileAsync(
+      resolve(fixtureDir, 'input.ts'),
+      fixOptions(finalOptions),
+    )) ?? {}
+  );
+};
+
+export const compare = async (
+  dir: string,
+  type: string,
+  fixture: string,
+  options?: object | string,
+): Promise<void> => {
+  const {code} = await transformFile(dir, type, fixture, options);
+  expect(code).toMatchSnapshot();
 };
