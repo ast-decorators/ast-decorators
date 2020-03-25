@@ -3,9 +3,9 @@ import {
   DecorableClass,
   PrivacyType,
 } from '@ast-decorators/typings';
+import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import {DecoratorSuitabilityFactors} from '@ast-decorators/utils/lib/checkDecoratorSuitability';
-import createPropertyByPrivacy
-  from '@ast-decorators/utils/lib/createPropertyByPrivacy';
+import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
 import {NodePath, template} from '@babel/core';
 import {
@@ -64,7 +64,7 @@ export const assert = (
   accessors: ReadonlyArray<NodePath<AccessorInterceptorNode> | undefined>,
 ): void => {
   if (!isClassProperty(member) && !isClassPrivateProperty(member)) {
-    throw new Error(
+    throw new ASTDecoratorsError(
       `Applying @${decorator} decorator to something other than property is not allowed`,
     );
   }
@@ -76,7 +76,7 @@ export const assert = (
       !isArrowFunctionExpression(accessor) &&
       !isIdentifier(accessor)
     ) {
-      throw new Error(
+      throw new ASTDecoratorsError(
         'Accessor interceptor can only be function or a variable identifier',
       );
     }

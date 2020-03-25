@@ -13,13 +13,8 @@ export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
 const detector = (
   decoratorName: string,
   transformerName: string = TRANSFORMER_NAME,
-): ASTDecoratorDetector => (name: string, path: string): boolean => {
-  return (
-    name === decoratorName &&
-    (minimatch(path, transformerName) ||
-      minimatch(path, `${transformerName}/**/*`))
-  );
-};
+): ASTDecoratorDetector => (name: string, path: string): boolean =>
+  name === decoratorName && minimatch(path, transformerName);
 
 const transformer: ASTDecoratorTransformer = (
   _,
