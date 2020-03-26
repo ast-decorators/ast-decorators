@@ -1,7 +1,8 @@
+// TODO: remove eslint-disable when typescript-eslint can handle TS 3.8 properly
+/* eslint-disable @typescript-eslint/explicit-member-accessibility */
 import {NodePath} from '@babel/core';
 import {Binding} from '@babel/traverse';
 import {
-  CallExpression,
   Decorator,
   Identifier,
   ImportDeclaration,
@@ -14,56 +15,58 @@ import {
   StringLiteral,
 } from '@babel/types';
 
-const $args = Symbol('args');
-const $binding = Symbol('binding');
-const $decorator = Symbol('decorators');
-const $id = Symbol('id');
-const $isCall = Symbol('isCall');
-const $object = Symbol('object');
-
-const $handleDecoratorWithArgs = Symbol('handleDecoratorWithArgs');
-const $handleDecoratorWithoutArgs = Symbol('handleDecoratorWithoutArgs');
-const $handleMemberDecorator = Symbol('handleMemberDecorator');
-
 export default class DecoratorMetadata {
-  private [$args]?: readonly NodePath[];
-  private [$binding]?: Binding;
-  private [$decorator]: NodePath<Decorator>;
-  private [$id]: NodePath<Identifier>;
-  private [$isCall]: boolean;
-  private [$object]?: NodePath<Identifier>;
+  readonly #args: readonly NodePath[];
+  readonly #binding?: Binding;
+  readonly #decorator: NodePath<Decorator>;
+  readonly #id: NodePath<Identifier>;
+  readonly #isCall: boolean;
+  readonly #object?: NodePath<Identifier>;
 
   public constructor(decorator: NodePath<Decorator>) {
-    this[$decorator] = decorator;
+    this.#decorator = decorator;
     const expression = decorator.get('expression');
 
-    this[$isCall] = isCallExpression(expression);
+    this.#isCall = isCallExpression(expression);
 
-    if (this[$isCall]) {
-      this[$handleDecoratorWithArgs](expression as NodePath<CallExpression>);
+    let memberOrIdentifier: NodePath<MemberExpression | Identifier>;
+
+    if (this.#isCall) {
+      this.#args = expression.get('arguments') as readonly NodePath[];
+      memberOrIdentifier = expression.get('callee') as NodePath<
+        MemberExpression | Identifier
+      >;
     } else {
-      this[$handleDecoratorWithoutArgs](
-        expression as NodePath<MemberExpression | Identifier>,
-      );
+      this.#args = [];
+      memberOrIdentifier = expression as NodePath<
+        MemberExpression | Identifier
+      >;
     }
 
-    if (this.isFree) {
-      this[$binding] = decorator.scope.getBinding(this[$id]!.node.name);
+    if (isMemberExpression(memberOrIdentifier)) {
+      this.#object = memberOrIdentifier.get('object') as NodePath<Identifier>;
+      this.#id = memberOrIdentifier.get('property') as NodePath<Identifier>;
     } else {
-      this[$binding] = decorator.scope.getBinding(this[$object]!.node.name);
+      this.#id = memberOrIdentifier as NodePath<Identifier>;
+    }
+
+    if (this.isMember) {
+      this.#binding = decorator.scope.getBinding(this.#object!.node.name);
+    } else {
+      this.#binding = decorator.scope.getBinding(this.#id.node.name);
     }
   }
 
   public get args(): readonly NodePath[] {
-    return this[$args] ?? [];
+    return this.#args;
   }
 
   public get binding(): Binding | undefined {
-    return this[$binding];
+    return this.#binding;
   }
 
   public get identifier(): NodePath<Identifier> {
-    return this.isFree ? this[$id] : this[$object]!;
+    return this.isMember ? this.#object! : this.#id;
   }
 
   public get importSpecifier():
@@ -71,7 +74,7 @@ export default class DecoratorMetadata {
         ImportSpecifier | ImportNamespaceSpecifier | ImportDefaultSpecifier
       >
     | undefined {
-    return this[$binding] ? (this[$binding]!.path as any) : undefined;
+    return this.#binding ? (this.#binding.path as any) : undefined;
   }
 
   public get importSource(): NodePath<StringLiteral> | undefined {
@@ -89,34 +92,31 @@ export default class DecoratorMetadata {
   }
 
   public get isCall(): boolean {
-    return this[$isCall];
+    return this.#isCall;
   }
 
-  /**
-   * Is decorator identifier or a part of MemberExpression?
-   */
-  public get isFree(): boolean {
-    return !this[$object];
+  public get isMember(): boolean {
+    return !!this.#object;
   }
 
   public get property(): NodePath<Identifier> | undefined {
-    return this.isFree ? undefined : this[$id];
+    return this.isMember ? this.#id : undefined;
   }
 
   public removeDecorator(): void {
-    this[$decorator].remove();
+    this.#decorator.remove();
   }
 
   public removeBinding(): void {
-    if (!this[$binding]) {
+    if (!this.#binding) {
       return;
     }
 
-    this[$binding]!.referencePaths = this[$binding]!.referencePaths.filter(
+    this.#binding.referencePaths = this.#binding.referencePaths.filter(
       p => p !== this.identifier,
     );
 
-    if (this[$binding]!.referencePaths.length === 0) {
+    if (this.#binding.referencePaths.length === 0) {
       const declaration = this.importSpecifier!.parentPath as NodePath<
         ImportDeclaration
       >;
@@ -127,36 +127,5 @@ export default class DecoratorMetadata {
         declaration.remove();
       }
     }
-  }
-
-  private [$handleDecoratorWithArgs](
-    expression: NodePath<CallExpression>,
-  ): void {
-    this[$args] = expression.get('arguments');
-
-    const callee = expression.get('callee');
-
-    if (isMemberExpression(callee)) {
-      this[$handleMemberDecorator](callee as NodePath<MemberExpression>);
-    } else {
-      this[$id] = callee as NodePath<Identifier>;
-    }
-  }
-
-  private [$handleDecoratorWithoutArgs](
-    expression: NodePath<MemberExpression | Identifier>,
-  ): void {
-    if (isMemberExpression(expression)) {
-      this[$handleMemberDecorator](expression as NodePath<MemberExpression>);
-    } else {
-      this[$id] = expression as NodePath<Identifier>;
-    }
-  }
-
-  private [$handleMemberDecorator](
-    expression: NodePath<MemberExpression>,
-  ): void {
-    this[$object] = expression.get('object') as NodePath<Identifier>;
-    this[$id] = expression.get('property') as NodePath<Identifier>;
   }
 }

@@ -24,14 +24,18 @@ describe('@ast-decorators/utils', () => {
         Decorator(path: NodePath<Decorator>) {
           const metadata = new DecoratorMetadata(path);
 
-          expect(metadata.args).toEqual([]);
-          expect(metadata.importSpecifier!.get('local').node.name).toBe('bar');
-          expect(metadata.importSource!.node.value).toBe('decorators');
           expect(metadata.binding).toBe(path.scope.getBinding('bar'));
+          expect(metadata.importSpecifier?.get('local').node.name).toBe('bar');
+          expect(metadata.importSource?.node.value).toBe('decorators');
+
+          expect(metadata.args).toEqual([]);
+
           expect(isIdentifier(metadata.identifier)).toBeTruthy();
           expect(metadata.identifier.node.name).toEqual('bar');
+
           expect(metadata.isCall).not.toBeTruthy();
-          expect(metadata.isFree).toBeTruthy();
+
+          expect(metadata.isMember).not.toBeTruthy();
           expect(metadata.property).toBeUndefined();
           done();
         },
@@ -49,9 +53,20 @@ describe('@ast-decorators/utils', () => {
 
           const [arg] = metadata.args as ReadonlyArray<NodePath<StringLiteral>>;
 
+          expect(metadata.binding).toBe(path.scope.getBinding('bar'));
+          expect(metadata.importSpecifier?.get('local').node.name).toBe('bar');
+          expect(metadata.importSource?.node.value).toBe('decorators');
+
           expect(isStringLiteral(arg)).toBeTruthy();
           expect(arg.node.value).toEqual('fuzz');
+
+          expect(isIdentifier(metadata.identifier)).toBeTruthy();
+          expect(metadata.identifier.node.name).toEqual('bar');
+
           expect(metadata.isCall).toBeTruthy();
+          expect(metadata.isMember).not.toBeTruthy();
+          expect(metadata.property).toBeUndefined();
+
           done();
         },
       });
@@ -64,10 +79,20 @@ describe('@ast-decorators/utils', () => {
         Decorator(path: NodePath<Decorator>) {
           const metadata = new DecoratorMetadata(path);
 
+          expect(metadata.binding).toBe(path.scope.getBinding('decorators'));
+          expect(metadata.importSpecifier?.get('local').node.name).toBe(
+            'decorators',
+          );
+          expect(metadata.importSource?.node.value).toBe('decorators');
+
+          expect(isIdentifier(metadata.identifier)).toBeTruthy();
           expect(metadata.identifier.node.name).toEqual('decorators');
+
+          expect(metadata.isCall).not.toBeTruthy();
+
+          expect(metadata.isMember).toBeTruthy();
           expect(isIdentifier(metadata.property)).toBeTruthy();
-          expect(metadata.property!.node.name).toBe('bar');
-          expect(metadata.isFree).not.toBeTruthy();
+          expect(metadata.property?.node.name).toBe('bar');
           done();
         },
       });

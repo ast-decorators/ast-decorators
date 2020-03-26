@@ -3,6 +3,7 @@
   "plugins": [
     ["@babel/plugin-proposal-optional-chaining", {"loose": true}],
     ["@babel/plugin-transform-modules-commonjs", {"loose": true}],
-    ["@babel/plugin-proposal-nullish-coalescing-operator", {"loose": true}]
+    ["@babel/plugin-proposal-nullish-coalescing-operator", {"loose": true}],
+    ["@babel/plugin-syntax-class-properties", {"loose": true}]
   ]
 }

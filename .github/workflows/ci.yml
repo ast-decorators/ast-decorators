@@ -40,6 +40,8 @@ jobs:
     name: Testing and Analysis
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      SONAR_VERSION: 4.2.0.1873
 
     steps:
       - name: Checkout project code
@@ -51,9 +53,9 @@ jobs:
       - name: Installation
         run: |
           npm ci
-          npx lerna bootstrap
+          npm run bootstrap
       - name: Building
-        run: npx lerna run build
+        run: npm run build
       - name: Testing
         run: npm run test:coverage
         env:
@@ -63,15 +65,12 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.sonar
-          key: ${{ runner.os }}-sonar
+          key: ${{ runner.os }}-sonar-${{ env.SONAR_VERSION }}
       - name: Download Sonar Scanner
         if: steps.sonar-cache.outputs.cache-hit != 'true'
         run: sh scripts/sonar-scanner-load.sh
-        env:
-          SONAR_VERSION: 4.2.0.1873
       - name: Run Sonar Scanner
         run: sh scripts/sonar-scanner-run.sh
         env:
-          SONAR_VERSION: 4.2.0.1873
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
