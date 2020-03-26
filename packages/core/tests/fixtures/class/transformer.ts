@@ -2,18 +2,16 @@ import {template} from '@babel/core';
 import {NodePath} from '@babel/traverse';
 import {Class, Statement} from '@babel/types';
 
-const $count = Symbol('count');
-
 class Counter {
-  [$count] = 0;
+  #count = 0;
 
   get count(): number {
-    const result = this[$count];
+    const result = this.#count;
 
-    this[$count] += 1;
+    this.#count += 1;
 
-    if (this[$count] > 1) {
-      this[$count] = 0;
+    if (this.#count > 1) {
+      this.#count = 0;
     }
 
     return result;
