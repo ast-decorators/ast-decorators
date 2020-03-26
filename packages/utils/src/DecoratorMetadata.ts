@@ -29,29 +29,31 @@ export default class DecoratorMetadata {
 
     this.#isCall = isCallExpression(expression);
 
-    let idOrMember: NodePath<MemberExpression | Identifier>;
+    let memberOrIdentifier: NodePath<MemberExpression | Identifier>;
 
     if (this.#isCall) {
       this.#args = expression.get('arguments') as readonly NodePath[];
-      idOrMember = expression.get('callee') as NodePath<
+      memberOrIdentifier = expression.get('callee') as NodePath<
         MemberExpression | Identifier
       >;
     } else {
       this.#args = [];
-      idOrMember = expression as NodePath<MemberExpression | Identifier>;
+      memberOrIdentifier = expression as NodePath<
+        MemberExpression | Identifier
+      >;
     }
 
-    if (isMemberExpression(idOrMember)) {
-      this.#object = expression.get('object') as NodePath<Identifier>;
-      this.#id = expression.get('property') as NodePath<Identifier>;
+    if (isMemberExpression(memberOrIdentifier)) {
+      this.#object = memberOrIdentifier.get('object') as NodePath<Identifier>;
+      this.#id = memberOrIdentifier.get('property') as NodePath<Identifier>;
     } else {
-      this.#id = expression as NodePath<Identifier>;
+      this.#id = memberOrIdentifier as NodePath<Identifier>;
     }
 
-    if (this.isFree) {
-      this.#binding = decorator.scope.getBinding(this.#id.node.name);
-    } else {
+    if (this.isMember) {
       this.#binding = decorator.scope.getBinding(this.#object!.node.name);
+    } else {
+      this.#binding = decorator.scope.getBinding(this.#id.node.name);
     }
   }
 
@@ -64,7 +66,7 @@ export default class DecoratorMetadata {
   }
 
   public get identifier(): NodePath<Identifier> {
-    return this.isFree ? this.#id : this.#object!;
+    return this.isMember ? this.#object! : this.#id;
   }
 
   public get importSpecifier():
@@ -93,15 +95,12 @@ export default class DecoratorMetadata {
     return this.#isCall;
   }
 
-  /**
-   * Is decorator identifier or a part of MemberExpression?
-   */
-  public get isFree(): boolean {
-    return !this.#object;
+  public get isMember(): boolean {
+    return !!this.#object;
   }
 
   public get property(): NodePath<Identifier> | undefined {
-    return this.isFree ? undefined : this.#id;
+    return this.isMember ? this.#id : undefined;
   }
 
   public removeDecorator(): void {
