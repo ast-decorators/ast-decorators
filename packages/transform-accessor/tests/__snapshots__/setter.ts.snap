@@ -35,8 +35,61 @@ exports[`@ast-decorators/transform-accessor @setter compiles for decorator on pr
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter compiles for decorator with inline arrow function interceptor 1`] = `
-"const _setInterceptor = value => {
+exports[`@ast-decorators/transform-accessor @setter compiles for decorator without interceptor 1`] = `
+"class Foo {
+  #_bar;
+
+  set bar(_value) {
+    this.#_bar = _value;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter context added for imported interceptor by default 1`] = `
+"import { set } from './set';
+
+class Foo {
+  #_bar;
+
+  set bar(_value) {
+    this.#_bar = set.call(this, _value);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter context added for imported interceptor if it fits "exclusions" options and "disableByDefault" is set 1`] = `
+"import { markedSetter } from './set';
+
+class Foo {
+  #_bar;
+
+  set bar(_value) {
+    this.#_bar = markedSetter.call(this, _value);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter context added for in-file regular function interceptor (declaration) 1`] = `
+"function set(value) {
+  console.log(value);
+  return value;
+}
+
+class Foo {
+  #_bar;
+
+  set bar(_value) {
+    this.#_bar = set.call(this, _value);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter context added for in-file regular function interceptor (expression) 1`] = `
+"const set = function (value) {
   console.log(value);
   return value;
 };
@@ -45,13 +98,13 @@ class Foo {
   #_bar;
 
   set bar(_value) {
-    this.#_bar = _setInterceptor(_value);
+    this.#_bar = set.call(this, _value);
   }
 
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter compiles for decorator with inline function interceptor 1`] = `
+exports[`@ast-decorators/transform-accessor @setter context added for inline regular function interceptor 1`] = `
 "function _setInterceptor(value) {
   console.log(value);
   return value;
@@ -67,7 +120,33 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter compiles for decorator with interceptor declared somewhere else 1`] = `
+exports[`@ast-decorators/transform-accessor @setter context omitted for imported interceptor if "disableByDefault" is set 1`] = `
+"import { set } from './set';
+
+class Foo {
+  #_bar;
+
+  set bar(_value) {
+    this.#_bar = set(_value);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter context omitted for imported interceptor if it fits "exclusions" options 1`] = `
+"import { markedSetter } from './set';
+
+class Foo {
+  #_bar;
+
+  set bar(_value) {
+    this.#_bar = markedSetter(_value);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter context omitted for in-file arrow function interceptor 1`] = `
 "const set = value => {
   console.log(value);
   return value;
@@ -77,18 +156,23 @@ class Foo {
   #_bar;
 
   set bar(_value) {
-    this.#_bar = set.call(this, _value);
+    this.#_bar = set(_value);
   }
 
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter compiles for decorator without interceptor 1`] = `
-"class Foo {
+exports[`@ast-decorators/transform-accessor @setter context omitted for inline arrow function interceptor 1`] = `
+"const _setInterceptor = value => {
+  console.log(value);
+  return value;
+};
+
+class Foo {
   #_bar;
 
   set bar(_value) {
-    this.#_bar = _value;
+    this.#_bar = _setInterceptor(_value);
   }
 
 }"

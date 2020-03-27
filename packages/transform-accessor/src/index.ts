@@ -1,5 +1,5 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import {AccessorInterceptor} from './utils';
+import {AccessorInterceptor} from './utils/misc';
 
 export type AccessorDecorator = (
   get?: AccessorInterceptor,
