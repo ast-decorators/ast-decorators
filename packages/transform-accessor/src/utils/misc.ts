@@ -2,10 +2,11 @@ import {
   ASTClassMemberDecorator,
   ClassMemberMethod,
   ClassMemberProperty,
+  PluginPass,
   PrivacyType,
 } from '@ast-decorators/typings';
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import {DecoratorSuitabilityFactors} from '@ast-decorators/utils/lib/checkDecoratorSuitability';
+import {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
 import {NodePath, template} from '@babel/core';
@@ -24,26 +25,35 @@ import {
   isClassProperty,
   isFunctionExpression,
   isIdentifier,
+  isMemberExpression,
   memberExpression,
   MemberExpression,
   PrivateName,
   thisExpression,
 } from '@babel/types';
+import shouldUseContext from './context';
 
 export type TransformAccessorOptions = Readonly<{
-  transformerPath?: string;
-  singleAccessorDecorators?: DecoratorSuitabilityFactors;
+  interceptorContext?: InterceptorContext;
   privacy?: PrivacyType;
+  singleAccessorDecorators?: SuitabilityFactors;
+  transformerPath?: string;
 }>;
 
 export type AccessorInterceptor = (value: any) => any;
 export type AccessorInterceptorNode =
   | FunctionExpression
   | ArrowFunctionExpression
-  | Identifier;
+  | Identifier
+  | MemberExpression;
+
+export type InterceptorContext = Readonly<{
+  disableByDefault?: boolean;
+  exclude?: SuitabilityFactors;
+}>;
 
 export type AccessorMethodCreatorOptions = Readonly<{
-  allowThisContext: boolean;
+  useContext: boolean;
   preservingDecorators: Decorator[] | null;
 }>;
 
@@ -58,7 +68,7 @@ export type AccessorMethodCreator = (
 export const assert = (
   decorator: string,
   member: NodePath<ClassMemberProperty>,
-  accessors: ReadonlyArray<NodePath<AccessorInterceptorNode> | undefined>,
+  interceptors: ReadonlyArray<NodePath<AccessorInterceptorNode> | undefined>,
 ): void => {
   if (!isClassProperty(member) && !isClassPrivateProperty(member)) {
     throw new ASTDecoratorsError(
@@ -66,15 +76,16 @@ export const assert = (
     );
   }
 
-  for (const accessor of accessors) {
+  for (const interceptor of interceptors) {
     if (
-      accessor &&
-      !isFunctionExpression(accessor) &&
-      !isArrowFunctionExpression(accessor) &&
-      !isIdentifier(accessor)
+      interceptor &&
+      !isFunctionExpression(interceptor) &&
+      !isArrowFunctionExpression(interceptor) &&
+      !isIdentifier(interceptor) &&
+      !isMemberExpression(interceptor)
     ) {
       throw new ASTDecoratorsError(
-        'Accessor interceptor can only be function or a variable identifier',
+        'Accessor interceptor can only be function, free variable or object property',
       );
     }
   }
@@ -129,26 +140,26 @@ export const generateInterceptor = (
 
 export const createAccessorDecorator = (
   decorator: string,
-  accessor: NodePath<AccessorInterceptorNode> | undefined,
+  interceptor: NodePath<AccessorInterceptorNode> | undefined,
   impl: AccessorMethodCreator,
 ): ASTClassMemberDecorator<TransformAccessorOptions> => (
   klass: NodePath<Class>,
   member: NodePath<ClassMemberProperty>,
-  {privacy}: TransformAccessorOptions = {},
+  {interceptorContext, privacy}: TransformAccessorOptions = {},
+  {filename}: PluginPass,
 ): void => {
-  assert(decorator, member, [accessor]);
+  assert(decorator, member, [interceptor]);
 
   const storage = createStorage(klass, member, privacy);
 
   const method = impl(
     klass,
     member,
-    accessor,
+    interceptor,
     storage.key as Identifier | PrivateName,
     {
-      // TODO: Add option to set up context
-      allowThisContext: true,
       preservingDecorators: member.node.decorators,
+      useContext: shouldUseContext(interceptor, interceptorContext, filename),
     },
   );
 
@@ -160,12 +171,12 @@ export const injectInterceptor = (
   interceptor: AccessorInterceptorNode,
   value: MemberExpression | Identifier,
   type: 'get' | 'set',
-  allowThisContext: boolean,
+  useContext: boolean,
 ): CallExpression => {
   const interceptorId = generateInterceptor(klass, interceptor, type);
 
   return isArrowFunctionExpression(interceptor) ||
-    (isIdentifier(interceptor) && !allowThisContext)
+    (isIdentifier(interceptor) && !useContext)
     ? callExpression(interceptorId, [value])
     : callExpression(memberExpression(interceptorId, identifier('call')), [
         thisExpression(),

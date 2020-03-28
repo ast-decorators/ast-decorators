@@ -4,20 +4,20 @@ import checkNodeModule from './checkNodeModule';
 
 const cwd = process.cwd();
 
-export type DecoratorSuitabilityFactors = Readonly<{
+export type SuitabilityFactors = Readonly<{
   names?: ReadonlyArray<RegExp | string>;
   nodeModules?: ReadonlyArray<RegExp | string>;
   paths?: readonly string[];
 }>;
 
-export type DecoratorInfo = Readonly<{
+export type CheckingElementInfo = Readonly<{
   name?: string;
   source?: string;
 }>;
 
-const checkDecoratorSuitability = (
-  {name, source}: DecoratorInfo,
-  {names, nodeModules, paths}: DecoratorSuitabilityFactors = {},
+const checkSuitability = (
+  {name, source}: CheckingElementInfo,
+  {names, nodeModules, paths}: SuitabilityFactors = {},
   filename: string,
 ): boolean => {
   if (
@@ -58,4 +58,4 @@ const checkDecoratorSuitability = (
   return false;
 };
 
-export default checkDecoratorSuitability;
+export default checkSuitability;

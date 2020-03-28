@@ -6,15 +6,12 @@ import {
 } from '@ast-decorators/typings';
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
-import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
+import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
 import {NodePath} from '@babel/core';
 import {
   Class,
   Decorator,
-  Identifier,
   isFunctionDeclaration,
-  isImportDefaultSpecifier,
-  isImportNamespaceSpecifier,
   isVariableDeclarator,
   StringLiteral,
 } from '@babel/types';
@@ -43,18 +40,13 @@ const processImportDeclaration = (
   transformerMap: TransformerMap,
 ): void => {
   const {filename} = babelOptions;
-  const {importSpecifier, importSource} = metadata;
-
-  const name = isImportDefaultSpecifier(importSpecifier)
-    ? 'default'
-    : isImportNamespaceSpecifier(importSpecifier)
-    ? metadata.property!.node.name
-    : (importSpecifier!.get('imported') as NodePath<Identifier>).node.name;
+  const {importSource, originalImportName} = metadata;
 
   const source = calculateSource(importSource!, filename);
 
   const transformer = transformerMap.find(([, detector, transformerOptions]) =>
-    detector(name, source, transformerOptions, babelOptions),
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    detector(originalImportName!, source, transformerOptions, babelOptions),
   );
 
   if (!transformer) {
@@ -63,7 +55,7 @@ const processImportDeclaration = (
 
   const [decoratorFn, , transformerOptions] = transformer;
 
-  metadata.removeDecorator();
+  metadata.remove();
   metadata.removeBinding();
 
   const decorator = metadata.isCall
@@ -95,7 +87,7 @@ const processDecorator = (
 
   if (!binding) {
     throw new ASTDecoratorsError(
-      `${metadata.identifier.node.name} is not defined`,
+      `${metadata.importIdentifier.node.name} is not defined`,
     );
   }
 

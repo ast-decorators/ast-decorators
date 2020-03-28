@@ -35,8 +35,61 @@ exports[`@ast-decorators/transform-accessor @getter compiles for decorator on pr
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @getter compiles for decorator with inline arrow function interceptor 1`] = `
-"const _getInterceptor = value => {
+exports[`@ast-decorators/transform-accessor @getter compiles for decorator without interceptor 1`] = `
+"class Foo {
+  #_bar;
+
+  get bar() {
+    return this.#_bar;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter context added for imported interceptor by default 1`] = `
+"import { get } from './get';
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    return get.call(this, this.#_bar);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter context added for imported interceptor if it fits "exclude" options and "disableByDefault" is set 1`] = `
+"import { markedGetter } from './get';
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    return markedGetter.call(this, this.#_bar);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter context added for in-file regular function interceptor (declaration) 1`] = `
+"function get(value) {
+  console.log(value);
+  return value;
+}
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    return get.call(this, this.#_bar);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter context added for in-file regular function interceptor (expression) 1`] = `
+"const get = function (value) {
   console.log(value);
   return value;
 };
@@ -45,13 +98,13 @@ class Foo {
   #_bar;
 
   get bar() {
-    return _getInterceptor(this.#_bar);
+    return get.call(this, this.#_bar);
   }
 
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @getter compiles for decorator with inline function interceptor 1`] = `
+exports[`@ast-decorators/transform-accessor @getter context added for inline regular function interceptor 1`] = `
 "function _getInterceptor(value) {
   console.log(value);
   return value;
@@ -67,7 +120,33 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @getter compiles for decorator with interceptor declared somewhere else 1`] = `
+exports[`@ast-decorators/transform-accessor @getter context omitted for imported interceptor if "disableByDefault" is set 1`] = `
+"import { get } from './get';
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    return get(this.#_bar);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter context omitted for imported interceptor if it fits "exclude" options 1`] = `
+"import { markedGetter } from './get';
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    return markedGetter(this.#_bar);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter context omitted for in-file arrow function interceptor 1`] = `
 "const get = value => {
   console.log(value);
   return value;
@@ -77,18 +156,23 @@ class Foo {
   #_bar;
 
   get bar() {
-    return get.call(this, this.#_bar);
+    return get(this.#_bar);
   }
 
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @getter compiles for decorator without interceptor 1`] = `
-"class Foo {
+exports[`@ast-decorators/transform-accessor @getter context omitted for inline arrow function interceptor 1`] = `
+"const _getInterceptor = value => {
+  console.log(value);
+  return value;
+};
+
+class Foo {
   #_bar;
 
   get bar() {
-    return this.#_bar;
+    return _getInterceptor(this.#_bar);
   }
 
 }"

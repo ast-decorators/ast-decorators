@@ -3,46 +3,26 @@
 import {NodePath} from '@babel/core';
 import {Binding} from '@babel/traverse';
 import {
-  Decorator,
   Identifier,
   ImportDeclaration,
   ImportDefaultSpecifier,
   ImportNamespaceSpecifier,
   ImportSpecifier,
-  isCallExpression,
   isMemberExpression,
   MemberExpression,
   StringLiteral,
+  isImportDefaultSpecifier,
+  isImportNamespaceSpecifier,
 } from '@babel/types';
 
-export default class DecoratorMetadata {
-  readonly #args: readonly NodePath[];
+export default class ImportMetadata {
   readonly #binding?: Binding;
-  readonly #decorator: NodePath<Decorator>;
   readonly #id: NodePath<Identifier>;
-  readonly #isCall: boolean;
   readonly #object?: NodePath<Identifier>;
 
-  public constructor(decorator: NodePath<Decorator>) {
-    this.#decorator = decorator;
-    const expression = decorator.get('expression');
-
-    this.#isCall = isCallExpression(expression);
-
-    let memberOrIdentifier: NodePath<MemberExpression | Identifier>;
-
-    if (this.#isCall) {
-      this.#args = expression.get('arguments') as readonly NodePath[];
-      memberOrIdentifier = expression.get('callee') as NodePath<
-        MemberExpression | Identifier
-      >;
-    } else {
-      this.#args = [];
-      memberOrIdentifier = expression as NodePath<
-        MemberExpression | Identifier
-      >;
-    }
-
+  public constructor(
+    memberOrIdentifier: NodePath<MemberExpression | Identifier>,
+  ) {
     if (isMemberExpression(memberOrIdentifier)) {
       this.#object = memberOrIdentifier.get('object') as NodePath<Identifier>;
       this.#id = memberOrIdentifier.get('property') as NodePath<Identifier>;
@@ -51,14 +31,12 @@ export default class DecoratorMetadata {
     }
 
     if (this.isMember) {
-      this.#binding = decorator.scope.getBinding(this.#object!.node.name);
+      this.#binding = memberOrIdentifier.scope.getBinding(
+        this.#object!.node.name,
+      );
     } else {
-      this.#binding = decorator.scope.getBinding(this.#id.node.name);
+      this.#binding = memberOrIdentifier.scope.getBinding(this.#id.node.name);
     }
-  }
-
-  public get args(): readonly NodePath[] {
-    return this.#args;
   }
 
   public get binding(): Binding | undefined {
@@ -66,6 +44,10 @@ export default class DecoratorMetadata {
   }
 
   public get identifier(): NodePath<Identifier> {
+    return this.#id;
+  }
+
+  public get importIdentifier(): NodePath<Identifier> {
     return this.isMember ? this.#object! : this.#id;
   }
 
@@ -91,20 +73,22 @@ export default class DecoratorMetadata {
     return declaration.get('source');
   }
 
-  public get isCall(): boolean {
-    return this.#isCall;
-  }
-
   public get isMember(): boolean {
     return !!this.#object;
   }
 
-  public get property(): NodePath<Identifier> | undefined {
-    return this.isMember ? this.#id : undefined;
-  }
+  public get originalImportName(): string | undefined {
+    const {identifier, importSpecifier} = this;
 
-  public removeDecorator(): void {
-    this.#decorator.remove();
+    if (!importSpecifier) {
+      return undefined;
+    }
+
+    return isImportDefaultSpecifier(importSpecifier)
+      ? 'default'
+      : isImportNamespaceSpecifier(importSpecifier)
+      ? identifier.node.name
+      : (importSpecifier.get('imported') as NodePath<Identifier>).node.name;
   }
 
   public removeBinding(): void {
@@ -113,7 +97,7 @@ export default class DecoratorMetadata {
     }
 
     this.#binding.referencePaths = this.#binding.referencePaths.filter(
-      p => p !== this.identifier,
+      p => p !== this.importIdentifier,
     );
 
     if (this.#binding.referencePaths.length === 0) {

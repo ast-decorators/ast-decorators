@@ -25,14 +25,14 @@ import {
   AccessorMethodCreator,
   createAccessorDecorator,
   injectInterceptor,
-} from './utils';
+} from './utils/misc';
 
 export const createSetterMethod: AccessorMethodCreator = (
   klass,
   member,
   interceptor,
   storageProperty,
-  {allowThisContext, preservingDecorators},
+  {preservingDecorators, useContext},
 ): ClassMemberMethod => {
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const valueId = classBody.scope.generateUidIdentifier('value');
@@ -48,7 +48,7 @@ export const createSetterMethod: AccessorMethodCreator = (
               interceptor.node,
               valueId,
               'set',
-              allowThisContext,
+              useContext,
             )
           : valueId,
       ),

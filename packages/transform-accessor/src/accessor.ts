@@ -2,19 +2,20 @@ import {
   ASTClassMemberDecorator,
   ClassMemberProperty,
 } from '@ast-decorators/typings';
-import checkDecoratorSuitability from '@ast-decorators/utils/lib/checkDecoratorSuitability';
-import DecoratorMetadata from '@ast-decorators/utils/lib/DecoratorMetadata';
+import checkSuitability from '@ast-decorators/utils/lib/checkSuitability';
+import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
 import {PrivateName} from '@ast-decorators/utils/node_modules/@babel/types';
 import {NodePath} from '@babel/core';
 import {Decorator, Identifier} from '@babel/types';
 import {createGetterMethod} from './getter';
 import {createSetterMethod} from './setter';
+import shouldUseContext from './utils/context';
 import {
   AccessorInterceptorNode,
   assert,
   createStorage,
   TransformAccessorOptions,
-} from './utils';
+} from './utils/misc';
 
 const accessor = (
   get?: NodePath<AccessorInterceptorNode>,
@@ -22,7 +23,11 @@ const accessor = (
 ): ASTClassMemberDecorator<TransformAccessorOptions> => (
   klass,
   member: NodePath<ClassMemberProperty>,
-  {privacy, singleAccessorDecorators}: TransformAccessorOptions = {},
+  {
+    interceptorContext,
+    privacy,
+    singleAccessorDecorators,
+  }: TransformAccessorOptions = {},
   {filename},
 ) => {
   assert('accessor', member, [get, set]);
@@ -38,18 +43,17 @@ const accessor = (
     get,
     storage.key as Identifier | PrivateName,
     {
-      // TODO: Add option to set up context
-      allowThisContext: true,
       preservingDecorators: decorators?.map(({node}) => node) ?? null,
+      useContext: shouldUseContext(get, interceptorContext, filename),
     },
   );
 
   const bothAccessorsDecorators = decorators?.filter(decorator => {
-    const {identifier, importSource} = new DecoratorMetadata(decorator);
+    const {importSource, originalImportName} = new DecoratorMetadata(decorator);
 
-    return !checkDecoratorSuitability(
+    return !checkSuitability(
       {
-        name: identifier.node.name,
+        name: originalImportName,
         source: importSource?.node.value,
       },
       singleAccessorDecorators,
@@ -63,10 +67,9 @@ const accessor = (
     set,
     storage.key as Identifier | PrivateName,
     {
-      // TODO: Add option to set up context
-      allowThisContext: true,
       preservingDecorators:
         bothAccessorsDecorators?.map(({node}) => node) ?? null,
+      useContext: shouldUseContext(set, interceptorContext, filename),
     },
   );
 

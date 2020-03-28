@@ -23,27 +23,21 @@ import {
   AccessorMethodCreator,
   createAccessorDecorator,
   injectInterceptor,
-} from './utils';
+} from './utils/misc';
 
 export const createGetterMethod: AccessorMethodCreator = (
   klass,
   member,
   interceptor,
   storageProperty,
-  {allowThisContext, preservingDecorators},
+  {preservingDecorators, useContext},
 ): ClassMemberMethod => {
   const value = memberExpression(thisExpression(), storageProperty);
 
   const body = blockStatement([
     returnStatement(
       interceptor
-        ? injectInterceptor(
-            klass,
-            interceptor.node,
-            value,
-            'get',
-            allowThisContext,
-          )
+        ? injectInterceptor(klass, interceptor.node, value, 'get', useContext)
         : value,
     ),
   ]);

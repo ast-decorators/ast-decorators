@@ -1,7 +1,5 @@
 // @ts-ignore
-import {bar, Fuzz} from 'decorators';
+import {foo, bar} from 'fns';
 
-// @ts-ignore
-class Foo extends Fuzz {
-  @bar public baz?: string;
-}
+foo();
+bar();

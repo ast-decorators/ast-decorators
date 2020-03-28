@@ -6,7 +6,7 @@ import minimatch from 'minimatch';
 import accessor from './accessor';
 import getter from './getter';
 import setter from './setter';
-import {TransformAccessorOptions} from './utils';
+import {TransformAccessorOptions} from './utils/misc';
 
 export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
 

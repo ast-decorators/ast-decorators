@@ -1,26 +1,20 @@
 import {resolve} from 'path';
-import checkDecoratorSuitability, {
-  DecoratorInfo,
-} from '../src/checkDecoratorSuitability';
+import checkSuitability, {CheckingElementInfo} from '../src/checkSuitability';
 
 describe('@ast-decorators/utils', () => {
-  describe('checkDecoratorSuitability', () => {
+  describe('checkSuitability', () => {
     const filename = resolve(__dirname, 'input.ts');
 
     it('allows to omit factors', () => {
       expect(
-        checkDecoratorSuitability(
-          {name: 'bar', source: 'foo'},
-          undefined,
-          filename,
-        ),
+        checkSuitability({name: 'bar', source: 'foo'}, undefined, filename),
       ).toBeFalsy();
     });
 
     describe('names', () => {
       it('detects if import specifier is listed in "names" factor in a string form', () => {
         const check = (name: string): boolean =>
-          checkDecoratorSuitability(
+          checkSuitability(
             {name, source: 'foo'},
             {names: ['positive']},
             filename,
@@ -32,11 +26,7 @@ describe('@ast-decorators/utils', () => {
 
       it('detects if import specifier fits regular expression', () => {
         const check = (name: string): boolean =>
-          checkDecoratorSuitability(
-            {name, source: 'foo'},
-            {names: [/\$\w+/]},
-            filename,
-          );
+          checkSuitability({name, source: 'foo'}, {names: [/\$\w+/]}, filename);
 
         expect(check('negative')).not.toBeTruthy();
         expect(check('$positive')).toBeTruthy();
@@ -45,20 +35,16 @@ describe('@ast-decorators/utils', () => {
 
     describe('paths', () => {
       it('detects if import source fits the glob expression', () => {
-        const check = (info: DecoratorInfo): boolean =>
-          checkDecoratorSuitability(
-            info,
-            {paths: ['packages/**/*.positive']},
-            filename,
-          );
+        const check = (info: CheckingElementInfo): boolean =>
+          checkSuitability(info, {paths: ['packages/**/*.positive']}, filename);
 
         expect(check({source: '../../file.positive'})).toBeTruthy();
         expect(check({source: '../../file.negative'})).not.toBeTruthy();
       });
 
       it('ignores "node_module" paths', () => {
-        const check = (info: DecoratorInfo): boolean =>
-          checkDecoratorSuitability(info, {paths: ['**/*.positive']}, filename);
+        const check = (info: CheckingElementInfo): boolean =>
+          checkSuitability(info, {paths: ['**/*.positive']}, filename);
 
         expect(
           check({source: 'some-module/path/to/file.positive'}),
@@ -69,12 +55,8 @@ describe('@ast-decorators/utils', () => {
 
     describe('nodeModules', () => {
       it('detects if import source starts with specified string', () => {
-        const check = (info: DecoratorInfo): boolean =>
-          checkDecoratorSuitability(
-            info,
-            {nodeModules: ['positive-module']},
-            filename,
-          );
+        const check = (info: CheckingElementInfo): boolean =>
+          checkSuitability(info, {nodeModules: ['positive-module']}, filename);
 
         expect(check({source: 'positive-module/path/to/file'})).toBeTruthy();
         expect(
@@ -83,8 +65,8 @@ describe('@ast-decorators/utils', () => {
       });
 
       it('detects if import source fits the glob expression', () => {
-        const check = (info: DecoratorInfo): boolean =>
-          checkDecoratorSuitability(
+        const check = (info: CheckingElementInfo): boolean =>
+          checkSuitability(
             info,
             {nodeModules: ['neutral-module/positive-path/**/*']},
             filename,
@@ -99,12 +81,8 @@ describe('@ast-decorators/utils', () => {
       });
 
       it('detects if import source fits the regular expression', () => {
-        const check = (info: DecoratorInfo): boolean =>
-          checkDecoratorSuitability(
-            info,
-            {nodeModules: [/positive/]},
-            filename,
-          );
+        const check = (info: CheckingElementInfo): boolean =>
+          checkSuitability(info, {nodeModules: [/positive/]}, filename);
 
         expect(
           check({source: 'neutral-module/positive-path/to/file'}),
