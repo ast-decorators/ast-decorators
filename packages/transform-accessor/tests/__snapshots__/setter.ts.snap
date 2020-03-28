@@ -35,7 +35,18 @@ exports[`@ast-decorators/transform-accessor @setter compiles for decorator on pr
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter compiles for decorator without interceptor 1`] = `
+exports[`@ast-decorators/transform-accessor @setter compiles for decorator on static property 1`] = `
+"class Foo {
+  static #_bar;
+
+  static set bar(_value) {
+    this.#_bar = _value;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter compiles without interceptor 1`] = `
 "class Foo {
   #_bar;
 
@@ -176,4 +187,26 @@ class Foo {
   }
 
 }"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter uses class name instead of this for static property 1`] = `
+"class Foo {
+  static #_bar;
+
+  static set bar(_value) {
+    Foo.#_bar = _value;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter uses this for static property if class name is absent 1`] = `
+"const Foo = class {
+  static #_bar;
+
+  static set bar(_value) {
+    this.#_bar = _value;
+  }
+
+};"
 `;

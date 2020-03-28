@@ -15,6 +15,7 @@ import {
   callExpression,
   CallExpression,
   Class,
+  cloneNode,
   Decorator,
   functionDeclaration,
   FunctionExpression,
@@ -29,6 +30,7 @@ import {
   memberExpression,
   MemberExpression,
   PrivateName,
+  ThisExpression,
   thisExpression,
 } from '@babel/types';
 import shouldUseContext from './context';
@@ -38,6 +40,7 @@ export type TransformAccessorOptions = Readonly<{
   privacy?: PrivacyType;
   singleAccessorDecorators?: SuitabilityFactors;
   transformerPath?: string;
+  useClassNameForStatic?: boolean;
 }>;
 
 export type AccessorInterceptor = (value: any) => any;
@@ -53,6 +56,7 @@ export type InterceptorContext = Readonly<{
 }>;
 
 export type AccessorMethodCreatorOptions = Readonly<{
+  useClassName: boolean;
   useContext: boolean;
   preservingDecorators: Decorator[] | null;
 }>;
@@ -96,12 +100,11 @@ export const createStorage = (
   member: NodePath<ClassMemberProperty>,
   privacy: PrivacyType = 'hard',
 ): ClassMemberProperty =>
-  createPropertyByPrivacy(
-    privacy,
-    String(getMemberName(member.node)),
-    member.node.value,
-    klass,
-  );
+  createPropertyByPrivacy(privacy, String(getMemberName(member.node)), klass, {
+    // @ts-ignore
+    static: member.node.static,
+    value: member.node.value,
+  });
 
 const declarator = template(`const VAR = FUNCTION`);
 
@@ -145,7 +148,11 @@ export const createAccessorDecorator = (
 ): ASTClassMemberDecorator<TransformAccessorOptions> => (
   klass: NodePath<Class>,
   member: NodePath<ClassMemberProperty>,
-  {interceptorContext, privacy}: TransformAccessorOptions = {},
+  {
+    interceptorContext,
+    privacy,
+    useClassNameForStatic,
+  }: TransformAccessorOptions = {},
   {filename}: PluginPass,
 ): void => {
   assert(decorator, member, [interceptor]);
@@ -159,6 +166,8 @@ export const createAccessorDecorator = (
     storage.key as Identifier | PrivateName,
     {
       preservingDecorators: member.node.decorators,
+      // @ts-ignore
+      useClassName: !!member.node.static && !!useClassNameForStatic,
       useContext: shouldUseContext(interceptor, interceptorContext, filename),
     },
   );
@@ -166,12 +175,19 @@ export const createAccessorDecorator = (
   member.replaceWithMultiple([storage, method]);
 };
 
+export const ownerNode = (
+  klass: NodePath<Class>,
+  useClassName: boolean,
+): Identifier | ThisExpression =>
+  useClassName && klass.node.id ? cloneNode(klass.node.id) : thisExpression();
+
 export const injectInterceptor = (
   klass: NodePath<Class>,
   interceptor: AccessorInterceptorNode,
   value: MemberExpression | Identifier,
   type: 'get' | 'set',
   useContext: boolean,
+  useClassName: boolean,
 ): CallExpression => {
   const interceptorId = generateInterceptor(klass, interceptor, type);
 
@@ -179,7 +195,7 @@ export const injectInterceptor = (
     (isIdentifier(interceptor) && !useContext)
     ? callExpression(interceptorId, [value])
     : callExpression(memberExpression(interceptorId, identifier('call')), [
-        thisExpression(),
+        ownerNode(klass, useClassName),
         value,
       ]);
 };

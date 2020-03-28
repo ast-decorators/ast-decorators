@@ -27,6 +27,7 @@ const accessor = (
     interceptorContext,
     privacy,
     singleAccessorDecorators,
+    useClassNameForStatic,
   }: TransformAccessorOptions = {},
   {filename},
 ) => {
@@ -36,6 +37,9 @@ const accessor = (
     ? (member.get('decorators') as ReadonlyArray<NodePath<Decorator>>)
     : null;
 
+  // @ts-ignore
+  const useClassName = !!member.node.static && !!useClassNameForStatic;
+
   const storage = createStorage(klass, member, privacy);
   const getter = createGetterMethod(
     klass,
@@ -44,6 +48,7 @@ const accessor = (
     storage.key as Identifier | PrivateName,
     {
       preservingDecorators: decorators?.map(({node}) => node) ?? null,
+      useClassName,
       useContext: shouldUseContext(get, interceptorContext, filename),
     },
   );
@@ -69,6 +74,7 @@ const accessor = (
     {
       preservingDecorators:
         bothAccessorsDecorators?.map(({node}) => node) ?? null,
+      useClassName,
       useContext: shouldUseContext(set, interceptorContext, filename),
     },
   );
