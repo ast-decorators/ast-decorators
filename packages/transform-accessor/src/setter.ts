@@ -9,7 +9,6 @@ import {
   ClassBody,
   classMethod,
   classPrivateMethod,
-  ClassProperty,
   Decorator,
   expressionStatement,
   Identifier,
@@ -18,12 +17,12 @@ import {
   NumericLiteral,
   PrivateName,
   StringLiteral,
-  thisExpression,
 } from '@babel/types';
 import {
   AccessorInterceptorNode,
   AccessorMethodCreator,
   createAccessorDecorator,
+  ownerNode,
   injectInterceptor,
 } from './utils/misc';
 
@@ -32,7 +31,7 @@ export const createSetterMethod: AccessorMethodCreator = (
   member,
   interceptor,
   storageProperty,
-  {preservingDecorators, useContext},
+  {preservingDecorators, useClassName, useContext},
 ): ClassMemberMethod => {
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const valueId = classBody.scope.generateUidIdentifier('value');
@@ -41,7 +40,7 @@ export const createSetterMethod: AccessorMethodCreator = (
     expressionStatement(
       assignmentExpression(
         '=',
-        memberExpression(thisExpression(), storageProperty),
+        memberExpression(ownerNode(klass, useClassName), storageProperty),
         interceptor
           ? injectInterceptor(
               klass,
@@ -49,20 +48,25 @@ export const createSetterMethod: AccessorMethodCreator = (
               valueId,
               'set',
               useContext,
+              useClassName,
             )
           : valueId,
       ),
     ),
   ]);
 
+  // @ts-ignore
+  const {computed, key, static: _static} = member.node;
+
   const method = isClassPrivateProperty(member)
-    ? classPrivateMethod('set', member.node.key as PrivateName, [valueId], body)
+    ? classPrivateMethod('set', key as PrivateName, [valueId], body, _static)
     : classMethod(
         'set',
-        member.node.key as Identifier | StringLiteral | NumericLiteral,
+        key as Identifier | StringLiteral | NumericLiteral,
         [valueId],
         body,
-        (member.node as ClassProperty).computed,
+        computed,
+        _static,
       );
 
   method.decorators = preservingDecorators as Decorator[];

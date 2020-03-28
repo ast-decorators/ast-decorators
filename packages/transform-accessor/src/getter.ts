@@ -7,7 +7,6 @@ import {
   blockStatement,
   classMethod,
   classPrivateMethod,
-  ClassProperty,
   Decorator,
   Identifier,
   isClassPrivateProperty,
@@ -16,13 +15,13 @@ import {
   PrivateName,
   returnStatement,
   StringLiteral,
-  thisExpression,
 } from '@babel/types';
 import {
   AccessorInterceptorNode,
   AccessorMethodCreator,
   createAccessorDecorator,
   injectInterceptor,
+  ownerNode,
 } from './utils/misc';
 
 export const createGetterMethod: AccessorMethodCreator = (
@@ -30,26 +29,40 @@ export const createGetterMethod: AccessorMethodCreator = (
   member,
   interceptor,
   storageProperty,
-  {preservingDecorators, useContext},
+  {preservingDecorators, useClassName, useContext},
 ): ClassMemberMethod => {
-  const value = memberExpression(thisExpression(), storageProperty);
+  const value = memberExpression(
+    ownerNode(klass, useClassName),
+    storageProperty,
+  );
 
   const body = blockStatement([
     returnStatement(
       interceptor
-        ? injectInterceptor(klass, interceptor.node, value, 'get', useContext)
+        ? injectInterceptor(
+            klass,
+            interceptor.node,
+            value,
+            'get',
+            useContext,
+            useClassName,
+          )
         : value,
     ),
   ]);
 
+  // @ts-ignore
+  const {computed, key, static: _static} = member.node;
+
   const method = isClassPrivateProperty(member)
-    ? classPrivateMethod('get', member.node.key as PrivateName, [], body)
+    ? classPrivateMethod('get', key as PrivateName, [], body, _static)
     : classMethod(
         'get',
-        member.node.key as Identifier | StringLiteral | NumericLiteral,
+        key as Identifier | StringLiteral | NumericLiteral,
         [],
         body,
-        (member.node as ClassProperty).computed,
+        computed,
+        _static,
       );
 
   method.decorators = preservingDecorators as Decorator[];

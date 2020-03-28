@@ -18,20 +18,32 @@ const transformFile = async (
 
 describe('@ast-decorators/transform-accessor', () => {
   describe('@setter', () => {
-    it('compiles for decorator without interceptor', async () => {
+    it('compiles without interceptor', async () => {
       await compare('default', commonOptions);
     });
 
-    it('compiles for decorator on private property', async () => {
+    it('compiles for private property', async () => {
       await compare('private-property', commonOptions);
     });
 
-    it('compiles for decorator on property with assignment', async () => {
+    it('compiles for property with assignment', async () => {
       await compare('property-assigning', commonOptions);
     });
 
-    it('compiles for decorator on computed property', async () => {
+    it('compiles for computed property', async () => {
       await compare('computed-property', commonOptions);
+    });
+
+    it('compiles for on static property', async () => {
+      await compare('static-property', commonOptions);
+    });
+
+    it('uses class name instead of this for static property', async () => {
+      await compare('static-property-class-name');
+    });
+
+    it('uses this for static property if class name is absent', async () => {
+      await compare('static-property-no-class-name');
     });
 
     it('fails if applied to something else than property', async () => {

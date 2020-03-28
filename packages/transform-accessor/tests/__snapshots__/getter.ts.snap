@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`@ast-decorators/transform-accessor @getter compiles for decorator on computed property 1`] = `
+exports[`@ast-decorators/transform-accessor @getter compiles for computed property 1`] = `
 "const $bar = Symbol();
 
 class Foo {
@@ -13,7 +13,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @getter compiles for decorator on private property 1`] = `
+exports[`@ast-decorators/transform-accessor @getter compiles for private property 1`] = `
 "class Foo {
   #_bar;
 
@@ -24,7 +24,7 @@ exports[`@ast-decorators/transform-accessor @getter compiles for decorator on pr
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @getter compiles for decorator on property with assignment 1`] = `
+exports[`@ast-decorators/transform-accessor @getter compiles for property with assignment 1`] = `
 "class Foo {
   #_bar = 'baz';
 
@@ -35,7 +35,18 @@ exports[`@ast-decorators/transform-accessor @getter compiles for decorator on pr
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @getter compiles for decorator without interceptor 1`] = `
+exports[`@ast-decorators/transform-accessor @getter compiles for static property 1`] = `
+"class Foo {
+  static #_bar;
+
+  static get bar() {
+    return this.#_bar;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter compiles without interceptor 1`] = `
 "class Foo {
   #_bar;
 
@@ -176,4 +187,26 @@ class Foo {
   }
 
 }"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter uses class name instead of this for static property 1`] = `
+"class Foo {
+  static #_bar;
+
+  static get bar() {
+    return Foo.#_bar;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter uses this for static property if class name is absent 1`] = `
+"const Foo = class {
+  static #_bar;
+
+  static get bar() {
+    return this.#_bar;
+  }
+
+};"
 `;

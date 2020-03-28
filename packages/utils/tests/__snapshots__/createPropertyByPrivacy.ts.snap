@@ -19,3 +19,9 @@ class Foo {
   [_bar] = \\"baz\\";
 }"
 `;
+
+exports[`@ast-decorators/utils createPropertyByPrivacy creates static property 1`] = `
+"class Foo {
+  static #_bar = \\"baz\\";
+}"
+`;

@@ -9,8 +9,12 @@ const compare = async (
 
 describe('@ast-decorators/transform-accessor', () => {
   describe('@accessor', () => {
-    it('compiles for decorator without interceptors', async () => {
+    it('compiles without interceptors', async () => {
       await compare('default', commonOptions);
+    });
+
+    it('compiles for static property', async () => {
+      await compare('static-property', commonOptions);
     });
 
     it('preserves following decorators for both accessors', async () => {
