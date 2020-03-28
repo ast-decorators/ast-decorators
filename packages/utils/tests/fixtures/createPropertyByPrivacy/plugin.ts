@@ -11,6 +11,7 @@ import createPropertyByPrivacy from '../../../src/createPropertyByPrivacy';
 
 export type BabelPluginTestOptions = {
   privacy: PrivacyType;
+  static: boolean;
 };
 
 const babelPluginTest = (): object => ({
@@ -20,6 +21,7 @@ const babelPluginTest = (): object => ({
       {opts}: PluginPass<BabelPluginTestOptions>,
     ) {
       const privacy = opts?.privacy ?? 'hard';
+      const _static = opts?.static ?? false;
       const klassBody = klass.get('body') as NodePath<ClassBody>;
       const [member] = klassBody.get('body') as readonly NodePath<
         ClassProperty
@@ -28,8 +30,8 @@ const babelPluginTest = (): object => ({
       const storage = createPropertyByPrivacy(
         privacy,
         (member.node.key as Identifier).name,
-        stringLiteral('baz'),
         klass,
+        {static: _static, value: stringLiteral('baz')},
       );
 
       klassBody.unshiftContainer('body', [storage]);

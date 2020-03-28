@@ -5,18 +5,23 @@ import {
   Class,
   ClassBody,
   classPrivateProperty,
+  ClassProperty,
   classProperty,
-  Expression,
   privateName,
 } from '@babel/types';
 
 const createSymbolAssignment = template.statement(`const VAR = Symbol()`);
 
+export type PropertyOptions = Readonly<{
+  static?: boolean;
+  value?: ClassProperty['value'];
+}>;
+
 const createPropertyByPrivacy = (
   privacy: PrivacyType,
   name: string | undefined,
-  value: Expression | null,
   klass: NodePath<Class>,
+  {static: _static, value}: PropertyOptions = {},
 ): ClassMemberProperty => {
   switch (privacy) {
     case 'hard': {
@@ -24,7 +29,12 @@ const createPropertyByPrivacy = (
       const id = classBody.scope.generateUidIdentifier(name);
       const privateId = privateName(id);
 
-      return classPrivateProperty(privateId, value);
+      const prop = classPrivateProperty(privateId, value, null);
+
+      // @ts-ignore
+      prop.static = _static;
+
+      return prop;
     }
     case 'soft': {
       const id = klass.parentPath.scope.generateUidIdentifier(name);

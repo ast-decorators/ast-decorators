@@ -16,5 +16,9 @@ describe('@ast-decorators/utils', () => {
     it('creates property when compiles with none privacy option', async () => {
       await compare('none');
     });
+
+    it('creates static property', async () => {
+      await compare('static');
+    });
   });
 });
