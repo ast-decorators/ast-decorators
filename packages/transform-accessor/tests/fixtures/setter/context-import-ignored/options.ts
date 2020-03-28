@@ -10,7 +10,7 @@ export default {
             require('../../../../src/transformer'),
             {
               interceptorContext: {
-                exclusions: {
+                exclude: {
                   names: ['markedSetter']
                 }
               },

@@ -59,7 +59,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter context added for imported interceptor if it fits "exclusions" options and "disableByDefault" is set 1`] = `
+exports[`@ast-decorators/transform-accessor @setter context added for imported interceptor if it fits "exclude" options and "disableByDefault" is set 1`] = `
 "import { markedSetter } from './set';
 
 class Foo {
@@ -133,7 +133,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter context omitted for imported interceptor if it fits "exclusions" options 1`] = `
+exports[`@ast-decorators/transform-accessor @setter context omitted for imported interceptor if it fits "exclude" options 1`] = `
 "import { markedSetter } from './set';
 
 class Foo {

@@ -49,7 +49,7 @@ export type AccessorInterceptorNode =
 
 export type InterceptorContext = Readonly<{
   disableByDefault?: boolean;
-  exclusions?: SuitabilityFactors;
+  exclude?: SuitabilityFactors;
 }>;
 
 export type AccessorMethodCreatorOptions = Readonly<{

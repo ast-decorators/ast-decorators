@@ -11,7 +11,7 @@ export default {
             {
               interceptorContext: {
                 disableByDefault: true,
-                exclusions: {
+                exclude: {
                   names: ['markedSetter'],
                 },
               },

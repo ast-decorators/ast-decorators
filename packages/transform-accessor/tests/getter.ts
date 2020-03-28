@@ -87,11 +87,11 @@ describe('@ast-decorators/transform-accessor', () => {
         await compare('context-import-disabled');
       });
 
-      it('omitted for imported interceptor if it fits "exclusions" options', async () => {
+      it('omitted for imported interceptor if it fits "exclude" options', async () => {
         await compare('context-import-ignored');
       });
 
-      it('added for imported interceptor if it fits "exclusions" options and "disableByDefault" is set', async () => {
+      it('added for imported interceptor if it fits "exclude" options and "disableByDefault" is set', async () => {
         await compare('context-import-disabled-ignored');
       });
 

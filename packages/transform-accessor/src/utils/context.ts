@@ -16,7 +16,7 @@ import {AccessorInterceptorNode, InterceptorContext} from './misc';
 
 const shouldUseContext = (
   fn: NodePath<AccessorInterceptorNode> | undefined,
-  {disableByDefault = false, exclusions = {}}: InterceptorContext = {},
+  {disableByDefault = false, exclude = {}}: InterceptorContext = {},
   filename: string,
 ): boolean => {
   if (!fn) {
@@ -82,10 +82,10 @@ const shouldUseContext = (
     ({name} = (fn.get('property') as NodePath<Identifier>).node);
   }
 
-  const suitable = checkSuitability({name, source}, exclusions, filename);
+  const suitable = checkSuitability({name, source}, exclude, filename);
 
-  // If context is disabled by default, all functions that fit exclusions should
-  // use context. Otherwise, exclusions should not use context.
+  // If context is disabled by default, all functions that fit "exclude" option
+  // should use context. Otherwise, exclusions should not use context.
   return disableByDefault ? suitable : !suitable;
 };
 
