@@ -1,6 +1,5 @@
 import {ClassMemberProperty, PrivacyType} from '@ast-decorators/typings';
-import {NodePath} from '@babel/core';
-import template from '@babel/template';
+import {NodePath, template} from '@babel/core';
 import {
   Class,
   ClassBody,

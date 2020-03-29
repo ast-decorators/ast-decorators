@@ -6,5 +6,9 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": {
+    "@babel/types": "^7",
+    "@types/babel__core": "^7"
   }
 }
