@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`@ast-decorators/bind @bindAll compiles for all methods in class 1`] = `
+exports[`@ast-decorators/transform-bind @bindAll compiles for all methods in class 1`] = `
 "function _baz() {}
 
 class Foo {
