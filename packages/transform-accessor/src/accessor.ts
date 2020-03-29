@@ -4,9 +4,8 @@ import {
 } from '@ast-decorators/typings';
 import checkSuitability from '@ast-decorators/utils/lib/checkSuitability';
 import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
-import {PrivateName} from '@ast-decorators/utils/node_modules/@babel/types';
 import {NodePath} from '@babel/core';
-import {Decorator, Identifier} from '@babel/types';
+import {Decorator, Identifier, PrivateName} from '@babel/types';
 import {createGetterMethod} from './getter';
 import {createSetterMethod} from './setter';
 import shouldUseContext from './utils/context';
