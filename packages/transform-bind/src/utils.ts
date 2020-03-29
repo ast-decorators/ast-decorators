@@ -1,5 +1,5 @@
-import {ClassMember, ClassMemberMethod} from '@ast-decorators/typings';
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
+import {ClassMember, ClassMemberMethod} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/traverse';
 import {
   callExpression,

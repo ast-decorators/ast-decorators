@@ -1,7 +1,7 @@
 import {
   ASTClassMemberDecorator,
   ClassMemberMethod,
-} from '@ast-decorators/typings';
+} from '@ast-decorators/utils/lib/common';
 import {applyBinding, TransformBindOptions, assert} from './utils';
 import {NodePath} from '@babel/core';
 

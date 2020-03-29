@@ -1,4 +1,4 @@
-import {ClassMember, PluginPass} from '@ast-decorators/typings';
+import {ClassMember, PluginPass} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/core';
 import {
   Class,

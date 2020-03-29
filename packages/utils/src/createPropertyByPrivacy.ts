@@ -1,4 +1,3 @@
-import {ClassMemberProperty, PrivacyType} from '@ast-decorators/typings';
 import {NodePath, template} from '@babel/core';
 import {
   Class,
@@ -8,6 +7,7 @@ import {
   classProperty,
   privateName,
 } from '@babel/types';
+import {ClassMemberProperty, PrivacyType} from './common';
 
 const createSymbolAssignment = template.statement(`const VAR = Symbol()`);
 

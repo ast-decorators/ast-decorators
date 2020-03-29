@@ -1,7 +1,7 @@
 import {
   ASTDecoratorDetector,
   ASTDecoratorTransformer,
-} from '@ast-decorators/typings';
+} from '@ast-decorators/utils/lib/common';
 import minimatch from 'minimatch';
 import accessor from './accessor';
 import getter from './getter';

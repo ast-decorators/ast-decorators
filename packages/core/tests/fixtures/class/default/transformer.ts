@@ -1,6 +1,5 @@
-import {ASTDecoratorTransformer} from '@ast-decorators/typings';
-import {template} from '@babel/core';
-import {NodePath} from '@babel/traverse';
+import {ASTDecoratorTransformer} from '@ast-decorators/utils/lib/common';
+import {NodePath, template} from '@babel/core';
 import {Class, StringLiteral} from '@babel/types';
 import minimatch from 'minimatch';
 

@@ -1,8 +1,8 @@
+import checkSuitability from '@ast-decorators/utils/lib/checkSuitability';
 import {
   ASTClassMemberDecorator,
   ClassMemberProperty,
-} from '@ast-decorators/typings';
-import checkSuitability from '@ast-decorators/utils/lib/checkSuitability';
+} from '@ast-decorators/utils/lib/common';
 import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
 import {NodePath} from '@babel/core';
 import {Decorator, Identifier, PrivateName} from '@babel/types';

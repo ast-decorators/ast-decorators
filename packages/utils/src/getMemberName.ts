@@ -1,4 +1,3 @@
-import {ClassMember} from '@ast-decorators/typings';
 import {
   isClassPrivateMethod,
   isClassPrivateProperty,
@@ -6,6 +5,7 @@ import {
   isNumericLiteral,
   isStringLiteral,
 } from '@babel/types';
+import {ClassMember} from './common';
 
 const getMemberName = (node: ClassMember): string | number | undefined => {
   if (isClassPrivateProperty(node) || isClassPrivateMethod(node)) {

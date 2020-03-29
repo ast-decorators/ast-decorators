@@ -1,11 +1,11 @@
 import {
   ASTDecoratorDetector,
   ASTDecoratorTransformer,
-} from '@ast-decorators/typings';
+} from '@ast-decorators/utils/lib/common';
 import minimatch from 'minimatch';
+import bind from './bind';
 import bindAll from './bindAll';
 import {TransformBindOptions} from './utils';
-import bind from './bind';
 
 export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
 

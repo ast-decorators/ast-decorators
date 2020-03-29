@@ -1,11 +1,11 @@
+import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
+import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
 import {
   ASTCallableDecorator,
   ASTSimpleDecorator,
   ClassMember,
   PluginPass,
-} from '@ast-decorators/typings';
-import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
+} from '@ast-decorators/utils/lib/common';
 import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
 import {NodePath} from '@babel/core';
 import {

@@ -1,12 +1,12 @@
 /* eslint-disable global-require */
+import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
+import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
 import {
   ASTDecoratorCoreOptions,
   ASTDecoratorTransformer,
   ClassMember,
   PluginPass,
-} from '@ast-decorators/typings';
-import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
+} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/core';
 import {Class, Decorator} from '@babel/types';
 import {resolve} from 'path';
