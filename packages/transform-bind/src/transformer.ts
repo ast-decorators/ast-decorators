@@ -7,7 +7,7 @@ import bind from './bind';
 import bindAll from './bindAll';
 import {TransformBindOptions} from './utils';
 
-export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
+export const TRANSFORMER_NAME = '@ast-decorators/transform-bind';
 
 const detector = (
   decoratorName: string,
