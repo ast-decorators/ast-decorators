@@ -1,5 +1,8 @@
-import {ASTClassCallableDecorator, PrivacyType} from '@ast-decorators/typings';
-import {NodePath} from '@babel/traverse';
+import {
+  ASTClassCallableDecorator,
+  PrivacyType,
+} from '@ast-decorators/utils/lib/common';
+import {NodePath} from '@babel/core';
 import {
   ClassBody,
   classPrivateProperty,

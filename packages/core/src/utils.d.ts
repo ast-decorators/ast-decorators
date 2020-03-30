@@ -1,4 +1,7 @@
-import {ASTDecorator, ASTDecoratorDetector} from '@ast-decorators/typings';
+import {
+  ASTDecorator,
+  ASTDecoratorDetector,
+} from '@ast-decorators/utils/lib/common';
 
 export type Mutable<T> = {
   -readonly [P in keyof T]: T[P];

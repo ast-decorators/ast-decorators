@@ -3,10 +3,9 @@ import {
   ASTDecoratorTransformer,
 } from '@ast-decorators/utils/lib/common';
 import minimatch from 'minimatch';
-import accessor from './accessor';
-import getter from './getter';
-import setter from './setter';
-import {TransformAccessorOptions} from './utils/misc';
+import bind from './bind';
+import bindAll from './bindAll';
+import {TransformBindOptions} from './utils';
 
 export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
 
@@ -18,11 +17,10 @@ const detector = (
 
 const transformer: ASTDecoratorTransformer = (
   _,
-  {transformerPath}: TransformAccessorOptions = {},
+  {transformerPath}: TransformBindOptions = {},
 ) => [
-  [accessor, detector('accessor', transformerPath)] as const,
-  [getter, detector('getter', transformerPath)] as const,
-  [setter, detector('setter', transformerPath)] as const,
+  [bind, detector('bind', transformerPath)] as const,
+  [bindAll, detector('bindAll', transformerPath)] as const,
 ];
 
 export default transformer;

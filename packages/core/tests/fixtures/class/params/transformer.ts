@@ -1,5 +1,4 @@
-import {template} from '@babel/core';
-import {NodePath} from '@babel/traverse';
+import {NodePath, template} from '@babel/core';
 import {Class, Statement} from '@babel/types';
 
 const foo = (...params: NodePath[]) => (klass: NodePath<Class>) => {

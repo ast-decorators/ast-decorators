@@ -1,12 +1,12 @@
+import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
+import {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
 import {
   ASTClassMemberDecorator,
   ClassMemberMethod,
   ClassMemberProperty,
   PluginPass,
   PrivacyType,
-} from '@ast-decorators/typings';
-import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
+} from '@ast-decorators/utils/lib/common';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
 import {NodePath, template} from '@babel/core';

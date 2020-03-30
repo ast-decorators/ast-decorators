@@ -1,4 +1,4 @@
-import {PluginPass} from '@ast-decorators/typings';
+import {PluginPass} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/core';
 import {Class, Decorator} from '@babel/types';
 import processDecorator from './processor';

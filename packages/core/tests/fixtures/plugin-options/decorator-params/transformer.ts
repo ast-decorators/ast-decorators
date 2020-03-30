@@ -2,8 +2,8 @@ import {
   ASTClassCallableDecorator,
   PluginPass,
   PrivacyType,
-} from '@ast-decorators/typings';
-import {NodePath} from '@babel/traverse';
+} from '@ast-decorators/utils/lib/common';
+import {NodePath} from '@babel/core';
 import {
   ClassBody,
   classPrivateProperty,
@@ -28,11 +28,7 @@ const foo: ASTClassCallableDecorator<
 ) => {
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const id = classBody.scope.generateUidIdentifier(name.node.value);
-  const value = stringLiteral(
-    relative(cwd, filename)
-      .split(sep)
-      .join('/'),
-  );
+  const value = stringLiteral(relative(cwd, filename).split(sep).join('/'));
   const node =
     privacy === 'hard'
       ? classPrivateProperty(privateName(id), value)

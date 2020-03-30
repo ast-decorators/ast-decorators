@@ -1,7 +1,7 @@
 {
-  "name": "@ast-decorators/transform-accessor",
+  "name": "@ast-decorators/transform-bind",
   "version": "0.1.0",
-  "description": "Transforms a property to an accessor with interceptors",
+  "description": "Makes method bound to the current class instance",
   "main": "lib/index.js",
   "scripts": {
     "build": "npm run build:remove && run-p build:js build:dts",

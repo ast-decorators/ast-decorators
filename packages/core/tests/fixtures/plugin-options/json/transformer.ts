@@ -1,4 +1,4 @@
-import {ASTClassDecorator} from '@ast-decorators/typings';
+import {ASTClassDecorator} from '@ast-decorators/utils/lib/common';
 import {template} from '@babel/core';
 import {Statement} from '@babel/types';
 

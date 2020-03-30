@@ -1,4 +1,4 @@
-import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
+import replaceDecorator from '@ast-decorators/utils/lib/replaceDecorator';
 import {AccessorInterceptor} from './utils/misc';
 
 export type AccessorDecorator = (
@@ -9,13 +9,19 @@ export type AccessorDecorator = (
 export type GetterDecorator = (get?: AccessorInterceptor) => PropertyDecorator;
 export type SetterDecorator = (set?: AccessorInterceptor) => PropertyDecorator;
 
-const replacement = (type: string) => () => () => {
-  throw new ASTDecoratorsError(
-    `Decorator @${type} won't work because @ast-decorators/transform-accessor/lib/transformer` +
-      'is not plugged in. You have to add it to your Babel config',
-  );
-};
+const transformerName = '@ast-decorators/transform-accessor';
 
-export const accessor: AccessorDecorator = replacement('accessor');
-export const getter: GetterDecorator = replacement('getter');
-export const setter: SetterDecorator = replacement('setter');
+export const accessor: AccessorDecorator = replaceDecorator(
+  'accessor',
+  transformerName,
+);
+
+export const getter: GetterDecorator = replaceDecorator(
+  'getter',
+  transformerName,
+);
+
+export const setter: SetterDecorator = replaceDecorator(
+  'setter',
+  transformerName,
+);
