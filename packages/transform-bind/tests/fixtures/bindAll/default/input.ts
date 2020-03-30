@@ -7,4 +7,7 @@ class Foo {
 
   // @ts-ignore
   #baz() {}
+
+  // @ts-ignore
+  *#fuzz() {}
 }

@@ -2,6 +2,7 @@ import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import {ClassMember, ClassMemberMethod} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/traverse';
 import {
+  arrowFunctionExpression,
   callExpression,
   Class,
   ClassMethod,
@@ -37,22 +38,28 @@ const applyBindingToClassPrivateMethods = (
   for (const method of methodsToBind) {
     const {async, body, generator, key, params} = method.node;
 
-    const functionId = klass.parentPath.scope.generateUidIdentifier(
-      key.id.name,
-    );
+    if (generator) {
+      const functionId = klass.parentPath.scope.generateUidIdentifier(
+        key.id.name,
+      );
 
-    methodFunctions.push(
-      functionDeclaration(functionId, params, body, generator, async),
-    );
+      methodFunctions.push(
+        functionDeclaration(functionId, params, body, generator, async),
+      );
 
-    method.replaceWith(
-      classPrivateProperty(
-        key,
-        callExpression(memberExpression(functionId, identifier('bind')), [
-          thisExpression(),
-        ]),
-      ),
-    );
+      method.replaceWith(
+        classPrivateProperty(
+          key,
+          callExpression(memberExpression(functionId, identifier('bind')), [
+            thisExpression(),
+          ]),
+        ),
+      );
+    } else {
+      method.replaceWith(
+        classPrivateProperty(key, arrowFunctionExpression(params, body, async)),
+      );
+    }
   }
 
   klass.insertBefore(methodFunctions);

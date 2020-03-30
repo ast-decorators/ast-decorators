@@ -1,13 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`@ast-decorators/transform-bind @bindAll compiles for all methods in class 1`] = `
-"function _baz() {}
+"function* _fuzz() {}
 
 class Foo {
   bar = this.bar.bind(this);
 
   bar() {}
 
-  #baz = _baz.bind(this);
+  #baz = () => {};
+  #fuzz = _fuzz.bind(this);
 }"
 `;

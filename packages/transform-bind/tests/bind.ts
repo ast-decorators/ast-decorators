@@ -15,5 +15,9 @@ describe('@ast-decorators/transform-bind', () => {
     it('compiles for private method', async () => {
       await compare('private-method', commonOptions);
     });
+
+    it('compiles for private generator method', async () => {
+      await compare('private-generator-method', commonOptions);
+    });
   });
 });
