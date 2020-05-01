@@ -15,7 +15,8 @@
     "minimatch": "^3.0.4"
   },
   "peerDependencies": {
-    "@babel/core": "^7"
+    "@babel/core": "^7",
+    "@babel/types": "^7"
   },
   "devDependencies": {
     "@ast-decorators/core": "^0.1.0"
