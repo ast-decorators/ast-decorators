@@ -1,55 +1,60 @@
-import {
-  ASTClassMemberCallableDecorator,
-  ClassMemberMethod,
-} from '@ast-decorators/utils/lib/common';
+import {ASTClassMemberCallableDecorator} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/core';
 import {
   blockStatement,
+  CallExpression,
   classMethod,
   classPrivateMethod,
   Decorator,
+  FunctionDeclaration,
   Identifier,
   isClassPrivateProperty,
+  MemberExpression,
   memberExpression,
   NumericLiteral,
   PrivateName,
   returnStatement,
   StringLiteral,
+  VariableDeclaration,
 } from '@babel/types';
 import {
   AccessorInterceptorNode,
   AccessorMethodCreator,
   createAccessorDecorator,
-  injectInterceptor,
   ownerNode,
-} from './utils/misc';
+  prepareInterceptor,
+} from './utils';
 
-export const createGetterMethod: AccessorMethodCreator = (
+export const getter: AccessorMethodCreator = (
   klass,
   member,
   interceptor,
   storageProperty,
   {preservingDecorators, useClassName, useContext},
-): ClassMemberMethod => {
+) => {
   const value = memberExpression(
     ownerNode(klass, useClassName),
     storageProperty,
   );
 
-  const body = blockStatement([
-    returnStatement(
-      interceptor
-        ? injectInterceptor(
-            klass,
-            interceptor.node,
-            value,
-            'get',
-            useContext,
-            useClassName,
-          )
-        : value,
-    ),
-  ]);
+  let statement: CallExpression | MemberExpression;
+  let declarations: Array<FunctionDeclaration | VariableDeclaration>;
+
+  if (interceptor) {
+    [statement, declarations] = prepareInterceptor(
+      klass,
+      interceptor.node,
+      value,
+      'get',
+      useContext,
+      useClassName,
+    );
+  } else {
+    statement = value;
+    declarations = [];
+  }
+
+  const body = blockStatement([returnStatement(statement)]);
 
   // @ts-ignore
   const {computed, key, static: _static} = member.node;
@@ -67,11 +72,9 @@ export const createGetterMethod: AccessorMethodCreator = (
 
   method.decorators = preservingDecorators as Decorator[];
 
-  return method;
+  return [method, declarations];
 };
 
-const getter: ASTClassMemberCallableDecorator = (
+export const getterTransformer: ASTClassMemberCallableDecorator = (
   get?: NodePath<AccessorInterceptorNode>,
-) => createAccessorDecorator('getter', get, createGetterMethod);
-
-export default getter;
+) => createAccessorDecorator('getter', get, getter);

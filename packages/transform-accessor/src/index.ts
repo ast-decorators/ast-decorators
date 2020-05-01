@@ -1,5 +1,5 @@
 import replaceDecorator from '@ast-decorators/utils/lib/replaceDecorator';
-import {AccessorInterceptor} from './utils/misc';
+import {AccessorInterceptor} from './utils';
 
 export type AccessorDecorator = (
   get?: AccessorInterceptor,
