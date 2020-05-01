@@ -1,0 +1,24 @@
+{
+  "name": "@ast-decorators/transform-decorate",
+  "version": "0.1.0",
+  "description": "Decorates method with a received function",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "npm run build:remove && run-p build:js build:dts",
+    "build:js": "babel src -d lib -x .ts --config-file ../../babel.config.json",
+    "build:dts": "tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:remove": "rimraf lib",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@ast-decorators/utils": "^0.1.0",
+    "minimatch": "^3.0.4"
+  },
+  "peerDependencies": {
+    "@babel/core": "^7",
+    "@babel/types": "^7"
+  },
+  "devDependencies": {
+    "@ast-decorators/core": "^0.1.0"
+  }
+}

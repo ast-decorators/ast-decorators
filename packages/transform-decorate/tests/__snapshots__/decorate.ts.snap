@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@ast-decorators/transform-decorate @decorate compiles for a method with decorator declared in the same file 1`] = `
+"const decorator = fn => function (...args) {
+  const result = fn.apply(this, args);
+  console.log(result);
+  return result;
+};
+
+const _bar = decorator(function (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate compiles for a method with inline arrow decorator 1`] = `
+"const _decorateBar = fn => function (...args) {
+  const result = fn.apply(this, args);
+  console.log(result);
+  return result;
+};
+
+const _bar = _decorateBar(function (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate compiles for a method with inline regular decorator 1`] = `
+"function _decorateBar(fn) {
+  return function (...args) {
+    const result = fn.apply(this, args);
+    console.log(result);
+    return result;
+  };
+}
+
+const _bar = _decorateBar(function (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
