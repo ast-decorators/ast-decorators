@@ -1,7 +1,7 @@
 import replaceDecorator from '../src/replaceDecorator';
 
 describe('@ast-decorators/utils', () => {
-  describe('ImportMetadata', () => {
+  describe('replaceDecorator', () => {
     it('fails on call with correct message', () => {
       expect(() =>
         replaceDecorator('foo', '@ast-decorators/bar')(),

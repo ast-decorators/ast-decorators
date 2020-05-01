@@ -1,4 +1,5 @@
-import {NodePath, template} from '@babel/core';
+import template from '@babel/template';
+import {NodePath} from '@babel/traverse';
 import {
   Class,
   ClassBody,
@@ -18,14 +19,16 @@ export type PropertyOptions = Readonly<{
 
 const createPropertyByPrivacy = (
   privacy: PrivacyType,
-  name: string | undefined,
+  name: string | number | undefined,
   klass: NodePath<Class>,
   {static: _static, value}: PropertyOptions = {},
 ): ClassMemberProperty => {
+  const uid = name?.toString();
+
   switch (privacy) {
     case 'hard': {
       const classBody = klass.get('body') as NodePath<ClassBody>;
-      const id = classBody.scope.generateUidIdentifier(name);
+      const id = classBody.scope.generateUidIdentifier(uid);
       const privateId = privateName(id);
 
       const prop = classPrivateProperty(privateId, value, null);
@@ -36,14 +39,14 @@ const createPropertyByPrivacy = (
       return prop;
     }
     case 'soft': {
-      const id = klass.parentPath.scope.generateUidIdentifier(name);
+      const id = klass.parentPath.scope.generateUidIdentifier(uid);
       klass.insertBefore([createSymbolAssignment({VAR: id})]);
 
       return classProperty(id, value, null, null, true);
     }
     default: {
       const classBody = klass.get('body') as NodePath<ClassBody>;
-      const id = classBody.scope.generateUidIdentifier(name);
+      const id = classBody.scope.generateUidIdentifier(uid);
 
       return classProperty(id, value);
     }

@@ -1,3 +1,4 @@
+import {BabelFileResult, NodePath} from '@babel/core';
 import {
   Class,
   ClassMethod,
@@ -5,7 +6,6 @@ import {
   ClassPrivateProperty,
   ClassProperty,
 } from '@babel/types';
-import {BabelFileResult, NodePath} from '@babel/core';
 
 export type ClassMemberProperty = ClassProperty | ClassPrivateProperty;
 export type ClassMemberMethod = ClassMethod | ClassPrivateMethod;
