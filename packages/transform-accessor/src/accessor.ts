@@ -6,17 +6,17 @@ import {
 import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
 import {NodePath} from '@babel/core';
 import {Decorator, Identifier, PrivateName} from '@babel/types';
-import {createGetterMethod} from './getter';
-import {createSetterMethod} from './setter';
-import shouldUseContext from './utils/context';
+import {getter} from './getter';
+import {setter} from './setter';
+import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
 import {
   AccessorInterceptorNode,
   assert,
   createStorage,
   TransformAccessorOptions,
-} from './utils/misc';
+} from './utils';
 
-const accessor = (
+export const accessorTransformer = (
   get?: NodePath<AccessorInterceptorNode>,
   set?: NodePath<AccessorInterceptorNode>,
 ): ASTClassMemberDecorator<TransformAccessorOptions> => (
@@ -40,7 +40,7 @@ const accessor = (
   const useClassName = !!member.node.static && !!useClassNameForStatic;
 
   const storage = createStorage(klass, member, privacy);
-  const getter = createGetterMethod(
+  const [getMethod, getterDeclarations] = getter(
     klass,
     member,
     get,
@@ -48,7 +48,11 @@ const accessor = (
     {
       preservingDecorators: decorators?.map(({node}) => node) ?? null,
       useClassName,
-      useContext: shouldUseContext(get, interceptorContext, filename),
+      useContext: shouldInterceptorUseContext(
+        get,
+        interceptorContext,
+        filename,
+      ),
     },
   );
 
@@ -65,7 +69,7 @@ const accessor = (
     );
   });
 
-  const setter = createSetterMethod(
+  const [setMethod, setterDeclarations] = setter(
     klass,
     member,
     set,
@@ -74,11 +78,14 @@ const accessor = (
       preservingDecorators:
         bothAccessorsDecorators?.map(({node}) => node) ?? null,
       useClassName,
-      useContext: shouldUseContext(set, interceptorContext, filename),
+      useContext: shouldInterceptorUseContext(
+        set,
+        interceptorContext,
+        filename,
+      ),
     },
   );
 
-  member.replaceWithMultiple([storage, getter, setter]);
+  klass.insertBefore([...getterDeclarations, ...setterDeclarations]);
+  member.replaceWithMultiple([storage, getMethod, setMethod]);
 };
-
-export default accessor;

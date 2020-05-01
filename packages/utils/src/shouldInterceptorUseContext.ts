@@ -1,8 +1,7 @@
-import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import checkSuitability from '@ast-decorators/utils/lib/checkSuitability';
-import {ImportMetadata} from '@ast-decorators/utils/lib/metadata';
-import {NodePath} from '@babel/core';
+import {NodePath} from '@babel/traverse';
 import {
+  ArrowFunctionExpression,
+  FunctionExpression,
   Identifier,
   isArrowFunctionExpression,
   isFunctionDeclaration,
@@ -12,11 +11,24 @@ import {
   isVariableDeclarator,
   MemberExpression,
 } from '@babel/types';
-import {AccessorInterceptorNode, InterceptorContext} from './misc';
+import ASTDecoratorsError from './ASTDecoratorsError';
+import checkSuitability, {SuitabilityFactors} from './checkSuitability';
+import {ImportMetadata} from './metadata';
 
-const shouldUseContext = (
-  fn: NodePath<AccessorInterceptorNode> | undefined,
-  {disableByDefault = false, exclude = {}}: InterceptorContext = {},
+export type InterceptorKind =
+  | FunctionExpression
+  | ArrowFunctionExpression
+  | Identifier
+  | MemberExpression;
+
+export type InterceptorContextOptions = Readonly<{
+  disableByDefault?: boolean;
+  exclude?: SuitabilityFactors;
+}>;
+
+const shouldInterceptorUseContext = (
+  fn: NodePath<InterceptorKind> | undefined,
+  {disableByDefault = false, exclude = {}}: InterceptorContextOptions = {},
   filename: string,
 ): boolean => {
   if (!fn) {
@@ -89,4 +101,4 @@ const shouldUseContext = (
   return disableByDefault ? suitable : !suitable;
 };
 
-export default shouldUseContext;
+export default shouldInterceptorUseContext;
