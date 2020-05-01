@@ -3,8 +3,8 @@ import {
   ASTDecoratorTransformer,
 } from '@ast-decorators/utils/lib/common';
 import minimatch from 'minimatch';
-import bind from './bind';
-import bindAll from './bindAll';
+import {bindTransformer} from './bind';
+import {bindAllTransformer} from './bindAll';
 import {TransformBindOptions} from './utils';
 
 export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
@@ -19,8 +19,8 @@ const transformer: ASTDecoratorTransformer = (
   _,
   {transformerPath}: TransformBindOptions = {},
 ) => [
-  [bind, detector('bind', transformerPath)] as const,
-  [bindAll, detector('bindAll', transformerPath)] as const,
+  [bindTransformer, detector('bind', transformerPath)] as const,
+  [bindAllTransformer, detector('bindAll', transformerPath)] as const,
 ];
 
 export default transformer;
