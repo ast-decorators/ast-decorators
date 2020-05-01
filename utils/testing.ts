@@ -30,7 +30,7 @@ const loadOptions = (
   return optionsOrModule.__esModule ? optionsOrModule.default : optionsOrModule;
 };
 
-export const parse = async (
+export const parseToAST = async (
   dir: string,
   type: string,
   fixture: string,
@@ -83,14 +83,4 @@ export const transformFile = async (
       fixOptions(finalOptions),
     )) ?? {}
   );
-};
-
-export const compare = async (
-  dir: string,
-  type: string,
-  fixture: string,
-  options?: object | string,
-): Promise<void> => {
-  const {code} = await transformFile(dir, type, fixture, options);
-  expect(code).toMatchSnapshot();
 };

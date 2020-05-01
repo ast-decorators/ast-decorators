@@ -11,12 +11,12 @@ import {
   isStringLiteral,
   StringLiteral,
 } from '@babel/types';
-import {parse as _parse} from '../../../utils/testing';
+import {parseToAST as _parseToAST} from '../../../utils/testing';
 import {DecoratorMetadata, ImportMetadata} from '../src/metadata';
 import options from './fixtures/DecoratorMetadata/options';
 
-const parse = async (fixture: string): ReturnType<typeof _parse> =>
-  _parse(__dirname, 'DecoratorMetadata', fixture, options);
+const parseToAST = async (fixture: string): ReturnType<typeof _parseToAST> =>
+  _parseToAST(__dirname, 'DecoratorMetadata', fixture, options);
 
 describe('@ast-decorators/utils', () => {
   describe('ImportMetadata', () => {
@@ -24,7 +24,7 @@ describe('@ast-decorators/utils', () => {
       fixture: string,
       callback: (callee: NodePath<Identifier>) => void,
     ): Promise<void> => {
-      const ast = await parse(fixture);
+      const ast = await parseToAST(fixture);
 
       await new Promise(resolve => {
         traverse(ast!, {
@@ -147,7 +147,7 @@ describe('@ast-decorators/utils', () => {
       fixture: string,
       callback: (decorator: NodePath<Decorator>) => void,
     ): Promise<void> => {
-      const ast = await parse(fixture);
+      const ast = await parseToAST(fixture);
 
       return new Promise(resolve => {
         traverse(ast!, {

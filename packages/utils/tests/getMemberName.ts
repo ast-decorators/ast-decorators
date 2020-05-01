@@ -1,17 +1,17 @@
-import {parse as _parse} from '../../../utils/testing';
+import {parseToAST as _parseToAST} from '../../../utils/testing';
 import {ClassMember} from '../src/common';
 import getMemberName from '../src/getMemberName';
 import {NodePath, traverse} from '@babel/core';
 import options from './fixtures/getMemberName/options';
 
-const parse = async (fixture: string): ReturnType<typeof _parse> =>
-  _parse(__dirname, 'getMemberName', fixture, options);
+const parseToAST = async (fixture: string): ReturnType<typeof _parseToAST> =>
+  _parseToAST(__dirname, 'getMemberName', fixture, options);
 
 const run = async (
   fixture: string,
   callback: (member: ClassMember) => void,
 ): Promise<void> => {
-  const ast = await parse(fixture);
+  const ast = await parseToAST(fixture);
 
   await new Promise(resolve => {
     traverse(ast!, {

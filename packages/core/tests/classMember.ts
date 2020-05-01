@@ -1,32 +1,40 @@
-import {compare as _compare} from '../../../utils/testing';
+import {transformFile as _transformFile} from '../../../utils/testing';
+
+const transformFile = async (
+  fixture: string,
+): ReturnType<typeof _transformFile> =>
+  _transformFile(__dirname, 'class-member', fixture);
 
 describe('@ast-decorators/core', () => {
   describe('class-member', () => {
-    const compare = async (fixture: string): Promise<void> =>
-      _compare(__dirname, 'class-member', fixture);
-
     it('compiles decorator for a public property', async () => {
-      await compare('public-property');
+      const {code} = await transformFile('public-property');
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles decorator for a private property', async () => {
-      await compare('private-property');
+      const {code} = await transformFile('private-property');
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles decorator for a public method', async () => {
-      await compare('public-method');
+      const {code} = await transformFile('public-method');
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles decorator for a private method', async () => {
-      await compare('private-method');
+      const {code} = await transformFile('private-method');
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles multiple decorators for a method', async () => {
-      await compare('multiple-decorators');
+      const {code} = await transformFile('multiple-decorators');
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles decorators imported as a namespace for a method', async () => {
-      await compare('namespace');
+      const {code} = await transformFile('namespace');
+      expect(code).toMatchSnapshot();
     });
   });
 });

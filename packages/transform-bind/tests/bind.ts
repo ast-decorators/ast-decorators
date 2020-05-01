@@ -1,23 +1,30 @@
-import {compare as _compare} from '../../../utils/testing';
+import {transformFile as _transformFile} from '../../../utils/testing';
 import commonOptions from './fixtures/options';
 
-const compare = async (
+const transformFile = async (
   fixture: string,
   options?: string | object,
-): Promise<void> => _compare(__dirname, 'bind', fixture, options);
+): ReturnType<typeof _transformFile> =>
+  _transformFile(__dirname, 'bind', fixture, options);
 
 describe('@ast-decorators/transform-bind', () => {
   describe('@bind', () => {
     it('compiles for regular method', async () => {
-      await compare('default', commonOptions);
+      const {code} = await transformFile('default', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles for private method', async () => {
-      await compare('private-method', commonOptions);
+      const {code} = await transformFile('private-method', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles for private generator method', async () => {
-      await compare('private-generator-method', commonOptions);
+      const {code} = await transformFile(
+        'private-generator-method',
+        commonOptions,
+      );
+      expect(code).toMatchSnapshot();
     });
   });
 });
