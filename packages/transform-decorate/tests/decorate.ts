@@ -1,23 +1,57 @@
-import {compare as _compare} from '../../../utils/testing';
+import {transformFile as _transformFile} from '../../../utils/testing';
 import commonOptions from './fixtures/options';
 
-const compare = async (
+const transformFile = async (
   fixture: string,
   options?: string | object,
-): Promise<void> => _compare(__dirname, 'decorate', fixture, options);
+): ReturnType<typeof _transformFile> =>
+  _transformFile(__dirname, 'decorate', fixture, options);
 
 describe('@ast-decorators/transform-decorate', () => {
   describe('@decorate', () => {
     it('compiles for a method with inline arrow decorator', async () => {
-      await compare('method-inline-arrow', commonOptions);
+      const {code} = await transformFile('method-inline-arrow', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles for a method with inline regular decorator', async () => {
-      await compare('method-inline-regular', commonOptions);
+      const {code} = await transformFile(
+        'method-inline-regular',
+        commonOptions,
+      );
+      expect(code).toMatchSnapshot();
     });
 
-    it('compiles for a method with decorator declared in the same file', async () => {
-      await compare('method-within-arrow', commonOptions);
+    it('compiles for a method with decorator declared in the same file as an arrow function', async () => {
+      const {code} = await transformFile('method-within-arrow', commonOptions);
+      expect(code).toMatchSnapshot();
+    });
+
+    it('compiles for a method with decorator declared in the same file as a regular function', async () => {
+      const {code} = await transformFile(
+        'method-within-regular',
+        commonOptions,
+      );
+      console.log(code);
+      expect(code).toMatchSnapshot();
+    });
+
+    it('compiles for a method with decorator imported from an external file', async () => {
+      const {code} = await transformFile(
+        'method-import-default',
+        commonOptions,
+      );
+      expect(code).toMatchSnapshot();
+    });
+
+    it('compiles for a method with multiple decorators', async () => {
+      const {code} = await transformFile('multiple-decorators', commonOptions);
+      expect(code).toMatchSnapshot();
+    });
+
+    it('sends arguments to a decorator function', async () => {
+      const {code} = await transformFile('decorator-args', commonOptions);
+      expect(code).toMatchSnapshot();
     });
   });
 });

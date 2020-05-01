@@ -1,11 +1,47 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`@ast-decorators/transform-decorate @decorate compiles for a method with decorator declared in the same file 1`] = `
+exports[`@ast-decorators/transform-decorate @decorate compiles for a method with decorator declared in the same file as a regular function 1`] = `
+"function decorator(fn) {
+  return function (...args) {
+    const result = fn.apply(this, args);
+    console.log(result);
+    return result;
+  };
+}
+
+const _bar = decorator(function (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate compiles for a method with decorator declared in the same file as an arrow function 1`] = `
 "const decorator = fn => function (...args) {
   const result = fn.apply(this, args);
   console.log(result);
   return result;
 };
+
+const _bar = decorator(function (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate compiles for a method with decorator imported from an external file 1`] = `
+"import { decorator } from './bar';
 
 const _bar = decorator(function (num) {
   return num * num;
@@ -50,6 +86,41 @@ exports[`@ast-decorators/transform-decorate @decorate compiles for a method with
 const _bar = _decorateBar(function (num) {
   return num * num;
 });
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate compiles for a method with multiple decorators 1`] = `
+"import { dec1 } from './dec1';
+import { dec2 } from './dec2';
+
+const _bar = dec1(function (num) {
+  return num * num;
+});
+
+const _bar2 = dec2(function (...args) {
+  return _bar.apply(this, args);
+});
+
+class Foo {
+  bar(...args) {
+    return _bar2.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate sends arguments to a decorator function 1`] = `
+"import { decorator } from './decorator';
+
+const _bar = decorator(function (num) {
+  return num * num;
+}, 'foo', 'bar', 42);
 
 class Foo {
   bar(...args) {
