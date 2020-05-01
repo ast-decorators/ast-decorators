@@ -2,7 +2,7 @@
 import {NodePath, traverse} from '@babel/core';
 import {CallExpression, Decorator} from '@babel/types';
 import {resolve} from 'path';
-import {parse as _parse} from '../../../utils/testing';
+import {parseToAST as _parse} from '../../../utils/testing';
 import shouldInterceptorUseContext, {
   InterceptorKind,
 } from '../src/shouldInterceptorUseContext';

@@ -1,14 +1,9 @@
 import {
-  compare as _compare,
   transform as _transform,
+  transformFile as _transformFile,
 } from '../../../utils/testing';
-import transformer from './fixtures/plugin-options/transformer';
 import createOptions from './fixtures/plugin-options/options';
-
-const compare = async (
-  fixture: string,
-  options?: string | object,
-): Promise<void> => _compare(__dirname, 'plugin-options', fixture, options);
+import transformer from './fixtures/plugin-options/transformer';
 
 const transform = async (
   fixture: string,
@@ -16,36 +11,47 @@ const transform = async (
 ): ReturnType<typeof _transform> =>
   _transform(__dirname, 'plugin-options', fixture, options);
 
+const transformFile = async (
+  fixture: string,
+  options?: string | object,
+): ReturnType<typeof _transformFile> =>
+  _transformFile(__dirname, 'plugin-options', fixture, options);
+
 describe('@ast-decorators/core', () => {
   describe('plugin-options', () => {
     it('compiles in one way if option has one state', async () => {
-      await compare(
+      const {code} = await transformFile(
         'options-first',
         createOptions({
           transformers: [[transformer, {privacy: 'hard'}]],
         }),
       );
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles in another way if option has different state', async () => {
-      await compare(
+      const {code} = await transformFile(
         'options-second',
         createOptions({
           transformers: [[transformer, {privacy: 'none'}]],
         }),
       );
+      expect(code).toMatchSnapshot();
     });
 
     it('sends a Babel tools object and transformer options to the transformer function', async () => {
-      await compare('transformer-params');
+      const {code} = await transformFile('transformer-params');
+      expect(code).toMatchSnapshot();
     });
 
     it('sends transformer options and Babel plugin options to a decorator', async () => {
-      await compare('decorator-params');
+      const {code} = await transformFile('decorator-params');
+      expect(code).toMatchSnapshot();
     });
 
     it('allows to specify options with JSON', async () => {
-      await compare('json', 'options.json');
+      const {code} = await transformFile('json', 'options.json');
+      expect(code).toMatchSnapshot();
     });
 
     it('throws an error if filename is not provided', async () => {
