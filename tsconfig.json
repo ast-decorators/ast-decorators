@@ -2,6 +2,7 @@
   "compilerOptions": {
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
     "declaration": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -18,6 +19,12 @@
     "strict": true,
     "strictFunctionTypes": false,
     "stripInternal": true,
+    "paths": {
+      "@babel/core":  ["node_modules/@babel/core"],
+      "@babel/template": ["node_modules/@babel/template"],
+      "@babel/traverse": ["node_modules/@babel/traverse"],
+      "@babel/types": ["node_modules/@babel/types"]
+    },
     "target": "esnext"
   },
   "include": [

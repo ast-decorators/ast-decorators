@@ -1,13 +1,12 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import {
+import type {
   ASTClassMemberCallableDecorator,
   ClassMember,
   ClassMemberMethod,
   ClassMemberProperty,
 } from '@ast-decorators/utils/lib/common';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
-import {NodePath} from '@babel/core';
-import {Scope} from '@babel/traverse';
+import type {NodePath, Scope} from '@babel/traverse';
 import {
   ArgumentPlaceholder,
   ArrowFunctionExpression,
@@ -46,7 +45,7 @@ import {
   variableDeclaration,
   variableDeclarator,
 } from '@babel/types';
-import {TransformBindOptions} from './utils';
+import type {AllowedDecorators, TransformDecorateOptions} from './utils';
 
 const capitalize = (msg: string): string =>
   msg.charAt(0).toUpperCase() + msg.slice(1);
@@ -209,11 +208,7 @@ const preparePropertyReplacement = (
 
 export const decorate = (
   member: ClassMember,
-  decorator:
-    | FunctionExpression
-    | ArrowFunctionExpression
-    | Identifier
-    | MemberExpression,
+  decorator: AllowedDecorators,
   args: ReadonlyArray<
     Expression | SpreadElement | JSXNamespacedName | ArgumentPlaceholder
   >,
@@ -252,15 +247,9 @@ export const decorate = (
 };
 
 export const decorateTransformer: ASTClassMemberCallableDecorator<
-  [
-    NodePath<
-      | FunctionExpression
-      | ArrowFunctionExpression
-      | Identifier
-      | MemberExpression
-    >,
-  ],
-  TransformBindOptions
+  [NodePath<AllowedDecorators>],
+  TransformDecorateOptions,
+  ClassMemberMethod
 > = (decorator, ...args) => (klass, member) => {
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!decorator) {

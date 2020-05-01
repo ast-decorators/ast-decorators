@@ -21,7 +21,7 @@ export default class ImportMetadata {
   readonly #object?: NodePath<Identifier>;
 
   public constructor(
-    memberOrIdentifier: NodePath<MemberExpression | Identifier>,
+    memberOrIdentifier: NodePath<MemberExpression> | NodePath<Identifier>,
   ) {
     if (isMemberExpression(memberOrIdentifier)) {
       this.#object = memberOrIdentifier.get('object') as NodePath<Identifier>;

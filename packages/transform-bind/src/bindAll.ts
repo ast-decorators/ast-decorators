@@ -1,8 +1,8 @@
-import {
-  ASTClassMemberDecorator,
+import type {
+  ASTClassDecorator,
   ClassMember,
 } from '@ast-decorators/utils/lib/common';
-import {NodePath} from '@babel/core';
+import type {NodePath} from '@babel/core';
 import {
   ClassBody,
   FunctionDeclaration,
@@ -10,9 +10,9 @@ import {
   isClassPrivateMethod,
 } from '@babel/types';
 import {bind} from './bind';
-import {TransformBindOptions} from './utils';
+import type {TransformBindOptions} from './utils';
 
-export const bindAllTransformer: ASTClassMemberDecorator<TransformBindOptions> = klass => {
+export const bindAllTransformer: ASTClassDecorator<TransformBindOptions> = klass => {
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const members = classBody.get('body') as ReadonlyArray<NodePath<ClassMember>>;
 

@@ -1,5 +1,5 @@
 import template from '@babel/template';
-import {NodePath} from '@babel/traverse';
+import type {NodePath} from '@babel/traverse';
 import {
   Class,
   ClassBody,
@@ -8,7 +8,7 @@ import {
   classProperty,
   privateName,
 } from '@babel/types';
-import {ClassMemberProperty, PrivacyType} from './common';
+import type {ClassMemberProperty, PrivacyType} from './common';
 
 const createSymbolAssignment = template.statement(`const VAR = Symbol()`);
 

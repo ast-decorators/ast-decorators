@@ -1,5 +1,5 @@
-import {ClassMember, PluginPass} from '@ast-decorators/utils/lib/common';
-import {NodePath} from '@babel/core';
+import type {ClassMember, PluginPass} from '@ast-decorators/utils/lib/common';
+import type {NodePath} from '@babel/traverse';
 import {
   Class,
   Decorator,

@@ -11,10 +11,10 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@babel/core": "^7.9.6",
+    "@babel/template": "^7.8.6",
+    "@babel/traverse": "^7.9.6",
+    "@babel/types": "^7.9.6",
     "minimatch": "^3.0.4"
-  },
-  "peerDependencies": {
-    "@babel/core": "^7",
-    "@babel/types": "^7"
   }
 }

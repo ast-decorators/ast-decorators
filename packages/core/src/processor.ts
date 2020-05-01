@@ -1,13 +1,13 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
-import {
+import type {
   ASTCallableDecorator,
   ASTSimpleDecorator,
   ClassMember,
   PluginPass,
 } from '@ast-decorators/utils/lib/common';
 import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
-import {NodePath} from '@babel/core';
+import type {NodePath} from '@babel/traverse';
 import {
   Class,
   Decorator,
@@ -16,7 +16,7 @@ import {
   StringLiteral,
 } from '@babel/types';
 import {dirname, resolve} from 'path';
-import {TransformerMap} from './utils';
+import type {TransformerMap} from './utils';
 
 type DecoratorProcessorArguments = {
   call: readonly NodePath[];

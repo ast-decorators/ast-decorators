@@ -1,18 +1,18 @@
 /* eslint-disable global-require */
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import checkNodeModule from '@ast-decorators/utils/lib/checkNodeModule';
-import {
+import type {
   ASTDecoratorCoreOptions,
   ASTDecoratorTransformer,
   ClassMember,
   PluginPass,
 } from '@ast-decorators/utils/lib/common';
-import {NodePath} from '@babel/core';
-import {Class, Decorator} from '@babel/types';
+import type {NodePath} from '@babel/traverse';
+import type {Class, Decorator} from '@babel/types';
 import {resolve} from 'path';
 import processClassDecorator from './class';
 import processClassMemberDecorator from './property';
-import {Mutable, TransformerMap} from './utils';
+import type {Mutable, TransformerMap} from './utils';
 
 type UncheckedPluginPass<T = object> = Omit<PluginPass<T>, 'filename'> &
   Readonly<{
@@ -20,7 +20,7 @@ type UncheckedPluginPass<T = object> = Omit<PluginPass<T>, 'filename'> &
   }>;
 
 const processEachDecorator = (
-  path: NodePath<Class | ClassMember>,
+  path: NodePath<Class> | NodePath<ClassMember>,
   opts: UncheckedPluginPass,
   transformerMap: TransformerMap,
   processor: (

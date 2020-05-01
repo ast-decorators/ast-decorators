@@ -1,14 +1,14 @@
 import checkSuitability from '@ast-decorators/utils/lib/checkSuitability';
-import {
-  ASTClassMemberDecorator,
+import type {
+  ASTCallableDecorator,
   ClassMemberProperty,
 } from '@ast-decorators/utils/lib/common';
 import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
-import {NodePath} from '@babel/core';
-import {Decorator, Identifier, PrivateName} from '@babel/types';
+import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
+import type {NodePath} from '@babel/traverse';
+import type {Decorator, Identifier, PrivateName} from '@babel/types';
 import {getter} from './getter';
 import {setter} from './setter';
-import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
 import {
   AccessorInterceptorNode,
   assert,
@@ -16,12 +16,13 @@ import {
   TransformAccessorOptions,
 } from './utils';
 
-export const accessorTransformer = (
-  get?: NodePath<AccessorInterceptorNode>,
-  set?: NodePath<AccessorInterceptorNode>,
-): ASTClassMemberDecorator<TransformAccessorOptions> => (
+export const accessorTransformer: ASTCallableDecorator<
+  [NodePath<AccessorInterceptorNode>?, NodePath<AccessorInterceptorNode>?],
+  TransformAccessorOptions,
+  ClassMemberProperty
+> = (get, set) => (
   klass,
-  member: NodePath<ClassMemberProperty>,
+  member,
   {
     interceptorContext,
     privacy,

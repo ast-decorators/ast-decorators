@@ -1,6 +1,7 @@
 import {
   ASTDecoratorDetector,
   ASTDecoratorTransformer,
+  ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
 import minimatch from 'minimatch';
 import {bindTransformer} from './bind';
@@ -15,10 +16,11 @@ const detector = (
 ): ASTDecoratorDetector => (name: string, path: string): boolean =>
   name === decoratorName && minimatch(path, transformerName);
 
-const transformer: ASTDecoratorTransformer = (
-  _,
-  {transformerPath}: TransformBindOptions = {},
-) => [
+const transformer: ASTDecoratorTransformer<
+  [],
+  TransformBindOptions,
+  ClassMemberMethod
+> = (_, {transformerPath}: TransformBindOptions = {}) => [
   [bindTransformer, detector('bind', transformerPath)] as const,
   [bindAllTransformer, detector('bindAll', transformerPath)] as const,
 ];
