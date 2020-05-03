@@ -1,4 +1,3 @@
-import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import type {
   ASTClassMemberCallableDecorator,
   ClassMember,
@@ -27,11 +26,8 @@ import {
   Identifier,
   isClassMethod,
   isClassPrivateMethod,
-  isClassPrivateProperty,
-  isClassProperty,
   isFunctionExpression,
   isIdentifier,
-  isLiteral,
   isPrivate,
   JSXNamespacedName,
   memberExpression,
@@ -45,7 +41,11 @@ import {
   variableDeclaration,
   variableDeclarator,
 } from '@babel/types';
-import type {AllowedDecorators, TransformDecorateOptions} from './utils';
+import {
+  AllowedDecorators,
+  TransformDecorateOptions,
+  assertDecorate,
+} from './utils';
 
 const capitalize = (msg: string): string =>
   msg.charAt(0).toUpperCase() + msg.slice(1);
@@ -129,7 +129,7 @@ const prepareMethodReplacement = (
   member: ClassMemberMethod,
   hoistedMethodId: Identifier,
 ): ClassMemberMethod => {
-  const {async, computed, decorators, generator, key, static: _static} = member;
+  const {async, computed, decorators, key, static: _static} = member;
 
   const methodArgs = identifier('args');
   const params = [restElement(methodArgs)];
@@ -153,7 +153,6 @@ const prepareMethodReplacement = (
       _static,
     );
     replacement.async = async;
-    replacement.generator = generator;
     replacement.decorators = decorators;
   } else {
     replacement = classMethod(
@@ -163,7 +162,6 @@ const prepareMethodReplacement = (
       body,
       computed,
       _static,
-      generator,
       async,
     );
     replacement.decorators = decorators;
@@ -251,26 +249,7 @@ export const decorateTransformer: ASTClassMemberCallableDecorator<
   TransformDecorateOptions,
   ClassMemberMethod
 > = (decorator, ...args) => (klass, member) => {
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (!decorator) {
-    const methodName = getMemberName(member.node);
-
-    throw new ASTDecoratorsError(
-      `No decorator function provided${
-        methodName !== undefined ? ` for ${methodName}` : ''
-      }`,
-    );
-  }
-
-  if (
-    (isClassProperty(member.node) || isClassPrivateProperty(member.node)) &&
-    (!member.node.value || isLiteral(member.node.value))
-  ) {
-    throw new ASTDecoratorsError(
-      '@decorate can only be applied to class methods or properties with ' +
-        'functions assigned',
-    );
-  }
+  assertDecorate(decorator?.node, member.node);
 
   const [replacement, declarations] = decorate(
     member.node,

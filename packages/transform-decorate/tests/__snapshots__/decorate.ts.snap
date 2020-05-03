@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`@ast-decorators/transform-decorate @decorate compiles for a method with decorator declared in the same file as a regular function 1`] = `
+exports[`@ast-decorators/transform-decorate @decorate decorator types compiles for a method with decorator declared in the same file as a regular function 1`] = `
 "function decorator(fn) {
   return function (...args) {
     const result = fn.apply(this, args);
@@ -21,7 +21,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-decorate @decorate compiles for a method with decorator declared in the same file as an arrow function 1`] = `
+exports[`@ast-decorators/transform-decorate @decorate decorator types compiles for a method with decorator declared in the same file as an arrow function 1`] = `
 "const decorator = fn => function (...args) {
   const result = fn.apply(this, args);
   console.log(result);
@@ -40,7 +40,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-decorate @decorate compiles for a method with decorator imported from an external file 1`] = `
+exports[`@ast-decorators/transform-decorate @decorate decorator types compiles for a method with decorator imported from an external file 1`] = `
 "import { decorator } from './bar';
 
 const _bar = decorator(function (num) {
@@ -55,7 +55,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-decorate @decorate compiles for a method with inline arrow decorator 1`] = `
+exports[`@ast-decorators/transform-decorate @decorate decorator types compiles for a method with inline arrow decorator 1`] = `
 "const _decorateBar = fn => function (...args) {
   const result = fn.apply(this, args);
   console.log(result);
@@ -74,7 +74,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-decorate @decorate compiles for a method with inline regular decorator 1`] = `
+exports[`@ast-decorators/transform-decorate @decorate decorator types compiles for a method with inline regular decorator 1`] = `
 "function _decorateBar(fn) {
   return function (...args) {
     const result = fn.apply(this, args);
@@ -95,7 +95,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-decorate @decorate compiles for a method with multiple decorators 1`] = `
+exports[`@ast-decorators/transform-decorate @decorate decorator types compiles for a method with multiple decorators 1`] = `
 "import { dec1 } from './dec1';
 import { dec2 } from './dec2';
 
@@ -115,7 +115,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-decorate @decorate sends arguments to a decorator function 1`] = `
+exports[`@ast-decorators/transform-decorate @decorate decorator types sends arguments to a decorator function 1`] = `
 "import { decorator } from './decorator';
 
 const _bar = decorator(function (num) {
@@ -127,5 +127,80 @@ class Foo {
     return _bar.apply(this, args);
   }
 
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate method compiles for a generator method 1`] = `
+"import { decorator } from './bar';
+
+const _bar = decorator(function* (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate method compiles for a private generator method 1`] = `
+"import { decorator } from './bar';
+
+const _bar = decorator(function* (num) {
+  return num * num;
+});
+
+class Foo {
+  #bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate method compiles for a private method 1`] = `
+"import { decorator } from './bar';
+
+const _bar = decorator(function (num) {
+  return num * num;
+});
+
+class Foo {
+  #bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate property compiles for a private property 1`] = `
+"import { decorator } from './decorator';
+
+class Foo {
+  #bar = decorator(num => {
+    return num * num;
+  });
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate property compiles for a property defined as a regular function 1`] = `
+"import { decorator } from './decorator';
+
+class Foo {
+  bar = decorator(function (num) {
+    return num * num;
+  });
+}"
+`;
+
+exports[`@ast-decorators/transform-decorate @decorate property compiles for a property defined as an arrow function 1`] = `
+"import { decorator } from './decorator';
+
+class Foo {
+  bar = decorator(num => {
+    return num * num;
+  });
 }"
 `;
