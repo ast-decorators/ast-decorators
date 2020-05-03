@@ -116,39 +116,6 @@ export const createStorage = (
 
 const declarator = template(`const VAR = FUNCTION`);
 
-export const generateInterceptor = (
-  klass: NodePath<Class>,
-  interceptor: AccessorInterceptorNode,
-  type: 'get' | 'set',
-): Identifier => {
-  const isArrow = isArrowFunctionExpression(interceptor);
-  const isRegular = isFunctionExpression(interceptor);
-
-  const accessorId =
-    isArrow || isRegular
-      ? klass.parentPath.scope.generateUidIdentifier(`${type}Interceptor`)
-      : (interceptor as Identifier);
-
-  if (isArrow) {
-    klass.insertBefore(
-      declarator({
-        FUNCTION: interceptor,
-        VAR: accessorId,
-      }),
-    );
-  } else if (isRegular) {
-    klass.insertBefore(
-      functionDeclaration(
-        accessorId,
-        (interceptor as FunctionExpression).params,
-        (interceptor as FunctionExpression).body,
-      ),
-    );
-  }
-
-  return accessorId;
-};
-
 export const createAccessorDecorator = (
   decorator: string,
   interceptor: NodePath<AccessorInterceptorNode> | undefined,
