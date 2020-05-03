@@ -1,0 +1,263 @@
+import type {
+  ASTClassMemberCallableDecorator,
+  ClassMember,
+  ClassMemberMethod,
+  ClassMemberProperty,
+} from '@ast-decorators/utils/lib/common';
+import getMemberName from '@ast-decorators/utils/lib/getMemberName';
+import type {NodePath, Scope} from '@babel/traverse';
+import {
+  ArgumentPlaceholder,
+  ArrowFunctionExpression,
+  blockStatement,
+  callExpression,
+  ClassMethod,
+  classMethod,
+  classPrivateMethod,
+  classPrivateProperty,
+  ClassProperty,
+  classProperty,
+  Expression,
+  functionDeclaration,
+  FunctionDeclaration,
+  functionExpression,
+  FunctionExpression,
+  identifier,
+  Identifier,
+  isClassMethod,
+  isClassPrivateMethod,
+  isFunctionExpression,
+  isIdentifier,
+  isPrivate,
+  JSXNamespacedName,
+  memberExpression,
+  MemberExpression,
+  PrivateName,
+  restElement,
+  returnStatement,
+  SpreadElement,
+  thisExpression,
+  VariableDeclaration,
+  variableDeclaration,
+  variableDeclarator,
+} from '@babel/types';
+import {
+  AllowedWrappers,
+  TransformWrapOptions,
+  assertWrap,
+} from './utils';
+
+const capitalize = (msg: string): string =>
+  msg.charAt(0).toUpperCase() + msg.slice(1);
+
+type PreparedNodes = readonly [
+  Identifier,
+  (FunctionDeclaration | VariableDeclaration)?,
+];
+
+export type TransformedNode = readonly [
+  ClassMember,
+  Array<FunctionDeclaration | VariableDeclaration>,
+];
+
+const prepareWrapperFunction = (
+  originalDecorator:
+    | FunctionExpression
+    | ArrowFunctionExpression
+    | Identifier
+    | MemberExpression,
+  member: ClassMember,
+  scope: Scope,
+): PreparedNodes => {
+  if (isIdentifier(originalDecorator)) {
+    return [originalDecorator];
+  }
+
+  const uid = getMemberName(member)?.toString();
+
+  const functionId = scope.generateUidIdentifier(
+    uid ? `wrap${capitalize(uid)}` : undefined,
+  );
+
+  let declaration: VariableDeclaration | FunctionDeclaration;
+
+  if (isFunctionExpression(originalDecorator)) {
+    const {async, body, generator, params} = originalDecorator;
+
+    declaration = functionDeclaration(
+      functionId,
+      params,
+      body,
+      generator,
+      async,
+    );
+  } else {
+    declaration = variableDeclaration('const', [
+      variableDeclarator(functionId, originalDecorator),
+    ]);
+  }
+
+  return [functionId, declaration];
+};
+const prepareWrappedMethod = (
+  member: ClassMemberMethod,
+  decoratorId: Identifier,
+  args: ReadonlyArray<
+    Expression | SpreadElement | JSXNamespacedName | ArgumentPlaceholder
+  >,
+  scope: Scope,
+): PreparedNodes => {
+  const methodId = scope.generateUidIdentifier(
+    getMemberName(member)?.toString(),
+  );
+  const {async, body, generator, params} = member;
+
+  const declaration = variableDeclaration('const', [
+    variableDeclarator(
+      methodId,
+      callExpression(decoratorId, [
+        functionExpression(null, params, body, generator, async),
+        ...args,
+      ]),
+    ),
+  ]);
+
+  return [methodId, declaration];
+};
+
+const prepareMethodReplacement = (
+  member: ClassMemberMethod,
+  hoistedMethodId: Identifier,
+): ClassMemberMethod => {
+  const {async, computed, decorators, key, static: _static} = member;
+
+  const methodArgs = identifier('args');
+  const params = [restElement(methodArgs)];
+  const body = blockStatement([
+    returnStatement(
+      callExpression(memberExpression(hoistedMethodId, identifier('apply')), [
+        thisExpression(),
+        methodArgs,
+      ]),
+    ),
+  ]);
+
+  let replacement: ClassMemberMethod;
+
+  if (isClassPrivateMethod(member)) {
+    replacement = classPrivateMethod(
+      'method',
+      key as PrivateName,
+      params,
+      body,
+      _static,
+    );
+    replacement.async = async;
+    replacement.decorators = decorators;
+  } else {
+    replacement = classMethod(
+      'method',
+      key as ClassMethod['key'],
+      params,
+      body,
+      computed,
+      _static,
+      async,
+    );
+    replacement.decorators = decorators;
+  }
+
+  return replacement;
+};
+
+const preparePropertyReplacement = (
+  member: ClassMemberProperty,
+  decoratorId: Identifier,
+): ClassMemberProperty => {
+  // @ts-ignore
+  const {computed, decorators, key, static: _static, value} = member;
+
+  const wrappedMember = callExpression(decoratorId, [value!]);
+
+  let property: ClassMemberProperty;
+
+  if (isPrivate(member)) {
+    property = classPrivateProperty(
+      key as PrivateName,
+      wrappedMember,
+      decorators,
+    );
+
+    // @ts-ignore
+    property.static = _static;
+  } else {
+    property = classProperty(
+      key as ClassProperty['key'],
+      wrappedMember,
+      null,
+      decorators,
+      computed,
+      _static,
+    );
+  }
+
+  return property;
+};
+
+export const wrap = (
+  member: ClassMember,
+  decorator: AllowedWrappers,
+  args: ReadonlyArray<
+    Expression | SpreadElement | JSXNamespacedName | ArgumentPlaceholder
+  >,
+  scope: Scope,
+): TransformedNode => {
+  const declarations: Array<FunctionDeclaration | VariableDeclaration> = [];
+
+  const [decoratorId, decoratorDeclaration] = prepareWrapperFunction(
+    decorator,
+    member,
+    scope,
+  );
+
+  if (decoratorDeclaration) {
+    declarations.push(decoratorDeclaration);
+  }
+
+  if (isClassMethod(member) || isClassPrivateMethod(member)) {
+    const [methodId, methodDeclaration] = prepareWrappedMethod(
+      member,
+      decoratorId,
+      args,
+      scope,
+    );
+
+    if (methodDeclaration) {
+      declarations.push(methodDeclaration);
+    }
+
+    return [prepareMethodReplacement(member, methodId), declarations];
+  }
+
+  const property = preparePropertyReplacement(member, decoratorId);
+
+  return [property, declarations];
+};
+
+export const wrapTransformer: ASTClassMemberCallableDecorator<
+  [NodePath<AllowedWrappers>?],
+  TransformWrapOptions,
+  ClassMemberMethod
+> = (wrapper, ...args) => (klass, member) => {
+  assertWrap(wrapper?.node, member.node);
+
+  const [replacement, declarations] = wrap(
+    member.node,
+    wrapper!.node,
+    args.map(({node}) => node),
+    klass.scope,
+  );
+
+  klass.insertBefore(declarations);
+  member.replaceWith(replacement);
+};

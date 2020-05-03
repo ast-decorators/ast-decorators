@@ -1,0 +1,206 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@ast-decorators/transform-wrap @wrap method compiles for a generator method 1`] = `
+"import { wrapper } from './bar';
+
+const _bar = wrapper(function* (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap method compiles for a private generator method 1`] = `
+"import { wrapper } from './bar';
+
+const _bar = wrapper(function* (num) {
+  return num * num;
+});
+
+class Foo {
+  #bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap method compiles for a private method 1`] = `
+"import { wrapper } from './bar';
+
+const _bar = wrapper(function (num) {
+  return num * num;
+});
+
+class Foo {
+  #bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap property compiles for a private property 1`] = `
+"import { wrapper } from './wrapper';
+
+class Foo {
+  #bar = wrapper(num => {
+    return num * num;
+  });
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap property compiles for a property defined as a regular function 1`] = `
+"import { wrapper } from './wrapper';
+
+class Foo {
+  bar = wrapper(function (num) {
+    return num * num;
+  });
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap property compiles for a property defined as an arrow function 1`] = `
+"import { wrapper } from './wrapper';
+
+class Foo {
+  bar = wrapper(num => {
+    return num * num;
+  });
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with inline arrow wrapper 1`] = `
+"const _wrapBar = fn => function (...args) {
+  const result = fn.apply(this, args);
+  console.log(result);
+  return result;
+};
+
+const _bar = _wrapBar(function (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with inline regular wrapper 1`] = `
+"function _wrapBar(fn) {
+  return function (...args) {
+    const result = fn.apply(this, args);
+    console.log(result);
+    return result;
+  };
+}
+
+const _bar = _wrapBar(function (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with multiple wrappers 1`] = `
+"import { dec1 } from './dec1';
+import { dec2 } from './dec2';
+
+const _bar = dec1(function (num) {
+  return num * num;
+});
+
+const _bar2 = dec2(function (...args) {
+  return _bar.apply(this, args);
+});
+
+class Foo {
+  bar(...args) {
+    return _bar2.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with wrapper declared in the same file as a regular function 1`] = `
+"function wrapper(fn) {
+  return function (...args) {
+    const result = fn.apply(this, args);
+    console.log(result);
+    return result;
+  };
+}
+
+const _bar = wrapper(function (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with wrapper declared in the same file as an arrow function 1`] = `
+"const wrapper = fn => function (...args) {
+  const result = fn.apply(this, args);
+  console.log(result);
+  return result;
+};
+
+const _bar = wrapper(function (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with wrapper imported from an external file 1`] = `
+"import { wrapper } from './bar';
+
+const _bar = wrapper(function (num) {
+  return num * num;
+});
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types sends arguments to a wrapper function 1`] = `
+"import { wrapper } from './wrapper';
+
+const _bar = wrapper(function (num) {
+  return num * num;
+}, 'foo', 'bar', 42);
+
+class Foo {
+  bar(...args) {
+    return _bar.apply(this, args);
+  }
+
+}"
+`;
