@@ -13,10 +13,11 @@ import {bind} from './bind';
 import {assertBindAll, TransformBindOptions} from './utils';
 
 export const bindAllTransformer: ASTClassDecorator<TransformBindOptions> = (
-  klass,
   ...args
 ) => {
   assertBindAll(args);
+
+  const [klass] = args;
 
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const members = classBody.get('body') as ReadonlyArray<NodePath<ClassMember>>;
