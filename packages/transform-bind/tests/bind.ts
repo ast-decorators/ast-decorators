@@ -10,21 +10,29 @@ const transformFile = async (
 describe('@ast-decorators/transform-bind', () => {
   describe('@bind', () => {
     it('compiles for regular method', async () => {
-      const {code} = await transformFile('default', commonOptions);
+      const {code} = await transformFile('method-default', commonOptions);
       expect(code).toMatchSnapshot();
     });
 
     it('compiles for private method', async () => {
-      const {code} = await transformFile('private-method', commonOptions);
+      const {code} = await transformFile('method-private', commonOptions);
       expect(code).toMatchSnapshot();
     });
 
     it('compiles for private generator method', async () => {
       const {code} = await transformFile(
-        'private-generator-method',
+        'method-private-generator',
         commonOptions,
       );
       expect(code).toMatchSnapshot();
+    });
+
+    it('fails if decorator applied to something other than method', async () => {
+      await expect(
+        transformFile('failure-no-method', commonOptions),
+      ).rejects.toThrowError(
+        'Applying @bind decorator to something other than method is not allowed',
+      );
     });
   });
 });

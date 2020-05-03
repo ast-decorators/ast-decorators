@@ -18,7 +18,7 @@ import {
   memberExpression,
   thisExpression,
 } from '@babel/types';
-import {assert, TransformBindOptions} from './utils';
+import {assertBind, TransformBindOptions} from './utils';
 
 export type BoundNodes = readonly [
   ClassMember | ClassMember[],
@@ -85,7 +85,7 @@ export const bindTransformer: ASTClassMemberDecorator<
   TransformBindOptions,
   ClassMemberMethod
 > = (klass, member) => {
-  assert('bind', member.node);
+  assertBind(member.node);
 
   const [replacement, declaration] = bind(member.node, klass.scope);
 
