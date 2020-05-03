@@ -6,10 +6,18 @@ export type TransformBindOptions = Readonly<{
   transformerPath?: string;
 }>;
 
-export const assert = (decorator: string, member: ClassMember): void => {
+export const assertBind = (member: ClassMember): void => {
   if (!isClassMethod(member) && !isClassPrivateMethod(member)) {
     throw new ASTDecoratorsError(
-      `Applying @${decorator} decorator to something other than method is not allowed`,
+      `Applying @bind decorator to something other than method is not allowed`,
+    );
+  }
+};
+
+export const assertBindAll = (args: any[]): void => {
+  if (args.length > 0) {
+    throw new ASTDecoratorsError(
+      'Applying @bindAll decorator to something other than class is not allowed',
     );
   }
 };

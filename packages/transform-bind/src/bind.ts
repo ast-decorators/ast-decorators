@@ -3,7 +3,7 @@ import {
   ClassMember,
   ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
-import {NodePath, Scope} from '@babel/traverse';
+import type {Scope} from '@babel/traverse';
 import {
   arrowFunctionExpression,
   callExpression,
@@ -18,7 +18,7 @@ import {
   memberExpression,
   thisExpression,
 } from '@babel/types';
-import {assert, TransformBindOptions} from './utils';
+import {assertBind, TransformBindOptions} from './utils';
 
 export type BoundNodes = readonly [
   ClassMember | ClassMember[],
@@ -81,11 +81,11 @@ const bindRegular = (method: ClassMethod): BoundNodes => {
 export const bind = (method: ClassMemberMethod, scope: Scope): BoundNodes =>
   isPrivate(method) ? bindPrivate(method, scope) : bindRegular(method);
 
-export const bindTransformer: ASTClassMemberDecorator<TransformBindOptions> = (
-  klass,
-  member: NodePath<ClassMemberMethod>,
-) => {
-  assert('bind', member.node);
+export const bindTransformer: ASTClassMemberDecorator<
+  TransformBindOptions,
+  ClassMemberMethod
+> = (klass, member) => {
+  assertBind(member.node);
 
   const [replacement, declaration] = bind(member.node, klass.scope);
 
