@@ -1,6 +1,6 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
-import {
+import type {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
+import type {
   ASTClassMemberDecorator,
   ClassMemberMethod,
   ClassMemberProperty,
@@ -10,7 +10,8 @@ import {
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
 import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
-import {NodePath, template} from '@babel/core';
+import template from '@babel/template';
+import type {NodePath} from '@babel/traverse';
 import {
   ArrowFunctionExpression,
   callExpression,
@@ -115,46 +116,13 @@ export const createStorage = (
 
 const declarator = template(`const VAR = FUNCTION`);
 
-export const generateInterceptor = (
-  klass: NodePath<Class>,
-  interceptor: AccessorInterceptorNode,
-  type: 'get' | 'set',
-): Identifier => {
-  const isArrow = isArrowFunctionExpression(interceptor);
-  const isRegular = isFunctionExpression(interceptor);
-
-  const accessorId =
-    isArrow || isRegular
-      ? klass.parentPath.scope.generateUidIdentifier(`${type}Interceptor`)
-      : (interceptor as Identifier);
-
-  if (isArrow) {
-    klass.insertBefore(
-      declarator({
-        FUNCTION: interceptor,
-        VAR: accessorId,
-      }),
-    );
-  } else if (isRegular) {
-    klass.insertBefore(
-      functionDeclaration(
-        accessorId,
-        (interceptor as FunctionExpression).params,
-        (interceptor as FunctionExpression).body,
-      ),
-    );
-  }
-
-  return accessorId;
-};
-
 export const createAccessorDecorator = (
   decorator: string,
   interceptor: NodePath<AccessorInterceptorNode> | undefined,
   impl: AccessorMethodCreator,
-): ASTClassMemberDecorator<TransformAccessorOptions> => (
+): ASTClassMemberDecorator<TransformAccessorOptions, ClassMemberProperty> => (
   klass: NodePath<Class>,
-  member: NodePath<ClassMemberProperty>,
+  member,
   {
     interceptorContext,
     privacy,

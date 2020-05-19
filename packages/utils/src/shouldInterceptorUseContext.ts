@@ -66,7 +66,7 @@ const shouldInterceptorUseContext = (
     // If the callback is imported, let's use global transformer rules.
 
     const {importSource, originalImportName} = new ImportMetadata(
-      fn as NodePath<MemberExpression | Identifier>,
+      fn as NodePath<MemberExpression> | NodePath<Identifier>,
     );
 
     name = originalImportName;
