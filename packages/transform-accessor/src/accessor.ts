@@ -3,7 +3,7 @@ import type {
   ASTCallableDecorator,
   ClassMemberProperty,
 } from '@ast-decorators/utils/lib/common';
-import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
+import {extractDecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
 import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
 import type {NodePath} from '@babel/traverse';
 import type {Decorator, Identifier, PrivateName} from '@babel/types';
@@ -58,7 +58,9 @@ export const accessorTransformer: ASTCallableDecorator<
   );
 
   const bothAccessorsDecorators = decorators?.filter(decorator => {
-    const {importSource, originalImportName} = new DecoratorMetadata(decorator);
+    const {importSource, originalImportName} = extractDecoratorMetadata(
+      decorator,
+    );
 
     return !checkSuitability(
       {

@@ -12,11 +12,11 @@ import {
   StringLiteral,
 } from '@babel/types';
 import {parseToAST as _parseToAST} from '../../../utils/testing';
-import {DecoratorMetadata, ImportMetadata} from '../src/metadata';
-import options from './fixtures/DecoratorMetadata/options';
+import {extractDecoratorMetadata, extractImportMetadata} from '../src/metadata';
+import options from './fixtures/extractDecoratorMetadata/options';
 
 const parseToAST = async (fixture: string): ReturnType<typeof _parseToAST> =>
-  _parseToAST(__dirname, 'DecoratorMetadata', fixture, options);
+  _parseToAST(__dirname, 'extractDecoratorMetadata', fixture, options);
 
 describe('@ast-decorators/utils', () => {
   describe('ImportMetadata', () => {
@@ -41,7 +41,7 @@ describe('@ast-decorators/utils', () => {
 
     it('provides metadata for imported element', async () => {
       await run('default', callee => {
-        const metadata = new ImportMetadata(callee);
+        const metadata = extractImportMetadata(callee);
 
         expect(metadata.binding).toBe(
           callee.parentPath.scope.getBinding('bar'),
@@ -61,7 +61,7 @@ describe('@ast-decorators/utils', () => {
 
     it('provides metadata for element that is a part of member expression', async () => {
       await run('member', callee => {
-        const metadata = new ImportMetadata(callee);
+        const metadata = extractImportMetadata(callee);
 
         expect(metadata.binding).toBe(
           callee.parentPath.scope.getBinding('fns'),
@@ -80,7 +80,7 @@ describe('@ast-decorators/utils', () => {
 
     it('removes binding for an element', async () => {
       await run('default', callee => {
-        const metadata = new ImportMetadata(callee);
+        const metadata = extractImportMetadata(callee);
 
         const importDeclaration = metadata.importSpecifier!
           .parentPath as NodePath<ImportDeclaration>;
@@ -98,7 +98,7 @@ describe('@ast-decorators/utils', () => {
           return;
         }
 
-        const metadata = new ImportMetadata(callee);
+        const metadata = extractImportMetadata(callee);
 
         const importDeclaration = metadata.importSpecifier!
           .parentPath as NodePath<ImportDeclaration>;
@@ -118,7 +118,7 @@ describe('@ast-decorators/utils', () => {
     describe('originalImportName', () => {
       it('gets "default" as an original name if import is default', async () => {
         await run('import-default', callee => {
-          const metadata = new ImportMetadata(callee);
+          const metadata = extractImportMetadata(callee);
 
           expect(metadata.originalImportName).toBe('default');
         });
@@ -126,7 +126,7 @@ describe('@ast-decorators/utils', () => {
 
       it("gets an element's name if import is namespace", async () => {
         await run('import-namespace', callee => {
-          const metadata = new ImportMetadata(callee);
+          const metadata = extractImportMetadata(callee);
 
           expect(metadata.originalImportName).toBe('foo');
         });
@@ -134,7 +134,7 @@ describe('@ast-decorators/utils', () => {
 
       it('gets an imported name as an original name if import element is re-named', async () => {
         await run('import-named', callee => {
-          const metadata = new ImportMetadata(callee);
+          const metadata = extractImportMetadata(callee);
 
           expect(metadata.originalImportName).toBe('foo');
         });
@@ -161,7 +161,7 @@ describe('@ast-decorators/utils', () => {
 
     it('provides metadata for decorator without args', async () => {
       await run('without-args', decorator => {
-        const metadata = new DecoratorMetadata(decorator);
+        const metadata = extractDecoratorMetadata(decorator);
 
         expect(metadata.args).toEqual([]);
         expect(metadata.isCall).not.toBeTruthy();
@@ -170,7 +170,7 @@ describe('@ast-decorators/utils', () => {
 
     it('provides metadata for decorator with args', async () => {
       await run('with-args', decorator => {
-        const metadata = new DecoratorMetadata(decorator);
+        const metadata = extractDecoratorMetadata(decorator);
 
         expect(metadata.args.length).toBe(1);
 
@@ -185,7 +185,7 @@ describe('@ast-decorators/utils', () => {
 
     it('removes decorator', async () => {
       await run('without-args', decorator => {
-        const metadata = new DecoratorMetadata(decorator);
+        const metadata = extractDecoratorMetadata(decorator);
 
         metadata.remove();
         expect(decorator.node).toBeNull();

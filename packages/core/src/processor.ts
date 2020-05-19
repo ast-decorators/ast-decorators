@@ -6,7 +6,10 @@ import type {
   ClassMember,
   PluginPass,
 } from '@ast-decorators/utils/lib/common';
-import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
+import {
+  DecoratorMetadata,
+  extractDecoratorMetadata,
+} from '@ast-decorators/utils/lib/metadata';
 import type {NodePath} from '@babel/traverse';
 import {
   Class,
@@ -72,7 +75,7 @@ const processDecorator = (
   transformerMap: TransformerMap,
   options: PluginPass,
 ): void => {
-  const metadata = new DecoratorMetadata(decorator);
+  const metadata = extractDecoratorMetadata(decorator);
 
   const data = {
     args: {
