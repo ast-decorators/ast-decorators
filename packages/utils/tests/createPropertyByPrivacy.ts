@@ -1,24 +1,30 @@
-import {compare as _compare} from '../../../utils/testing';
+import {transformFile as _transformFile} from '../../../utils/testing';
 
-const compare = async (fixture: string): Promise<void> =>
-  _compare(__dirname, 'createPropertyByPrivacy', fixture);
+const transformFile = async (
+  fixture: string,
+): ReturnType<typeof _transformFile> =>
+  _transformFile(__dirname, 'createPropertyByPrivacy', fixture);
 
 describe('@ast-decorators/utils', () => {
   describe('createPropertyByPrivacy', () => {
     it('creates property when compiles with hard privacy option', async () => {
-      await compare('hard');
+      const {code} = await transformFile('hard');
+      expect(code).toMatchSnapshot();
     });
 
     it('creates property when compiles with soft privacy option', async () => {
-      await compare('soft');
+      const {code} = await transformFile('soft');
+      expect(code).toMatchSnapshot();
     });
 
     it('creates property when compiles with none privacy option', async () => {
-      await compare('none');
+      const {code} = await transformFile('none');
+      expect(code).toMatchSnapshot();
     });
 
     it('creates static property', async () => {
-      await compare('static');
+      const {code} = await transformFile('static');
+      expect(code).toMatchSnapshot();
     });
   });
 });

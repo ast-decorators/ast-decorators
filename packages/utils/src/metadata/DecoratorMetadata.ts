@@ -1,6 +1,6 @@
 // TODO: remove eslint-disable when typescript-eslint can handle TS 3.8 properly
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
-import {NodePath} from '@babel/core';
+import {NodePath} from '@babel/traverse';
 import {
   Decorator,
   Identifier,
@@ -19,19 +19,19 @@ export default class DecoratorMetadata extends ImportMetadata {
     const expression = decorator.get('expression');
     const isCall = isCallExpression(expression);
 
-    let memberOrIdentifier: NodePath<MemberExpression | Identifier>;
+    let memberOrIdentifier: NodePath<MemberExpression> | NodePath<Identifier>;
     let args: readonly NodePath[];
 
     if (isCall) {
       args = expression.get('arguments') as readonly NodePath[];
-      memberOrIdentifier = expression.get('callee') as NodePath<
-        MemberExpression | Identifier
-      >;
+      memberOrIdentifier = expression.get('callee') as
+        | NodePath<MemberExpression>
+        | NodePath<Identifier>;
     } else {
       args = [];
-      memberOrIdentifier = expression as NodePath<
-        MemberExpression | Identifier
-      >;
+      memberOrIdentifier = expression as
+        | NodePath<MemberExpression>
+        | NodePath<Identifier>;
     }
 
     super(memberOrIdentifier);

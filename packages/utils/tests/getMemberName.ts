@@ -1,131 +1,68 @@
-/* eslint-disable capitalized-comments */
-import {
-  binaryExpression,
-  blockStatement,
-  classMethod,
-  classPrivateMethod,
-  classPrivateProperty,
-  classProperty,
-  conditionalExpression,
-  identifier,
-  numericLiteral,
-  privateName,
-  stringLiteral,
-} from '@babel/types';
+import {parseToAST as _parseToAST} from '../../../utils/testing';
+import {ClassMember} from '../src/common';
 import getMemberName from '../src/getMemberName';
+import {NodePath, traverse} from '@babel/core';
+import options from './fixtures/getMemberName/options';
+
+const parseToAST = async (fixture: string): ReturnType<typeof _parseToAST> =>
+  _parseToAST(__dirname, 'getMemberName', fixture, options);
+
+const run = async (
+  fixture: string,
+  callback: (member: ClassMember) => void,
+): Promise<void> => {
+  const ast = await parseToAST(fixture);
+
+  await new Promise(resolve => {
+    traverse(ast!, {
+      // @ts-ignore
+      'ClassProperty|ClassPrivateProperty|ClassMethod|ClassPrivateMethod'(
+        path: NodePath<ClassMember>,
+      ) {
+        // eslint-disable-next-line callback-return
+        callback(path.node);
+        resolve();
+      },
+    });
+  });
+};
 
 describe('@ast-decorators/utils', () => {
   describe('getMemberName', () => {
-    it('gets name for regular class property', () => {
-      const name = 'foo';
-
-      /*
-       * class Bar {
-       *  foo = 10;
-       * }
-       */
-      const prop = classProperty(identifier(name), numericLiteral(10));
-
-      expect(getMemberName(prop)).toBe(name);
+    it('gets a name for a regular property', async () => {
+      await run('regular-property', member => {
+        expect(getMemberName(member)).toBe('bar');
+      });
     });
 
-    it('gets name for class method', () => {
-      const name = 'foo';
-
-      /*
-       * class Bar {
-       *  foo() {}
-       * }
-       */
-      const method = classMethod(
-        'method',
-        identifier(name),
-        [],
-        blockStatement([]),
-      );
-
-      expect(getMemberName(method)).toBe(name);
+    it('gets a name for a private property', async () => {
+      await run('private-property', member => {
+        expect(getMemberName(member)).toBe('bar');
+      });
     });
 
-    it('gets name if property is a computed string literal', () => {
-      const name = 'foo';
-
-      /*
-       * class Bar {
-       *  'foo' = 10;
-       * }
-       */
-      const prop = classProperty(stringLiteral(name), numericLiteral(10));
-
-      expect(getMemberName(prop)).toBe(name);
+    it('gets a name for a computed property', async () => {
+      await run('computed-property', member => {
+        expect(getMemberName(member)).toBe('bar');
+      });
     });
 
-    it('gets name if property is a numeric literal', () => {
-      const name = 42;
-
-      /*
-       * class Bar {
-       *  42 = 10;
-       * }
-       */
-      const prop = classProperty(numericLiteral(name), numericLiteral(10));
-
-      expect(getMemberName(prop)).toBe(name);
+    it('gets a name for a string literal property', async () => {
+      await run('string-literal-property', member => {
+        expect(getMemberName(member)).toBe('str-bar');
+      });
     });
 
-    it('gets name if member is a private property', () => {
-      const name = 'foo';
-
-      /*
-       * class Bar {
-       *  #foo = 10;
-       * }
-       */
-      const prop = classPrivateProperty(
-        privateName(identifier(name)),
-        numericLiteral(10),
-      );
-
-      expect(getMemberName(prop)).toBe(name);
+    it('gets a name for a numeric literal property', async () => {
+      await run('numeric-literal-property', member => {
+        expect(getMemberName(member)).toBe(42);
+      });
     });
 
-    it('gets name if member is a private method', () => {
-      const name = 'foo';
-
-      /*
-       * class Bar {
-       *  #foo() {}
-       * }
-       */
-      const prop = classPrivateMethod(
-        'method',
-        privateName(identifier(name)),
-        [],
-        blockStatement([]),
-      );
-
-      expect(getMemberName(prop)).toBe(name);
-    });
-
-    it('gets undefined if member has computed expression name', () => {
-      /*
-       * class Bar {
-       *  [foo > 0 ? 'baz' : 42] = 10
-       * }
-       */
-      const prop = classProperty(
-        conditionalExpression(
-          binaryExpression('>', identifier('foo'), numericLiteral(0)),
-          stringLiteral('baz'),
-          numericLiteral(42),
-        ),
-        numericLiteral(10),
-        null,
-        null,
-        true,
-      );
-
-      expect(getMemberName(prop)).toBeUndefined();
+    it('gets null for a property which key is an expression', async () => {
+      await run('expression-property', member => {
+        expect(getMemberName(member)).toBeUndefined();
+      });
     });
   });
 });

@@ -1,27 +1,28 @@
 import checkSuitability from '@ast-decorators/utils/lib/checkSuitability';
-import {
-  ASTClassMemberDecorator,
+import type {
+  ASTCallableDecorator,
   ClassMemberProperty,
 } from '@ast-decorators/utils/lib/common';
 import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
-import {NodePath} from '@babel/core';
-import {Decorator, Identifier, PrivateName} from '@babel/types';
-import {createGetterMethod} from './getter';
-import {createSetterMethod} from './setter';
-import shouldUseContext from './utils/context';
+import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
+import type {NodePath} from '@babel/traverse';
+import type {Decorator, Identifier, PrivateName} from '@babel/types';
+import {getter} from './getter';
+import {setter} from './setter';
 import {
   AccessorInterceptorNode,
   assert,
   createStorage,
   TransformAccessorOptions,
-} from './utils/misc';
+} from './utils';
 
-const accessor = (
-  get?: NodePath<AccessorInterceptorNode>,
-  set?: NodePath<AccessorInterceptorNode>,
-): ASTClassMemberDecorator<TransformAccessorOptions> => (
+export const accessorTransformer: ASTCallableDecorator<
+  [NodePath<AccessorInterceptorNode>?, NodePath<AccessorInterceptorNode>?],
+  TransformAccessorOptions,
+  ClassMemberProperty
+> = (get, set) => (
   klass,
-  member: NodePath<ClassMemberProperty>,
+  member,
   {
     interceptorContext,
     privacy,
@@ -40,7 +41,7 @@ const accessor = (
   const useClassName = !!member.node.static && !!useClassNameForStatic;
 
   const storage = createStorage(klass, member, privacy);
-  const getter = createGetterMethod(
+  const [getMethod, getterDeclarations] = getter(
     klass,
     member,
     get,
@@ -48,7 +49,11 @@ const accessor = (
     {
       preservingDecorators: decorators?.map(({node}) => node) ?? null,
       useClassName,
-      useContext: shouldUseContext(get, interceptorContext, filename),
+      useContext: shouldInterceptorUseContext(
+        get,
+        interceptorContext,
+        filename,
+      ),
     },
   );
 
@@ -65,7 +70,7 @@ const accessor = (
     );
   });
 
-  const setter = createSetterMethod(
+  const [setMethod, setterDeclarations] = setter(
     klass,
     member,
     set,
@@ -74,11 +79,14 @@ const accessor = (
       preservingDecorators:
         bothAccessorsDecorators?.map(({node}) => node) ?? null,
       useClassName,
-      useContext: shouldUseContext(set, interceptorContext, filename),
+      useContext: shouldInterceptorUseContext(
+        set,
+        interceptorContext,
+        filename,
+      ),
     },
   );
 
-  member.replaceWithMultiple([storage, getter, setter]);
+  klass.insertBefore([...getterDeclarations, ...setterDeclarations]);
+  member.replaceWithMultiple([storage, getMethod, setMethod]);
 };
-
-export default accessor;

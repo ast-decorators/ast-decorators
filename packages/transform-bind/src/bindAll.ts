@@ -1,22 +1,46 @@
-import {
-  ASTClassMemberDecorator,
+import type {
+  ASTClassDecorator,
   ClassMember,
-  ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
-import {NodePath} from '@babel/core';
-import {ClassBody, isClassMethod, isClassPrivateMethod} from '@babel/types';
-import {applyBinding, TransformBindOptions} from './utils';
+import type {NodePath} from '@babel/core';
+import {
+  ClassBody,
+  FunctionDeclaration,
+  isClassMethod,
+  isClassPrivateMethod,
+} from '@babel/types';
+import {bind} from './bind';
+import {assertBindAll, TransformBindOptions} from './utils';
 
-const bindAll: ASTClassMemberDecorator<TransformBindOptions> = klass => {
+export const bindAllTransformer: ASTClassDecorator<TransformBindOptions> = (
+  ...args
+) => {
+  assertBindAll(args);
+
+  const [klass] = args;
+
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const members = classBody.get('body') as ReadonlyArray<NodePath<ClassMember>>;
 
-  applyBinding(
-    klass,
-    members.filter(
-      member => isClassMethod(member) || isClassPrivateMethod(member),
-    ) as ReadonlyArray<NodePath<ClassMemberMethod>>,
-  );
-};
+  for (const member of members) {
+    const {node} = member;
 
-export default bindAll;
+    const declarations: FunctionDeclaration[] = [];
+
+    if (isClassMethod(node) || isClassPrivateMethod(node)) {
+      const [replacement, declaration] = bind(node, klass.scope);
+
+      if (declaration) {
+        declarations.push(declaration);
+      }
+
+      if (Array.isArray(replacement)) {
+        member.replaceWithMultiple(replacement);
+      } else {
+        member.replaceWith(replacement);
+      }
+    }
+
+    klass.insertBefore(declarations);
+  }
+};

@@ -1,56 +1,68 @@
-import {
+import type {
   ASTClassMemberCallableDecorator,
-  ClassMemberMethod,
+  ClassMemberProperty,
 } from '@ast-decorators/utils/lib/common';
-import {NodePath} from '@babel/core';
+import type {NodePath} from '@babel/traverse';
 import {
   assignmentExpression,
   blockStatement,
+  CallExpression,
   ClassBody,
   classMethod,
   classPrivateMethod,
   Decorator,
   expressionStatement,
+  FunctionDeclaration,
   Identifier,
   isClassPrivateProperty,
   memberExpression,
   NumericLiteral,
   PrivateName,
   StringLiteral,
+  VariableDeclaration,
 } from '@babel/types';
 import {
   AccessorInterceptorNode,
   AccessorMethodCreator,
   createAccessorDecorator,
-  injectInterceptor,
   ownerNode,
-} from './utils/misc';
+  prepareInterceptor,
+  TransformAccessorOptions,
+} from './utils';
 
-export const createSetterMethod: AccessorMethodCreator = (
+export const setter: AccessorMethodCreator = (
   klass,
   member,
   interceptor,
   storageProperty,
   {preservingDecorators, useClassName, useContext},
-): ClassMemberMethod => {
+) => {
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const valueId = classBody.scope.generateUidIdentifier('value');
+
+  let statement: CallExpression | Identifier;
+  let declarations: Array<FunctionDeclaration | VariableDeclaration>;
+
+  if (interceptor) {
+    [statement, declarations] = prepareInterceptor(
+      klass,
+      interceptor.node,
+      valueId,
+      'set',
+      useContext,
+      useClassName,
+    );
+  } else {
+    statement = valueId;
+    declarations = [];
+  }
 
   const body = blockStatement([
     expressionStatement(
       assignmentExpression(
         '=',
         memberExpression(ownerNode(klass, useClassName), storageProperty),
-        interceptor
-          ? injectInterceptor(
-              klass,
-              interceptor.node,
-              valueId,
-              'set',
-              useContext,
-              useClassName,
-            )
-          : valueId,
+        statement,
       ),
     ),
   ]);
@@ -71,11 +83,11 @@ export const createSetterMethod: AccessorMethodCreator = (
 
   method.decorators = preservingDecorators as Decorator[];
 
-  return method;
+  return [method, declarations];
 };
 
-const setter: ASTClassMemberCallableDecorator = (
-  set?: NodePath<AccessorInterceptorNode>,
-) => createAccessorDecorator('setter', set, createSetterMethod);
-
-export default setter;
+export const setterTransformer: ASTClassMemberCallableDecorator<
+  [NodePath<AccessorInterceptorNode>?],
+  TransformAccessorOptions,
+  ClassMemberProperty
+> = set => createAccessorDecorator('setter', set, setter);

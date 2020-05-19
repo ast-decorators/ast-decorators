@@ -1,16 +1,101 @@
-import {
+import type {
   ASTClassMemberDecorator,
+  ClassMember,
   ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
-import {applyBinding, TransformBindOptions, assert} from './utils';
-import {NodePath} from '@babel/core';
+import type {Scope} from '@babel/traverse';
+import {
+  arrowFunctionExpression,
+  callExpression,
+  ClassMethod,
+  ClassPrivateMethod,
+  classPrivateProperty,
+  classProperty,
+  FunctionDeclaration,
+  functionDeclaration,
+  identifier,
+  isPrivate,
+  memberExpression,
+  thisExpression,
+} from '@babel/types';
+import {assertBind, TransformBindOptions} from './utils';
 
-const bind: ASTClassMemberDecorator<TransformBindOptions> = (
-  klass,
-  member: NodePath<ClassMemberMethod>,
-) => {
-  assert('bind', member.node);
-  applyBinding(klass, [member]);
+export type BoundNodes = readonly [
+  ClassMember | ClassMember[],
+  FunctionDeclaration?,
+];
+
+const bindPrivate = (method: ClassPrivateMethod, scope: Scope): BoundNodes => {
+  const {async, body, decorators, generator, key, params} = method;
+
+  if (generator) {
+    const functionId = scope.generateUidIdentifier(key.id.name);
+
+    return [
+      classPrivateProperty(
+        key,
+        callExpression(memberExpression(functionId, identifier('bind')), [
+          thisExpression(),
+        ]),
+        decorators,
+      ),
+      functionDeclaration(functionId, params, body, generator, async),
+    ];
+  }
+
+  return [
+    classPrivateProperty(
+      key,
+      arrowFunctionExpression(params, body, async),
+      decorators,
+    ),
+  ];
 };
 
-export default bind;
+const bindRegular = (method: ClassMethod): BoundNodes => {
+  const {computed, decorators, key, static: _static} = method;
+
+  const bindingExpression = callExpression(
+    memberExpression(
+      memberExpression(thisExpression(), key),
+      identifier('bind'),
+    ),
+    [thisExpression()],
+  );
+
+  return [
+    [
+      classProperty(
+        key,
+        bindingExpression,
+        null,
+        decorators,
+        computed,
+        _static,
+      ),
+      method,
+    ],
+  ];
+};
+
+export const bind = (method: ClassMemberMethod, scope: Scope): BoundNodes =>
+  isPrivate(method) ? bindPrivate(method, scope) : bindRegular(method);
+
+export const bindTransformer: ASTClassMemberDecorator<
+  TransformBindOptions,
+  ClassMemberMethod
+> = (klass, member) => {
+  assertBind(member.node);
+
+  const [replacement, declaration] = bind(member.node, klass.scope);
+
+  if (declaration) {
+    klass.insertBefore(declaration);
+  }
+
+  if (Array.isArray(replacement)) {
+    member.replaceWithMultiple(replacement);
+  } else {
+    member.replaceWith(replacement);
+  }
+};

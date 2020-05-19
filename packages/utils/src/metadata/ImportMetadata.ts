@@ -1,7 +1,6 @@
 // TODO: remove eslint-disable when typescript-eslint can handle TS 3.8 properly
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */
-import {NodePath} from '@babel/core';
-import {Binding} from '@babel/traverse';
+import type {NodePath, Binding} from '@babel/traverse';
 import {
   Identifier,
   ImportDeclaration,
@@ -21,7 +20,7 @@ export default class ImportMetadata {
   readonly #object?: NodePath<Identifier>;
 
   public constructor(
-    memberOrIdentifier: NodePath<MemberExpression | Identifier>,
+    memberOrIdentifier: NodePath<MemberExpression> | NodePath<Identifier>,
   ) {
     if (isMemberExpression(memberOrIdentifier)) {
       this.#object = memberOrIdentifier.get('object') as NodePath<Identifier>;

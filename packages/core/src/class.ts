@@ -1,8 +1,8 @@
-import {PluginPass} from '@ast-decorators/utils/lib/common';
-import {NodePath} from '@babel/core';
-import {Class, Decorator} from '@babel/types';
+import type {PluginPass} from '@ast-decorators/utils/lib/common';
+import type {NodePath} from '@babel/traverse';
+import type {Class, Decorator} from '@babel/types';
 import processDecorator from './processor';
-import {TransformerMap} from './utils';
+import type {TransformerMap} from './utils';
 
 const processClassDecorator = (
   decorator: NodePath<Decorator>,

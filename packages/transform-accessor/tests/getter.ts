@@ -1,14 +1,6 @@
+import {transformFile as _transformFile} from '../../../utils/testing';
 import {getter} from '../src';
-import {
-  compare as _compare,
-  transformFile as _transformFile,
-} from '../../../utils/testing';
 import commonOptions from './fixtures/options';
-
-const compare = async (
-  fixture: string,
-  options?: string | object,
-): Promise<void> => _compare(__dirname, 'getter', fixture, options);
 
 const transformFile = async (
   fixture: string,
@@ -19,31 +11,38 @@ const transformFile = async (
 describe('@ast-decorators/transform-accessor', () => {
   describe('@getter', () => {
     it('compiles without interceptor', async () => {
-      await compare('default', commonOptions);
+      const {code} = await transformFile('default', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles for private property', async () => {
-      await compare('private-property', commonOptions);
+      const {code} = await transformFile('private-property', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles for property with assignment', async () => {
-      await compare('property-assigning', commonOptions);
+      const {code} = await transformFile('property-assigning', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles for computed property', async () => {
-      await compare('computed-property', commonOptions);
+      const {code} = await transformFile('computed-property', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles for static property', async () => {
-      await compare('static-property', commonOptions);
+      const {code} = await transformFile('static-property', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('uses class name instead of this for static property', async () => {
-      await compare('static-property-class-name');
+      const {code} = await transformFile('static-property-class-name');
+      expect(code).toMatchSnapshot();
     });
 
     it('uses this for static property if class name is absent', async () => {
-      await compare('static-property-no-class-name');
+      const {code} = await transformFile('static-property-no-class-name');
+      expect(code).toMatchSnapshot();
     });
 
     it('fails if applied to something else than property', async () => {
@@ -72,39 +71,66 @@ describe('@ast-decorators/transform-accessor', () => {
 
     describe('context', () => {
       it('omitted for inline arrow function interceptor', async () => {
-        await compare('context-inline-arrow', commonOptions);
+        const {code} = await transformFile(
+          'context-inline-arrow',
+          commonOptions,
+        );
+        expect(code).toMatchSnapshot();
       });
 
       it('added for inline regular function interceptor', async () => {
-        await compare('context-inline-regular', commonOptions);
+        const {code} = await transformFile(
+          'context-inline-regular',
+          commonOptions,
+        );
+        expect(code).toMatchSnapshot();
       });
 
       it('omitted for in-file arrow function interceptor', async () => {
-        await compare('context-within-arrow', commonOptions);
+        const {code} = await transformFile(
+          'context-within-arrow',
+          commonOptions,
+        );
+        expect(code).toMatchSnapshot();
       });
 
       it('added for in-file regular function interceptor (expression)', async () => {
-        await compare('context-within-regular', commonOptions);
+        const {code} = await transformFile(
+          'context-within-regular',
+          commonOptions,
+        );
+        expect(code).toMatchSnapshot();
       });
 
       it('added for in-file regular function interceptor (declaration)', async () => {
-        await compare('context-within-declaration', commonOptions);
+        const {code} = await transformFile(
+          'context-within-declaration',
+          commonOptions,
+        );
+        expect(code).toMatchSnapshot();
       });
 
       it('added for imported interceptor by default', async () => {
-        await compare('context-import-default', commonOptions);
+        const {code} = await transformFile(
+          'context-import-default',
+          commonOptions,
+        );
+        expect(code).toMatchSnapshot();
       });
 
       it('omitted for imported interceptor if "disableByDefault" is set', async () => {
-        await compare('context-import-disabled');
+        const {code} = await transformFile('context-import-disabled');
+        expect(code).toMatchSnapshot();
       });
 
       it('omitted for imported interceptor if it fits "exclude" options', async () => {
-        await compare('context-import-ignored');
+        const {code} = await transformFile('context-import-ignored');
+        expect(code).toMatchSnapshot();
       });
 
       it('added for imported interceptor if it fits "exclude" options and "disableByDefault" is set', async () => {
-        await compare('context-import-disabled-ignored');
+        const {code} = await transformFile('context-import-disabled-ignored');
+        expect(code).toMatchSnapshot();
       });
 
       it('fails if in-file interceptor is not a function', async () => {

@@ -1,13 +1,5 @@
-import {
-  compare as _compare,
-  transformFile as _transformFile,
-} from '../../../utils/testing';
+import {transformFile as _transformFile} from '../../../utils/testing';
 import commonOptions from './fixtures/class/options';
-
-const compare = async (
-  fixture: string,
-  options?: string | object,
-): Promise<void> => _compare(__dirname, 'class', fixture, options);
 
 const transformFile = async (
   fixture: string,
@@ -18,27 +10,33 @@ const transformFile = async (
 describe('@ast-decorators/core', () => {
   describe('class', () => {
     it('compiles decorator for a class', async () => {
-      await compare('default');
+      const {code} = await transformFile('default');
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles multiple decorators for a class', async () => {
-      await compare('multiple-decorators', commonOptions);
+      const {code} = await transformFile('multiple-decorators', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles decorators imported as namespace', async () => {
-      await compare('namespace', commonOptions);
+      const {code} = await transformFile('namespace', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles renamed decorators', async () => {
-      await compare('rename', commonOptions);
+      const {code} = await transformFile('rename', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('compiles decorators with params', async () => {
-      await compare('params');
+      const {code} = await transformFile('params');
+      expect(code).toMatchSnapshot();
     });
 
     it('ignores other decorators', async () => {
-      await compare('other-decorators', commonOptions);
+      const {code} = await transformFile('other-decorators', commonOptions);
+      expect(code).toMatchSnapshot();
     });
 
     it('throws an error if decorator is not declared', async () => {

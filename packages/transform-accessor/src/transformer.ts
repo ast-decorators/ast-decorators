@@ -1,12 +1,14 @@
-import {
+import type {
   ASTDecoratorDetector,
   ASTDecoratorTransformer,
+  ClassMemberProperty,
 } from '@ast-decorators/utils/lib/common';
+import type {NodePath} from '@babel/traverse';
 import minimatch from 'minimatch';
-import accessor from './accessor';
-import getter from './getter';
-import setter from './setter';
-import {TransformAccessorOptions} from './utils/misc';
+import {accessorTransformer} from './accessor';
+import {getterTransformer} from './getter';
+import {setterTransformer} from './setter';
+import type {AccessorInterceptorNode, TransformAccessorOptions} from './utils';
 
 export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
 
@@ -16,13 +18,15 @@ const detector = (
 ): ASTDecoratorDetector => (name: string, path: string): boolean =>
   name === decoratorName && minimatch(path, transformerName);
 
-const transformer: ASTDecoratorTransformer = (
-  _,
-  {transformerPath}: TransformAccessorOptions = {},
-) => [
-  [accessor, detector('accessor', transformerPath)] as const,
-  [getter, detector('getter', transformerPath)] as const,
-  [setter, detector('setter', transformerPath)] as const,
+const transformer: ASTDecoratorTransformer<
+  | [NodePath<AccessorInterceptorNode>?, NodePath<AccessorInterceptorNode>?]
+  | [NodePath<AccessorInterceptorNode>?],
+  TransformAccessorOptions,
+  ClassMemberProperty
+> = (_, {transformerPath}: TransformAccessorOptions = {}) => [
+  [accessorTransformer, detector('accessor', transformerPath)] as const,
+  [getterTransformer, detector('getter', transformerPath)] as const,
+  [setterTransformer, detector('setter', transformerPath)] as const,
 ];
 
 export default transformer;

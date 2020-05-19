@@ -1,6 +1,6 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
-import {
+import type {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
+import type {
   ASTClassMemberDecorator,
   ClassMemberMethod,
   ClassMemberProperty,
@@ -9,7 +9,9 @@ import {
 } from '@ast-decorators/utils/lib/common';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
-import {NodePath, template} from '@babel/core';
+import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
+import template from '@babel/template';
+import type {NodePath} from '@babel/traverse';
 import {
   ArrowFunctionExpression,
   callExpression,
@@ -17,6 +19,7 @@ import {
   Class,
   cloneNode,
   Decorator,
+  FunctionDeclaration,
   functionDeclaration,
   FunctionExpression,
   identifier,
@@ -32,8 +35,13 @@ import {
   PrivateName,
   ThisExpression,
   thisExpression,
+  VariableDeclaration,
 } from '@babel/types';
-import shouldUseContext from './context';
+
+export type TransformedNode = readonly [
+  ClassMemberMethod,
+  Array<FunctionDeclaration | VariableDeclaration>,
+];
 
 export type TransformAccessorOptions = Readonly<{
   interceptorContext?: InterceptorContext;
@@ -67,7 +75,7 @@ export type AccessorMethodCreator = (
   accessor: NodePath<AccessorInterceptorNode> | undefined,
   storage: Identifier | PrivateName,
   options: AccessorMethodCreatorOptions,
-) => ClassMemberMethod;
+) => TransformedNode;
 
 export const assert = (
   decorator: string,
@@ -100,7 +108,7 @@ export const createStorage = (
   member: NodePath<ClassMemberProperty>,
   privacy: PrivacyType = 'hard',
 ): ClassMemberProperty =>
-  createPropertyByPrivacy(privacy, String(getMemberName(member.node)), klass, {
+  createPropertyByPrivacy(privacy, getMemberName(member.node), klass, {
     // @ts-ignore
     static: member.node.static,
     value: member.node.value,
@@ -108,46 +116,13 @@ export const createStorage = (
 
 const declarator = template(`const VAR = FUNCTION`);
 
-export const generateInterceptor = (
-  klass: NodePath<Class>,
-  interceptor: AccessorInterceptorNode,
-  type: 'get' | 'set',
-): Identifier => {
-  const isArrow = isArrowFunctionExpression(interceptor);
-  const isRegular = isFunctionExpression(interceptor);
-
-  const accessorId =
-    isArrow || isRegular
-      ? klass.parentPath.scope.generateUidIdentifier(`${type}Interceptor`)
-      : (interceptor as Identifier);
-
-  if (isArrow) {
-    klass.insertBefore(
-      declarator({
-        FUNCTION: interceptor,
-        VAR: accessorId,
-      }),
-    );
-  } else if (isRegular) {
-    klass.insertBefore(
-      functionDeclaration(
-        accessorId,
-        (interceptor as FunctionExpression).params,
-        (interceptor as FunctionExpression).body,
-      ),
-    );
-  }
-
-  return accessorId;
-};
-
 export const createAccessorDecorator = (
   decorator: string,
   interceptor: NodePath<AccessorInterceptorNode> | undefined,
   impl: AccessorMethodCreator,
-): ASTClassMemberDecorator<TransformAccessorOptions> => (
+): ASTClassMemberDecorator<TransformAccessorOptions, ClassMemberProperty> => (
   klass: NodePath<Class>,
-  member: NodePath<ClassMemberProperty>,
+  member,
   {
     interceptorContext,
     privacy,
@@ -159,7 +134,7 @@ export const createAccessorDecorator = (
 
   const storage = createStorage(klass, member, privacy);
 
-  const method = impl(
+  const [method, declarations] = impl(
     klass,
     member,
     interceptor,
@@ -168,10 +143,15 @@ export const createAccessorDecorator = (
       preservingDecorators: member.node.decorators,
       // @ts-ignore
       useClassName: !!member.node.static && !!useClassNameForStatic,
-      useContext: shouldUseContext(interceptor, interceptorContext, filename),
+      useContext: shouldInterceptorUseContext(
+        interceptor,
+        interceptorContext,
+        filename,
+      ),
     },
   );
 
+  klass.insertBefore(declarations);
   member.replaceWithMultiple([storage, method]);
 };
 
@@ -181,21 +161,52 @@ export const ownerNode = (
 ): Identifier | ThisExpression =>
   useClassName && klass.node.id ? cloneNode(klass.node.id) : thisExpression();
 
-export const injectInterceptor = (
+export const prepareInterceptor = (
   klass: NodePath<Class>,
   interceptor: AccessorInterceptorNode,
   value: MemberExpression | Identifier,
   type: 'get' | 'set',
   useContext: boolean,
   useClassName: boolean,
-): CallExpression => {
-  const interceptorId = generateInterceptor(klass, interceptor, type);
+): readonly [
+  CallExpression,
+  Array<FunctionDeclaration | VariableDeclaration>,
+] => {
+  const isArrow = isArrowFunctionExpression(interceptor);
+  const isRegular = isFunctionExpression(interceptor);
 
-  return isArrowFunctionExpression(interceptor) ||
+  const interceptorId =
+    isArrow || isRegular
+      ? klass.parentPath.scope.generateUidIdentifier(`${type}Interceptor`)
+      : (interceptor as Identifier);
+
+  const declarations: Array<FunctionDeclaration | VariableDeclaration> = [];
+
+  if (isArrow) {
+    declarations.push(
+      declarator({
+        FUNCTION: interceptor,
+        VAR: interceptorId,
+      }) as VariableDeclaration,
+    );
+  } else if (isRegular) {
+    declarations.push(
+      functionDeclaration(
+        interceptorId,
+        (interceptor as FunctionExpression).params,
+        (interceptor as FunctionExpression).body,
+      ),
+    );
+  }
+
+  return [
+    isArrowFunctionExpression(interceptor) ||
     (isIdentifier(interceptor) && !useContext)
-    ? callExpression(interceptorId, [value])
-    : callExpression(memberExpression(interceptorId, identifier('call')), [
-        ownerNode(klass, useClassName),
-        value,
-      ]);
+      ? callExpression(interceptorId, [value])
+      : callExpression(memberExpression(interceptorId, identifier('call')), [
+          ownerNode(klass, useClassName),
+          value,
+        ]),
+    declarations,
+  ];
 };
