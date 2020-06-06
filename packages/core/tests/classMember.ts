@@ -36,5 +36,10 @@ describe('@ast-decorators/core', () => {
       const {code} = await transformFile('namespace');
       expect(code).toMatchSnapshot();
     });
+
+    it('correctly renders multiple decorators for a class property with replacing', async () => {
+      const {code} = await transformFile('disappearing-decorators');
+      expect(code).toMatchSnapshot();
+    });
   });
 });
