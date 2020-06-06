@@ -13,9 +13,3 @@ export const assertBind = (member: ClassMember): void => {
     );
   }
 };
-
-export const assertBindAll = (args: any[]): void => {
-  if (args.length > 3) {
-
-  }
-};

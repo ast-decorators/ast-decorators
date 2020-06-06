@@ -1,8 +1,8 @@
 import type {
+  ASTSimpleDecorator,
   ClassMember,
   ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
-import {ASTSimpleDecorator} from '@ast-decorators/utils/src/common';
 import type {Scope} from '@babel/traverse';
 import {
   arrowFunctionExpression,

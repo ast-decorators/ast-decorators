@@ -2,8 +2,8 @@ import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import type {
   ASTSimpleDecorator,
   ClassMember,
+  ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
-import {ClassMemberMethod} from '@ast-decorators/utils/src/common';
 import type {NodePath} from '@babel/core';
 import {
   ClassBody,

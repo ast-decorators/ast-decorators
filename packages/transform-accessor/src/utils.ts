@@ -1,6 +1,7 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import type {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
 import type {
+  ASTSimpleDecorator,
   ClassMemberMethod,
   ClassMemberProperty,
   PluginPass,
@@ -9,7 +10,6 @@ import type {
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
 import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
-import {ASTSimpleDecorator} from '@ast-decorators/utils/src/common';
 import template from '@babel/template';
 import type {NodePath} from '@babel/traverse';
 import {

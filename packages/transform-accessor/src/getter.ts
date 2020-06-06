@@ -1,5 +1,7 @@
-import type {ClassMemberProperty} from '@ast-decorators/utils/lib/common';
-import {ASTCallableDecorator} from '@ast-decorators/utils/src/common';
+import type {
+  ASTCallableDecorator,
+  ClassMemberProperty,
+} from '@ast-decorators/utils/lib/common';
 import type {NodePath} from '@babel/traverse';
 import {
   blockStatement,
