@@ -12,16 +12,18 @@ import {
   StringLiteral,
   isImportDefaultSpecifier,
   isImportNamespaceSpecifier,
+  isImportSpecifier,
 } from '@babel/types';
 
 export type ImportMetadata = Readonly<{
   binding?: Binding;
-  identifier: NodePath<Identifier>;
-  importIdentifier: NodePath<Identifier>;
-  importSpecifier?: NodePath<
-    ImportSpecifier | ImportNamespaceSpecifier | ImportDefaultSpecifier
-  >;
-  importSource?: NodePath<StringLiteral>;
+  identifier: Identifier;
+  importIdentifier: Identifier;
+  importSpecifier?:
+    | ImportSpecifier
+    | ImportNamespaceSpecifier
+    | ImportDefaultSpecifier;
+  importSource?: StringLiteral;
   isMember: boolean;
   originalImportName?: string;
   removeBinding: () => void;
@@ -54,21 +56,25 @@ const extractImportMetadata = (
       >
     | undefined;
 
+  const importDeclaration = importSpecifier?.parentPath as
+    | NodePath<ImportDeclaration>
+    | undefined;
+
   return {
     binding,
-    identifier,
-    importIdentifier,
-    importSource: (importSpecifier?.parentPath as NodePath<
-      ImportDeclaration
-    >).get('source'),
-    importSpecifier,
+    identifier: identifier.node,
+    importIdentifier: importIdentifier.node,
+    importSource: importDeclaration?.node.source,
+    importSpecifier: importSpecifier?.node,
     isMember,
     originalImportName: importSpecifier
-      ? isImportDefaultSpecifier(importSpecifier)
+      ? isImportDefaultSpecifier(importSpecifier.node)
         ? 'default'
-        : isImportNamespaceSpecifier(importSpecifier)
+        : isImportNamespaceSpecifier(importSpecifier.node)
         ? identifier.node.name
-        : (importSpecifier.get('imported') as NodePath<Identifier>).node.name
+        : isImportSpecifier(importSpecifier.node)
+        ? importSpecifier.node.imported.name
+        : undefined
       : undefined,
     removeBinding(): void {
       if (!binding) {
@@ -80,14 +86,10 @@ const extractImportMetadata = (
       );
 
       if (binding.referencePaths.length === 0) {
-        const declaration = importSpecifier!.parentPath as NodePath<
-          ImportDeclaration
-        >;
-
         importSpecifier!.remove();
 
-        if (declaration.node.specifiers.length === 0) {
-          declaration.remove();
+        if (importDeclaration!.node.specifiers.length === 0) {
+          importDeclaration!.remove();
         }
       }
     },

@@ -1,6 +1,6 @@
+import {ASTDecoratorNodes} from '@ast-decorators/utils/lib/common';
 import {NodePath, template} from '@babel/core';
 import {
-  Class,
   ClassMethod,
   ClassProperty,
   isClassMethod,
@@ -11,17 +11,11 @@ import {appendConsoleLog, createGetter} from '../utils';
 
 let count = 0;
 
-const foo = (
-  klass: NodePath<Class>,
-  property: NodePath<ClassProperty | ClassMethod>,
-) => {
-  if (
-    isClassMethod(property) &&
-    (property.node as ClassMethod).kind === 'get'
-  ) {
-    appendConsoleLog(property as NodePath<ClassMethod>, 'foo');
-  } else if (isClassProperty(property)) {
-    createGetter(property as NodePath<ClassProperty>);
+const foo = ({klass, member}: ASTDecoratorNodes) => {
+  if (isClassMethod(member) && (member.node as ClassMethod).kind === 'get') {
+    appendConsoleLog(member as NodePath<ClassMethod>, 'foo');
+  } else if (isClassProperty(member)) {
+    createGetter(member as NodePath<ClassProperty>);
   }
 
   klass.insertAfter([
@@ -29,17 +23,11 @@ const foo = (
   ]);
 };
 
-const bar = (
-  klass: NodePath<Class>,
-  property: NodePath<ClassProperty | ClassMethod>,
-) => {
-  if (
-    isClassMethod(property) &&
-    (property.node as ClassMethod).kind === 'get'
-  ) {
-    appendConsoleLog(property as NodePath<ClassMethod>, 'bar');
-  } else if (isClassProperty(property)) {
-    createGetter(property as NodePath<ClassProperty>);
+const bar = ({klass, member}: ASTDecoratorNodes) => {
+  if (isClassMethod(member) && (member.node as ClassMethod).kind === 'get') {
+    appendConsoleLog(member as NodePath<ClassMethod>, 'bar');
+  } else if (isClassProperty(member)) {
+    createGetter(member as NodePath<ClassProperty>);
   }
 
   klass.insertAfter([

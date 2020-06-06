@@ -70,7 +70,7 @@ const shouldInterceptorUseContext = (
     );
 
     name = originalImportName;
-    source = importSource?.node.value;
+    source = importSource?.value;
   } else if (!isMember) {
     // If element is declared in the same file and it is an arrow or a regular
     // function, let's decide if we need to add context.

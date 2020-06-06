@@ -46,13 +46,13 @@ describe('@ast-decorators/utils', () => {
         expect(metadata.binding).toBe(
           callee.parentPath.scope.getBinding('bar'),
         );
-        expect(metadata.importSpecifier?.get('local').node.name).toBe('bar');
-        expect(metadata.importSource?.node.value).toBe('fns');
+        expect(metadata.importSpecifier?.local.name).toBe('bar');
+        expect(metadata.importSource?.value).toBe('fns');
 
         expect(isIdentifier(metadata.identifier)).toBeTruthy();
         expect(isIdentifier(metadata.importIdentifier)).toBeTruthy();
-        expect(metadata.importIdentifier.node.name).toEqual('bar');
-        expect(metadata.identifier.node.name).toEqual('bar');
+        expect(metadata.importIdentifier.name).toEqual('bar');
+        expect(metadata.identifier.name).toEqual('bar');
         expect(metadata.importIdentifier).toBe(metadata.identifier);
 
         expect(metadata.isMember).not.toBeTruthy();
@@ -66,15 +66,15 @@ describe('@ast-decorators/utils', () => {
         expect(metadata.binding).toBe(
           callee.parentPath.scope.getBinding('fns'),
         );
-        expect(metadata.importSpecifier?.get('local').node.name).toBe('fns');
-        expect(metadata.importSource?.node.value).toBe('fns');
+        expect(metadata.importSpecifier?.local.name).toBe('fns');
+        expect(metadata.importSource?.value).toBe('fns');
 
         expect(metadata.isMember).toBeTruthy();
         expect(isIdentifier(metadata.importIdentifier)).toBeTruthy();
-        expect(metadata.importIdentifier.node.name).toEqual('fns');
+        expect(metadata.importIdentifier.name).toEqual('fns');
 
         expect(isIdentifier(metadata.identifier)).toBeTruthy();
-        expect(metadata.identifier.node.name).toEqual('bar');
+        expect(metadata.identifier.name).toEqual('bar');
       });
     });
 
@@ -82,8 +82,9 @@ describe('@ast-decorators/utils', () => {
       await run('default', callee => {
         const metadata = extractImportMetadata(callee);
 
-        const importDeclaration = metadata.importSpecifier!
-          .parentPath as NodePath<ImportDeclaration>;
+        const importDeclaration = metadata.binding!.path.parentPath as NodePath<
+          ImportDeclaration
+        >;
 
         expect(isImportDeclaration(importDeclaration.node)).toBeTruthy();
 
@@ -100,8 +101,9 @@ describe('@ast-decorators/utils', () => {
 
         const metadata = extractImportMetadata(callee);
 
-        const importDeclaration = metadata.importSpecifier!
-          .parentPath as NodePath<ImportDeclaration>;
+        const importDeclaration = metadata.binding!.path.parentPath as NodePath<
+          ImportDeclaration
+        >;
 
         metadata.removeBinding();
 

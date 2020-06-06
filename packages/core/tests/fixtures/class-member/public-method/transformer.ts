@@ -1,9 +1,8 @@
-import {NodePath} from '@babel/core';
+import {ASTDecoratorNodes} from '@ast-decorators/utils/lib/common';
 import {
   assignmentExpression,
   blockStatement,
   callExpression,
-  Class,
   classMethod,
   ClassPrivateMethod,
   expressionStatement,
@@ -12,7 +11,7 @@ import {
   thisExpression,
 } from '@babel/types';
 
-const bind = (_: NodePath<Class>, property: NodePath<ClassPrivateMethod>) => {
+const bind = ({member}: Required<ASTDecoratorNodes<ClassPrivateMethod>>) => {
   const constructor = classMethod(
     'constructor',
     identifier('constructor'),
@@ -21,10 +20,10 @@ const bind = (_: NodePath<Class>, property: NodePath<ClassPrivateMethod>) => {
       expressionStatement(
         assignmentExpression(
           '=',
-          memberExpression(thisExpression(), property.node.key),
+          memberExpression(thisExpression(), member.node.key),
           callExpression(
             memberExpression(
-              memberExpression(thisExpression(), property.node.key),
+              memberExpression(thisExpression(), member.node.key),
               identifier('bind'),
             ),
             [thisExpression()],
@@ -34,7 +33,7 @@ const bind = (_: NodePath<Class>, property: NodePath<ClassPrivateMethod>) => {
     ]),
   );
 
-  property.insertBefore(constructor);
+  member.insertBefore(constructor);
 };
 
 export default () => [[bind, name => name === 'bind']];

@@ -1,7 +1,5 @@
-import type {
-  ASTClassMemberCallableDecorator,
-  ClassMemberProperty,
-} from '@ast-decorators/utils/lib/common';
+import type {ClassMemberProperty} from '@ast-decorators/utils/lib/common';
+import {ASTCallableDecorator} from '@ast-decorators/utils/src/common';
 import type {NodePath} from '@babel/traverse';
 import {
   blockStatement,
@@ -79,7 +77,7 @@ export const getter: AccessorMethodCreator = (
   return [method, declarations];
 };
 
-export const getterTransformer: ASTClassMemberCallableDecorator<
+export const getterTransformer: ASTCallableDecorator<
   [NodePath<AccessorInterceptorNode>?],
   TransformAccessorOptions,
   ClassMemberProperty

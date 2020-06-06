@@ -23,43 +23,25 @@ export type PluginPass<T = object> = Readonly<{
 
 export type PrivacyType = 'hard' | 'soft' | 'none';
 
-export type ASTClassDecorator<O extends object = object> = (
-  klass: NodePath<Class>,
-  transformerOptions: O | undefined,
-  babelOptions: PluginPass<ASTDecoratorCoreOptions>,
-) => void;
-
-export type ASTClassMemberDecorator<
-  O extends object = object,
-  M extends ClassMember = ClassMember
-> = (
-  klass: NodePath<Class>,
-  member: NodePath<M>,
-  transformerOptions: O | undefined,
-  babelOptions: PluginPass<ASTDecoratorCoreOptions>,
-) => void;
-
-export type ASTClassCallableDecorator<
-  A extends any[] = any[],
-  O extends object = object
-> = (...args: A) => ASTClassDecorator<O>;
-
-export type ASTClassMemberCallableDecorator<
-  A extends any[] = any[],
-  O extends object = object,
-  M extends ClassMember = ClassMember
-> = (...args: A) => ASTClassMemberDecorator<O, M>;
+export type ASTDecoratorNodes<M extends ClassMember = ClassMember> = Readonly<{
+  klass: NodePath<Class>;
+  member?: NodePath<M>;
+}>;
 
 export type ASTSimpleDecorator<
   O extends object = object,
   M extends ClassMember = ClassMember
-> = ASTClassDecorator<O> | ASTClassMemberDecorator<O, M>;
+> = (
+  nodes: ASTDecoratorNodes<M>,
+  transformerOptions: O | undefined,
+  babelOptions: PluginPass<ASTDecoratorCoreOptions>,
+) => void;
 
 export type ASTCallableDecorator<
   A extends any[] = any[],
   O extends object = object,
   M extends ClassMember = ClassMember
-> = ASTClassCallableDecorator<A, O> | ASTClassMemberCallableDecorator<A, O, M>;
+> = (...args: A) => ASTSimpleDecorator<O, M>;
 
 export type ASTDecorator<
   A extends any[] = any[],

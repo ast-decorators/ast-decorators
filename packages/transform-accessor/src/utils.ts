@@ -1,7 +1,6 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import type {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
 import type {
-  ASTClassMemberDecorator,
   ClassMemberMethod,
   ClassMemberProperty,
   PluginPass,
@@ -10,6 +9,7 @@ import type {
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
 import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
+import {ASTSimpleDecorator} from '@ast-decorators/utils/src/common';
 import template from '@babel/template';
 import type {NodePath} from '@babel/traverse';
 import {
@@ -120,9 +120,8 @@ export const createAccessorDecorator = (
   decorator: string,
   interceptor: NodePath<AccessorInterceptorNode> | undefined,
   impl: AccessorMethodCreator,
-): ASTClassMemberDecorator<TransformAccessorOptions, ClassMemberProperty> => (
-  klass: NodePath<Class>,
-  member,
+): ASTSimpleDecorator<TransformAccessorOptions, ClassMemberProperty> => (
+  {klass, member},
   {
     interceptorContext,
     privacy,
@@ -130,17 +129,17 @@ export const createAccessorDecorator = (
   }: TransformAccessorOptions = {},
   {filename}: PluginPass,
 ): void => {
-  assert(decorator, member, [interceptor]);
+  assert(decorator, member!, [interceptor]);
 
-  const storage = createStorage(klass, member, privacy);
+  const storage = createStorage(klass, member!, privacy);
 
   const [method, declarations] = impl(
     klass,
-    member,
+    member!,
     interceptor,
     storage.key as Identifier | PrivateName,
     {
-      preservingDecorators: member.node.decorators,
+      preservingDecorators: member!.node.decorators,
       // @ts-ignore
       useClassName: !!member.node.static && !!useClassNameForStatic,
       useContext: shouldInterceptorUseContext(
@@ -152,7 +151,7 @@ export const createAccessorDecorator = (
   );
 
   klass.insertBefore(declarations);
-  member.replaceWithMultiple([storage, method]);
+  member!.replaceWithMultiple([storage, method]);
 };
 
 export const ownerNode = (
