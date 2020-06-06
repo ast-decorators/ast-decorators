@@ -13,11 +13,3 @@ export const assertBind = (member: ClassMember): void => {
     );
   }
 };
-
-export const assertBindAll = (args: any[]): void => {
-  if (args.length > 3) {
-    throw new ASTDecoratorsError(
-      'Applying @bindAll decorator to something other than class is not allowed',
-    );
-  }
-};

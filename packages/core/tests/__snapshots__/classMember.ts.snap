@@ -99,3 +99,11 @@ class Bar {
 console.log('bar is 3');
 console.log('foo is 2');"
 `;
+
+exports[`@ast-decorators/core class-member correctly renders multiple decorators for a class property with replacing 1`] = `
+"import { foo } from './decorators';
+
+class Foo {
+  prop = () => {};
+}"
+`;

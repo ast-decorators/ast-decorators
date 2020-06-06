@@ -1,5 +1,5 @@
 import type {
-  ASTClassMemberDecorator,
+  ASTSimpleDecorator,
   ClassMember,
   ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
@@ -81,21 +81,21 @@ const bindRegular = (method: ClassMethod): BoundNodes => {
 export const bind = (method: ClassMemberMethod, scope: Scope): BoundNodes =>
   isPrivate(method) ? bindPrivate(method, scope) : bindRegular(method);
 
-export const bindTransformer: ASTClassMemberDecorator<
+export const bindTransformer: ASTSimpleDecorator<
   TransformBindOptions,
   ClassMemberMethod
-> = (klass, member) => {
-  assertBind(member.node);
+> = ({klass, member}) => {
+  assertBind(member!.node);
 
-  const [replacement, declaration] = bind(member.node, klass.scope);
+  const [replacement, declaration] = bind(member!.node, klass.scope);
 
   if (declaration) {
     klass.insertBefore(declaration);
   }
 
   if (Array.isArray(replacement)) {
-    member.replaceWithMultiple(replacement);
+    member!.replaceWithMultiple(replacement);
   } else {
-    member.replaceWith(replacement);
+    member!.replaceWith(replacement);
   }
 };

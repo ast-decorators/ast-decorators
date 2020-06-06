@@ -13,7 +13,7 @@ import {
 } from '@babel/types';
 import ASTDecoratorsError from './ASTDecoratorsError';
 import checkSuitability, {SuitabilityFactors} from './checkSuitability';
-import {ImportMetadata} from './metadata';
+import {extractImportMetadata} from './metadata';
 
 export type InterceptorKind =
   | FunctionExpression
@@ -65,12 +65,12 @@ const shouldInterceptorUseContext = (
   if (isImportDeclaration(declarationOrSpecifier.parentPath)) {
     // If the callback is imported, let's use global transformer rules.
 
-    const {importSource, originalImportName} = new ImportMetadata(
+    const {importSource, originalImportName} = extractImportMetadata(
       fn as NodePath<MemberExpression> | NodePath<Identifier>,
     );
 
     name = originalImportName;
-    source = importSource?.node.value;
+    source = importSource?.value;
   } else if (!isMember) {
     // If element is declared in the same file and it is an arrow or a regular
     // function, let's decide if we need to add context.

@@ -1,4 +1,5 @@
-import {ASTClassDecorator, PrivacyType} from '@ast-decorators/utils/lib/common';
+import {PrivacyType} from '@ast-decorators/utils/lib/common';
+import {ASTSimpleDecorator} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/core';
 import {ClassBody, privateName, StringLiteral} from '@babel/types';
 
@@ -16,7 +17,7 @@ export default (
     (
       name: NodePath<StringLiteral>,
       value: NodePath<StringLiteral>,
-    ): ASTClassDecorator => klass => {
+    ): ASTSimpleDecorator => ({klass}) => {
       const classBody = klass.get('body') as NodePath<ClassBody>;
       const id = classBody.scope.generateUidIdentifier(name.node.value);
       const node =

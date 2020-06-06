@@ -1,5 +1,6 @@
-import {NodePath, template} from '@babel/core';
-import {Class, Statement} from '@babel/types';
+import type {ASTDecoratorNodes} from '@ast-decorators/utils/lib/common';
+import {template} from '@babel/core';
+import type {Statement} from '@babel/types';
 
 class Counter {
   #count = 0;
@@ -19,13 +20,13 @@ class Counter {
 
 const counter = new Counter();
 
-const foo = () => (klass: NodePath<Class>) => {
+const foo = () => ({klass}: ASTDecoratorNodes) => {
   const consoleTpl = template(`console.log('foo is ${counter.count}')`);
 
   klass.insertAfter([consoleTpl() as Statement]);
 };
 
-const bar = (klass: NodePath<Class>) => {
+const bar = ({klass}: ASTDecoratorNodes) => {
   const consoleTpl = template(`console.log('bar is ${counter.count}')`);
 
   klass.insertAfter([consoleTpl() as Statement]);

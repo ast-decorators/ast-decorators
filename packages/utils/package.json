@@ -5,16 +5,16 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "npm run build:remove && run-p build:js build:dts",
-    "build:js": "babel src -d lib -x .ts --ignore src/**/*.d.ts --copy-files --config-file ../../babel.config.json",
+    "build:js": "babel src -d lib -x .ts --config-file ../../babel.config.json --ignore \"src/**/*.d.ts\" --copy-files",
     "build:dts": "tsc -p tsconfig.build.json --emitDeclarationOnly",
     "build:remove": "rimraf lib",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@babel/core": "^7.9.6",
+    "@babel/template": "^7.8.6",
+    "@babel/traverse": "^7.9.6",
+    "@babel/types": "^7.9.6",
     "minimatch": "^3.0.4"
-  },
-  "peerDependencies": {
-    "@babel/core": "^7",
-    "@babel/types": "^7"
   }
 }

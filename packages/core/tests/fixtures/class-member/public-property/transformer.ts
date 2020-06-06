@@ -1,9 +1,9 @@
+import {ASTDecoratorNodes} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/core';
 import {
   assignmentExpression,
   blockStatement,
   callExpression,
-  Class,
   ClassBody,
   classMethod,
   ClassProperty,
@@ -19,12 +19,12 @@ import {
   thisExpression,
 } from '@babel/types';
 
-const observe = (observer: NodePath<FunctionExpression>) => (
-  klass: NodePath<Class>,
-  property: NodePath<ClassProperty>,
-) => {
+const observe = (observer: NodePath<FunctionExpression>) => ({
+  klass,
+  member,
+}: Required<ASTDecoratorNodes<ClassProperty>>) => {
   const klassBody = klass.get('body') as NodePath<ClassBody>;
-  const propertyStringName = (property.node.key as Identifier).name;
+  const propertyStringName = (member.node.key as Identifier).name;
 
   const observerId = klassBody.scope.generateUidIdentifier(
     `${propertyStringName}Observer`,
@@ -46,7 +46,7 @@ const observe = (observer: NodePath<FunctionExpression>) => (
 
   const getter = classMethod(
     'get',
-    property.node.key,
+    member.node.key,
     [],
     blockStatement([returnStatement(cloneNode(thisPropExpression))]),
   );
@@ -55,7 +55,7 @@ const observe = (observer: NodePath<FunctionExpression>) => (
 
   const setter = classMethod(
     'set',
-    property.node.key,
+    member.node.key,
     [valueIdentifier],
     blockStatement([
       expressionStatement(
@@ -75,7 +75,7 @@ const observe = (observer: NodePath<FunctionExpression>) => (
   );
 
   klass.insertBefore(outerObserver);
-  property.replaceWithMultiple([privateProperty, getter, setter]);
+  member.replaceWithMultiple([privateProperty, getter, setter]);
 };
 
 export default () => [[observe, name => name === 'observe']];

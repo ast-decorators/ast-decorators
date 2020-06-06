@@ -1,7 +1,5 @@
-import {
-  ASTClassCallableDecorator,
-  PrivacyType,
-} from '@ast-decorators/utils/lib/common';
+import {PrivacyType} from '@ast-decorators/utils/lib/common';
+import {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/core';
 import {
   ClassBody,
@@ -13,10 +11,10 @@ import {
 
 type TransformerOptions = {privacy?: PrivacyType};
 
-const foo: ASTClassCallableDecorator<
+const foo: ASTCallableDecorator<
   [NodePath<StringLiteral>, NodePath<StringLiteral>],
   TransformerOptions
-> = (name, value) => (klass, {privacy}: TransformerOptions = {}) => {
+> = (name, value) => ({klass}, {privacy}: TransformerOptions = {}) => {
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const id = classBody.scope.generateUidIdentifier(name.node.value);
   const node =

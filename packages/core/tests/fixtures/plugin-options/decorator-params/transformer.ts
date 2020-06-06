@@ -1,8 +1,8 @@
 import {
-  ASTClassCallableDecorator,
   PluginPass,
   PrivacyType,
 } from '@ast-decorators/utils/lib/common';
+import {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/core';
 import {
   ClassBody,
@@ -18,11 +18,11 @@ type TransformerOptions = {privacy?: PrivacyType};
 
 const cwd = process.cwd();
 
-const foo: ASTClassCallableDecorator<
+const foo: ASTCallableDecorator<
   [NodePath<StringLiteral>, NodePath<StringLiteral>],
   TransformerOptions
 > = name => (
-  klass,
+  {klass},
   {privacy}: TransformerOptions = {},
   {filename}: PluginPass,
 ) => {

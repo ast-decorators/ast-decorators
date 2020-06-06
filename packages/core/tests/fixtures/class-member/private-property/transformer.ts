@@ -1,24 +1,22 @@
-import {NodePath} from '@babel/core';
+import {ASTDecoratorNodes} from '@ast-decorators/utils/lib/common';
 import {
   blockStatement,
-  Class,
   classPrivateMethod,
   ClassPrivateProperty,
   returnStatement,
 } from '@babel/types';
 
-const readonly = (
-  _: NodePath<Class>,
-  property: NodePath<ClassPrivateProperty>,
-) => {
+const readonly = ({
+  member,
+}: Required<ASTDecoratorNodes<ClassPrivateProperty>>) => {
   const getter = classPrivateMethod(
     'get',
-    property.node.key,
+    member.node.key,
     [],
-    blockStatement([returnStatement(property.node.value)]),
+    blockStatement([returnStatement(member.node.value)]),
   );
 
-  property.replaceWith(getter);
+  member.replaceWith(getter);
 };
 
 export default () => [[readonly, name => name === 'readonly']];

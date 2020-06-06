@@ -1,6 +1,8 @@
+import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import type {
-  ASTClassDecorator,
+  ASTSimpleDecorator,
   ClassMember,
+  ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
 import type {NodePath} from '@babel/core';
 import {
@@ -10,14 +12,17 @@ import {
   isClassPrivateMethod,
 } from '@babel/types';
 import {bind} from './bind';
-import {assertBindAll, TransformBindOptions} from './utils';
+import {TransformBindOptions} from './utils';
 
-export const bindAllTransformer: ASTClassDecorator<TransformBindOptions> = (
-  ...args
-) => {
-  assertBindAll(args);
-
-  const [klass] = args;
+export const bindAllTransformer: ASTSimpleDecorator<
+  TransformBindOptions,
+  ClassMemberMethod
+> = ({klass, member: forbiddenMember}) => {
+  if (forbiddenMember) {
+    throw new ASTDecoratorsError(
+      'Applying @bindAll decorator to something other than class is not allowed',
+    );
+  }
 
   const classBody = klass.get('body') as NodePath<ClassBody>;
   const members = classBody.get('body') as ReadonlyArray<NodePath<ClassMember>>;

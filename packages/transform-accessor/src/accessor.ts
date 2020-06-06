@@ -3,7 +3,7 @@ import type {
   ASTCallableDecorator,
   ClassMemberProperty,
 } from '@ast-decorators/utils/lib/common';
-import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
+import {extractDecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
 import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
 import type {NodePath} from '@babel/traverse';
 import type {Decorator, Identifier, PrivateName} from '@babel/types';
@@ -21,8 +21,7 @@ export const accessorTransformer: ASTCallableDecorator<
   TransformAccessorOptions,
   ClassMemberProperty
 > = (get, set) => (
-  klass,
-  member,
+  {klass, member},
   {
     interceptorContext,
     privacy,
@@ -31,19 +30,19 @@ export const accessorTransformer: ASTCallableDecorator<
   }: TransformAccessorOptions = {},
   {filename},
 ) => {
-  assert('accessor', member, [get, set]);
+  assert('accessor', member!, [get, set]);
 
-  const decorators = member.node.decorators
-    ? (member.get('decorators') as ReadonlyArray<NodePath<Decorator>>)
+  const decorators = member!.node.decorators
+    ? (member!.get('decorators') as ReadonlyArray<NodePath<Decorator>>)
     : null;
 
   // @ts-ignore
   const useClassName = !!member.node.static && !!useClassNameForStatic;
 
-  const storage = createStorage(klass, member, privacy);
+  const storage = createStorage(klass, member!, privacy);
   const [getMethod, getterDeclarations] = getter(
     klass,
-    member,
+    member!,
     get,
     storage.key as Identifier | PrivateName,
     {
@@ -58,12 +57,14 @@ export const accessorTransformer: ASTCallableDecorator<
   );
 
   const bothAccessorsDecorators = decorators?.filter(decorator => {
-    const {importSource, originalImportName} = new DecoratorMetadata(decorator);
+    const {importSource, originalImportName} = extractDecoratorMetadata(
+      decorator,
+    );
 
     return !checkSuitability(
       {
         name: originalImportName,
-        source: importSource?.node.value,
+        source: importSource?.value,
       },
       singleAccessorDecorators,
       filename,
@@ -72,7 +73,7 @@ export const accessorTransformer: ASTCallableDecorator<
 
   const [setMethod, setterDeclarations] = setter(
     klass,
-    member,
+    member!,
     set,
     storage.key as Identifier | PrivateName,
     {
@@ -88,5 +89,5 @@ export const accessorTransformer: ASTCallableDecorator<
   );
 
   klass.insertBefore([...getterDeclarations, ...setterDeclarations]);
-  member.replaceWithMultiple([storage, getMethod, setMethod]);
+  member!.replaceWithMultiple([storage, getMethod, setMethod]);
 };

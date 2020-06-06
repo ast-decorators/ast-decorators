@@ -6,89 +6,66 @@ import type {
   ClassMember,
   PluginPass,
 } from '@ast-decorators/utils/lib/common';
-import {DecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
+import {
+  DecoratorMetadata,
+  extractDecoratorMetadata,
+} from '@ast-decorators/utils/lib/metadata';
 import type {NodePath} from '@babel/traverse';
 import {
   Class,
+  cloneNode,
   Decorator,
   isFunctionDeclaration,
   isVariableDeclarator,
   StringLiteral,
 } from '@babel/types';
 import {dirname, resolve} from 'path';
-import type {TransformerMap} from './utils';
+import type {
+  EntitiesExtractor,
+  TransformerMap,
+  TransformerMapItem,
+} from './utils';
 
-type DecoratorProcessorArguments = {
-  call: readonly NodePath[];
-  decorator: readonly [NodePath<Class>, NodePath<ClassMember>?];
-};
-
-type ImportProcessorData = Readonly<{
-  args: DecoratorProcessorArguments;
-  metadata: DecoratorMetadata;
-  options: PluginPass;
-}>;
-
-const calculateSource = (
-  {node: {value}}: NodePath<StringLiteral>,
-  filename: string,
-): string =>
+const calculateSource = ({value}: StringLiteral, filename: string): string =>
   checkNodeModule(value) ? value : resolve(dirname(filename), value);
 
-const processImportDeclaration = (
-  {args, metadata, options: babelOptions}: ImportProcessorData,
+const findTransformer = (
+  {importSource, originalImportName}: DecoratorMetadata,
   transformerMap: TransformerMap,
-): void => {
+  babelOptions: PluginPass,
+): TransformerMapItem | undefined => {
   const {filename} = babelOptions;
-  const {importSource, originalImportName} = metadata;
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   const source = calculateSource(importSource!, filename);
 
-  const transformer = transformerMap.find(([, detector, transformerOptions]) =>
+  return transformerMap.find(([, detector, transformerOptions]) =>
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     detector(originalImportName!, source, transformerOptions, babelOptions),
   );
-
-  if (!transformer) {
-    return;
-  }
-
-  const [decoratorFn, , transformerOptions] = transformer;
-
-  metadata.remove();
-  metadata.removeBinding();
-
-  const decorator = metadata.isCall
-    ? (decoratorFn as ASTCallableDecorator)(...args.call)
-    : (decoratorFn as ASTSimpleDecorator);
-
-  // @ts-ignore
-  decorator(...args.decorator, transformerOptions, babelOptions);
 };
 
 const processDecorator = (
-  decorator: NodePath<Decorator>,
-  args: readonly [NodePath<Class>, NodePath<ClassMember>?],
-  transformerMap: TransformerMap,
-  options: PluginPass,
+  {args, isCall}: DecoratorMetadata,
+  [klass, member]: readonly [NodePath<Class>, NodePath<ClassMember>?],
+  transformer: TransformerMapItem,
+  babelOptions: PluginPass,
 ): void => {
-  const metadata = new DecoratorMetadata(decorator);
+  const [decoratorFn, , transformerOptions] = transformer;
 
-  const data = {
-    args: {
-      call: metadata.args,
-      decorator: args,
-    },
-    metadata,
-    options,
-  };
+  const decorate = isCall
+    ? (decoratorFn as ASTCallableDecorator)(...args)
+    : (decoratorFn as ASTSimpleDecorator);
 
-  const binding = metadata.binding;
+  decorate({klass, member}, transformerOptions, babelOptions);
+};
 
+const assertBinding = ({
+  binding,
+  importIdentifier,
+}: DecoratorMetadata): void => {
   if (!binding) {
-    throw new ASTDecoratorsError(
-      `${metadata.importIdentifier.node.name} is not defined`,
-    );
+    throw new ASTDecoratorsError(`${importIdentifier.name} is not defined`);
   }
 
   if (
@@ -98,9 +75,76 @@ const processDecorator = (
     throw new ASTDecoratorsError(
       'Decorator should be imported from a separate file',
     );
-  } else {
-    processImportDeclaration(data, transformerMap);
   }
 };
 
-export default processDecorator;
+const createNodeWithUnprocessedDecorators = (
+  node: Class | ClassMember,
+): Class | ClassMember => {
+  const remainingDecorators = node.decorators.slice(0, -1);
+
+  const replacement = cloneNode(node);
+  replacement.decorators = remainingDecorators;
+
+  return replacement;
+};
+
+const processDecorators = (
+  path: NodePath<Class> | NodePath<ClassMember>,
+  extractEntities: EntitiesExtractor,
+  transformerMap: TransformerMap,
+  options: PluginPass,
+): void => {
+  if (!options.filename) {
+    throw new ASTDecoratorsError(
+      'AST Decorators system requires filename to be set',
+    );
+  }
+
+  if (!path.node.decorators?.length) {
+    return;
+  }
+
+  let numberOfDecoratorsToSkip = 0;
+
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition,no-constant-condition
+  while (true) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!path.node) {
+      break;
+    }
+
+    const decorators = path.get('decorators') as ReadonlyArray<
+      NodePath<Decorator>
+    >;
+
+    if (decorators.length === 0) {
+      break;
+    }
+
+    const decorator =
+      decorators[decorators.length - 1 - numberOfDecoratorsToSkip];
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!decorator) {
+      break;
+    }
+
+    const metadata = extractDecoratorMetadata(decorator);
+    assertBinding(metadata);
+
+    const transformer = findTransformer(metadata, transformerMap, options);
+
+    if (!transformer) {
+      numberOfDecoratorsToSkip += 1;
+      continue;
+    }
+
+    path.replaceWith(createNodeWithUnprocessedDecorators(path.node));
+    processDecorator(metadata, extractEntities(path), transformer, options);
+
+    metadata.removeBinding();
+  }
+};
+
+export default processDecorators;

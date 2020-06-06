@@ -8,49 +8,15 @@ import type {
   PluginPass,
 } from '@ast-decorators/utils/lib/common';
 import type {NodePath} from '@babel/traverse';
-import type {Class, Decorator} from '@babel/types';
+import {Class, isClassDeclaration, isClassExpression} from '@babel/types';
 import {resolve} from 'path';
-import processClassDecorator from './class';
-import processClassMemberDecorator from './property';
-import type {Mutable, TransformerMap} from './utils';
+import processDecorators from './processor';
+import type {EntitiesExtractor, Mutable, TransformerMap} from './utils';
 
 type UncheckedPluginPass<T = object> = Omit<PluginPass<T>, 'filename'> &
   Readonly<{
     filename?: string;
   }>;
-
-const processEachDecorator = (
-  path: NodePath<Class> | NodePath<ClassMember>,
-  opts: UncheckedPluginPass,
-  transformerMap: TransformerMap,
-  processor: (
-    decorator: NodePath<Decorator>,
-    transformerMap: TransformerMap,
-    options: PluginPass,
-  ) => void,
-): void => {
-  if (!opts.filename) {
-    throw new ASTDecoratorsError(
-      'AST Decorators system requires filename to be set',
-    );
-  }
-
-  if (path.node.decorators?.length > 0) {
-    const decorators = path.get('decorators') as ReadonlyArray<
-      NodePath<Decorator>
-    >;
-
-    // Decorators apply in the reverse order of their storing
-    for (let i = decorators.length - 1; i >= 0; i--) {
-      processor(decorators[i], transformerMap, opts as PluginPass);
-
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-      if (!path.node) {
-        break;
-      }
-    }
-  }
-};
 
 type TransformerModule = {
   default: ASTDecoratorTransformer;
@@ -94,6 +60,17 @@ const prepareTransformerMap = (
     return acc;
   }, []);
 
+const extractClass: EntitiesExtractor = (klass: NodePath<Class>) => [klass];
+const extractClassMember: EntitiesExtractor = (
+  member: NodePath<ClassMember>,
+) => {
+  const klass = member.findParent(
+    path => isClassDeclaration(path) || isClassExpression(path),
+  ) as NodePath<Class>;
+
+  return [klass, member];
+};
+
 const babelPluginAstDecoratorsCore = (
   babel: object,
   {transformers}: ASTDecoratorCoreOptions,
@@ -107,20 +84,25 @@ const babelPluginAstDecoratorsCore = (
   return {
     visitor: {
       'ClassDeclaration|ClassExpression'(
-        path: NodePath<Class>,
+        klass: NodePath<Class>,
         opts: UncheckedPluginPass,
       ) {
-        processEachDecorator(path, opts, transformerMap, processClassDecorator);
+        processDecorators(
+          klass,
+          extractClass,
+          transformerMap,
+          opts as PluginPass,
+        );
       },
       'ClassProperty|ClassMethod|ClassPrivateProperty|ClassPrivateMethod'(
-        path: NodePath<ClassMember>,
+        member: NodePath<ClassMember>,
         opts: UncheckedPluginPass,
       ) {
-        processEachDecorator(
-          path,
-          opts,
+        processDecorators(
+          member,
+          extractClassMember,
           transformerMap,
-          processClassMemberDecorator,
+          opts as PluginPass,
         );
       },
     },
