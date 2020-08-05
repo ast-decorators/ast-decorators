@@ -81,10 +81,10 @@ const assertBinding = ({
 const createNodeWithUnprocessedDecorators = (
   node: Class | ClassMember,
 ): Class | ClassMember => {
-  const remainingDecorators = node.decorators.slice(0, -1);
+  const remainDecorators = node.decorators!.slice(0, -1);
 
   const replacement = cloneNode(node);
-  replacement.decorators = remainingDecorators;
+  replacement.decorators = remainDecorators;
 
   return replacement;
 };

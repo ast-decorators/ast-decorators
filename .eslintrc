@@ -10,10 +10,6 @@
     "jasmine": true
   },
   "rules": {
-    "@typescript-eslint/no-unnecessary-condition": [
-      "error",
-      {"ignoreRhs": true}
-    ],
     "@typescript-eslint/no-require-imports": "off"
   }
 }
