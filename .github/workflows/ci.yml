@@ -20,6 +20,7 @@ on:
       - 'tsconfig.json'
   pull_request:
     branches: [master]
+    types: [opened, synchronize, reopened]
     paths:
       - '.github/workflows/ci.yml'
       - 'packages/**'
@@ -54,23 +55,16 @@ jobs:
         run: |
           npm ci
           npm run bootstrap
+      - name: Check
+        run: npm run lint & npm run typecheck
       - name: Building
         run: npm run build
       - name: Testing
         run: npm run test:coverage
         env:
           CI: true
-      - name: Cache Sonar Scanner
-        id: sonar-cache
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar
-          key: ${{ runner.os }}-sonar-${{ env.SONAR_VERSION }}
-      - name: Download Sonar Scanner
-        if: steps.sonar-cache.outputs.cache-hit != 'true'
-        run: sh scripts/sonar-scanner-load.sh
-      - name: Run Sonar Scanner
-        run: sh scripts/sonar-scanner-run.sh
+      - name: Analysis
+        uses: sonarsource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
