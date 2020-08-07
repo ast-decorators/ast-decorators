@@ -81,7 +81,7 @@ const assertBinding = ({
 const createNodeWithUnprocessedDecorators = (
   node: Class | ClassMember,
 ): Class | ClassMember => {
-  const remainingDecorators = node.decorators.slice(0, -1);
+  const remainingDecorators = node.decorators!.slice(0, -1);
 
   const replacement = cloneNode(node);
   replacement.decorators = remainingDecorators;
@@ -101,6 +101,7 @@ const processDecorators = (
     );
   }
 
+  // If there is no decorators or decorators length is 0
   if (!path.node.decorators?.length) {
     return;
   }

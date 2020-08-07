@@ -2,7 +2,6 @@ import template from '@babel/template';
 import type {NodePath} from '@babel/traverse';
 import {
   Class,
-  ClassBody,
   classPrivateProperty,
   ClassProperty,
   classProperty,
@@ -27,13 +26,13 @@ const createPropertyByPrivacy = (
 
   switch (privacy) {
     case 'hard': {
-      const classBody = klass.get('body') as NodePath<ClassBody>;
+      const classBody = klass.get('body');
       const id = classBody.scope.generateUidIdentifier(uid);
       const privateId = privateName(id);
 
       const prop = classPrivateProperty(privateId, value, null);
 
-      // @ts-ignore
+      // @ts-expect-error: "static" is not listed in d.ts
       prop.static = _static;
 
       return prop;
@@ -45,7 +44,7 @@ const createPropertyByPrivacy = (
       return classProperty(id, value, null, null, true);
     }
     default: {
-      const classBody = klass.get('body') as NodePath<ClassBody>;
+      const classBody = klass.get('body');
       const id = classBody.scope.generateUidIdentifier(uid);
 
       return classProperty(id, value);

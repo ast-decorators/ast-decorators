@@ -10,10 +10,8 @@
     "jasmine": true
   },
   "rules": {
-    "@typescript-eslint/no-unnecessary-condition": [
-      "error",
-      {"ignoreRhs": true}
-    ],
-    "@typescript-eslint/no-require-imports": "off"
+    "@typescript-eslint/no-require-imports": "off",
+    "@typescript-eslint/naming-convention": "off",
+    "@typescript-eslint/default-param-last": "off"
   }
 }

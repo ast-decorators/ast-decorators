@@ -26,7 +26,11 @@ describe('@ast-decorators/utils', () => {
 
       it('detects if import specifier fits regular expression', () => {
         const check = (name: string): boolean =>
-          checkSuitability({name, source: 'foo'}, {names: [/\$\w+/]}, filename);
+          checkSuitability(
+            {name, source: 'foo'},
+            {names: [/\$\w+/u]},
+            filename,
+          );
 
         expect(check('negative')).not.toBeTruthy();
         expect(check('$positive')).toBeTruthy();
@@ -82,7 +86,7 @@ describe('@ast-decorators/utils', () => {
 
       it('detects if import source fits the regular expression', () => {
         const check = (info: CheckingElementInfo): boolean =>
-          checkSuitability(info, {nodeModules: [/positive/]}, filename);
+          checkSuitability(info, {nodeModules: [/positive/u]}, filename);
 
         expect(
           check({source: 'neutral-module/positive-path/to/file'}),

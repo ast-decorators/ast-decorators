@@ -24,7 +24,7 @@ type TransformerModule = {
 
 /* istanbul ignore next */
 const interop = (obj: any): TransformerModule =>
-  obj && obj.__esModule ? obj : {default: obj};
+  obj && '__esModule' in obj ? obj : {default: obj};
 
 const cwd = process.cwd();
 
@@ -83,6 +83,7 @@ const babelPluginAstDecoratorsCore = (
 
   return {
     visitor: {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'ClassDeclaration|ClassExpression'(
         klass: NodePath<Class>,
         opts: UncheckedPluginPass,
@@ -94,6 +95,7 @@ const babelPluginAstDecoratorsCore = (
           opts as PluginPass,
         );
       },
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       'ClassProperty|ClassMethod|ClassPrivateProperty|ClassPrivateMethod'(
         member: NodePath<ClassMember>,
         opts: UncheckedPluginPass,

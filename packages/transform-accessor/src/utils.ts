@@ -109,7 +109,7 @@ export const createStorage = (
   privacy: PrivacyType = 'hard',
 ): ClassMemberProperty =>
   createPropertyByPrivacy(privacy, getMemberName(member.node), klass, {
-    // @ts-ignore
+    // @ts-expect-error: "static" is not listed in d.ts
     static: member.node.static,
     value: member.node.value,
   });
@@ -140,7 +140,7 @@ export const createAccessorDecorator = (
     storage.key as Identifier | PrivateName,
     {
       preservingDecorators: member!.node.decorators,
-      // @ts-ignore
+      // @ts-expect-error: "static" is not listed in d.ts
       useClassName: !!member.node.static && !!useClassNameForStatic,
       useContext: shouldInterceptorUseContext(
         interceptor,
@@ -155,10 +155,10 @@ export const createAccessorDecorator = (
 };
 
 export const ownerNode = (
-  klass: NodePath<Class>,
+  klass: Class,
   useClassName: boolean,
 ): Identifier | ThisExpression =>
-  useClassName && klass.node.id ? cloneNode(klass.node.id) : thisExpression();
+  useClassName && klass.id ? cloneNode(klass.id) : thisExpression();
 
 export const prepareInterceptor = (
   klass: NodePath<Class>,
@@ -203,7 +203,7 @@ export const prepareInterceptor = (
     (isIdentifier(interceptor) && !useContext)
       ? callExpression(interceptorId, [value])
       : callExpression(memberExpression(interceptorId, identifier('call')), [
-          ownerNode(klass, useClassName),
+          ownerNode(klass.node, useClassName),
           value,
         ]),
     declarations,

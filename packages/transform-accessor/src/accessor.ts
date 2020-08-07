@@ -36,8 +36,7 @@ export const accessorTransformer: ASTCallableDecorator<
     ? (member!.get('decorators') as ReadonlyArray<NodePath<Decorator>>)
     : null;
 
-  // @ts-ignore
-  const useClassName = !!member.node.static && !!useClassNameForStatic;
+  const useClassName = 'static' in member!.node && !!useClassNameForStatic;
 
   const storage = createStorage(klass, member!, privacy);
   const [getMethod, getterDeclarations] = getter(
