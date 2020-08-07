@@ -7,7 +7,6 @@ import {
   assignmentExpression,
   blockStatement,
   CallExpression,
-  ClassBody,
   classMethod,
   classPrivateMethod,
   Decorator,
@@ -37,7 +36,7 @@ export const setter: AccessorMethodCreator = (
   storageProperty,
   {preservingDecorators, useClassName, useContext},
 ) => {
-  const classBody = klass.get('body') as NodePath<ClassBody>;
+  const classBody = klass.get('body');
   const valueId = classBody.scope.generateUidIdentifier('value');
 
   let statement: CallExpression | Identifier;
@@ -61,13 +60,14 @@ export const setter: AccessorMethodCreator = (
     expressionStatement(
       assignmentExpression(
         '=',
-        memberExpression(ownerNode(klass, useClassName), storageProperty),
+        memberExpression(ownerNode(klass.node, useClassName), storageProperty),
         statement,
       ),
     ),
   ]);
 
-  // @ts-ignore
+  // @ts-expect-error: "computed" do not exist on the ClassMemberProperty (it
+  // will simply be undefined) and "static" is not listed in d.ts
   const {computed, key, static: _static} = member.node;
 
   const method = isClassPrivateProperty(member)

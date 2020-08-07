@@ -35,6 +35,7 @@
   "exclude": [
     "node_modules/!(@open-wc)",
     "packages/*/tests/fixtures/**/*",
-    "packages/*/node_modules/**/*"
+    "packages/*/node_modules/**/*",
+    "packages/*/lib/**/*"
   ]
 }

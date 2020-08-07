@@ -37,7 +37,7 @@ export const getter: AccessorMethodCreator = (
   {preservingDecorators, useClassName, useContext},
 ) => {
   const value = memberExpression(
-    ownerNode(klass, useClassName),
+    ownerNode(klass.node, useClassName),
     storageProperty,
   );
 
@@ -60,7 +60,8 @@ export const getter: AccessorMethodCreator = (
 
   const body = blockStatement([returnStatement(statement)]);
 
-  // @ts-ignore
+  // @ts-expect-error: "computed" do not exist on the ClassMemberProperty (it
+  // will simply be undefined) and "static" is not listed in d.ts
   const {computed, key, static: _static} = member.node;
 
   const method = isClassPrivateProperty(member)

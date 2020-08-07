@@ -15,7 +15,8 @@ const run = async (
 
   await new Promise(resolve => {
     traverse(ast!, {
-      // @ts-ignore
+      // @ts-expect-error: Babel d.ts does not allow multiple combination while
+      // Babel itself allows it.
       'ClassProperty|ClassPrivateProperty|ClassMethod|ClassPrivateMethod'(
         path: NodePath<ClassMember>,
       ) {

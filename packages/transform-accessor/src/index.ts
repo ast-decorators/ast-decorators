@@ -11,17 +11,17 @@ export type SetterDecorator = (set?: AccessorInterceptor) => PropertyDecorator;
 
 const transformerName = '@ast-decorators/transform-accessor';
 
-export const accessor: AccessorDecorator = replaceDecorator(
+export const accessor = replaceDecorator(
   'accessor',
   transformerName,
-);
+) as AccessorDecorator;
 
-export const getter: GetterDecorator = replaceDecorator(
+export const getter = replaceDecorator(
   'getter',
   transformerName,
-);
+) as GetterDecorator;
 
-export const setter: SetterDecorator = replaceDecorator(
+export const setter = replaceDecorator(
   'setter',
   transformerName,
-);
+) as SetterDecorator;

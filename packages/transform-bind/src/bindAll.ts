@@ -6,7 +6,6 @@ import type {
 } from '@ast-decorators/utils/lib/common';
 import type {NodePath} from '@babel/core';
 import {
-  ClassBody,
   FunctionDeclaration,
   isClassMethod,
   isClassPrivateMethod,
@@ -24,7 +23,7 @@ export const bindAllTransformer: ASTSimpleDecorator<
     );
   }
 
-  const classBody = klass.get('body') as NodePath<ClassBody>;
+  const classBody = klass.get('body');
   const members = classBody.get('body') as ReadonlyArray<NodePath<ClassMember>>;
 
   for (const member of members) {

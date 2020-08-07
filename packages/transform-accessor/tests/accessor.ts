@@ -34,7 +34,8 @@ describe('@ast-decorators/transform-accessor', () => {
     });
 
     it('throws an error if transformer is not plugged in', () => {
-      // @ts-ignore
+      // @ts-expect-error: Here the runtime replacement used. It does not
+      // require arguments
       expect(() => accessor()()).toThrowError(
         "Decorator @accessor won't work because @ast-decorators/transform-accessor/lib/transformer" +
           'is not plugged in. You have to add it to your Babel config',
