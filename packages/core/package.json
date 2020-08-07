@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "@ast-decorators/utils": "^0.1.0",
-    "@babel/traverse": "^7.9.6",
-    "@babel/types": "^7.9.6",
+    "@babel/traverse": "^7.11.0",
+    "@babel/types": "^7.11.0",
     "minimatch": "^3.0.4"
   }
 }
