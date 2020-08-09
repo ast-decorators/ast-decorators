@@ -1,212 +1,265 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`@ast-decorators/transform-accessor @setter compiles for computed property 1`] = `
+exports[`@ast-decorators/transform-accessor @setter class-related transformations compiles for computed property 1`] = `
 "const $bar = Symbol();
 
 class Foo {
   #_$bar;
 
-  set [$bar](_value) {
-    this.#_$bar = _value;
+  set [$bar](value) {
+    const _this = this;
+
+    this.#_$bar = value;
   }
 
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter compiles for on static property 1`] = `
+exports[`@ast-decorators/transform-accessor @setter class-related transformations compiles for existing setter 1`] = `
 "class Foo {
-  static #_bar;
+  #bar = '10';
 
-  static set bar(_value) {
-    this.#_bar = _value;
+  set bar(value) {
+    this.#bar = value;
   }
 
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter compiles for private property 1`] = `
+exports[`@ast-decorators/transform-accessor @setter class-related transformations compiles for private property 1`] = `
 "class Foo {
   #_bar;
 
-  set #bar(_value) {
-    this.#_bar = _value;
+  set #bar(value) {
+    const _this = this;
+
+    this.#_bar = value;
   }
 
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter compiles for property with assignment 1`] = `
+exports[`@ast-decorators/transform-accessor @setter class-related transformations compiles for property with assignment 1`] = `
 "class Foo {
   #_bar = 'baz';
 
-  set bar(_value) {
-    this.#_bar = _value;
+  set bar(value) {
+    const _this = this;
+
+    this.#_bar = value;
   }
 
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter compiles without interceptor 1`] = `
-"class Foo {
-  #_bar;
-
-  set bar(_value) {
-    this.#_bar = _value;
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter context added for imported interceptor by default 1`] = `
-"import { set } from './set';
-
-class Foo {
-  #_bar;
-
-  set bar(_value) {
-    this.#_bar = set.call(this, _value);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter context added for imported interceptor if it fits "exclude" options and "disableByDefault" is set 1`] = `
-"import { markedSetter } from './set';
-
-class Foo {
-  #_bar;
-
-  set bar(_value) {
-    this.#_bar = markedSetter.call(this, _value);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter context added for in-file regular function interceptor (declaration) 1`] = `
-"function set(value) {
-  console.log(value);
-  return value;
-}
-
-class Foo {
-  #_bar;
-
-  set bar(_value) {
-    this.#_bar = set.call(this, _value);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter context added for in-file regular function interceptor (expression) 1`] = `
-"const set = function (value) {
-  console.log(value);
-  return value;
-};
-
-class Foo {
-  #_bar;
-
-  set bar(_value) {
-    this.#_bar = set.call(this, _value);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter context added for inline regular function interceptor 1`] = `
-"function _setInterceptor(value) {
-  console.log(value);
-  return value;
-}
-
-class Foo {
-  #_bar;
-
-  set bar(_value) {
-    this.#_bar = _setInterceptor.call(this, _value);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter context omitted for imported interceptor if "disableByDefault" is set 1`] = `
-"import { set } from './set';
-
-class Foo {
-  #_bar;
-
-  set bar(_value) {
-    this.#_bar = set(_value);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter context omitted for imported interceptor if it fits "exclude" options 1`] = `
-"import { markedSetter } from './set';
-
-class Foo {
-  #_bar;
-
-  set bar(_value) {
-    this.#_bar = markedSetter(_value);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter context omitted for in-file arrow function interceptor 1`] = `
-"const set = value => {
-  console.log(value);
-  return value;
-};
-
-class Foo {
-  #_bar;
-
-  set bar(_value) {
-    this.#_bar = set(_value);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter context omitted for inline arrow function interceptor 1`] = `
-"const _setInterceptor = value => {
-  console.log(value);
-  return value;
-};
-
-class Foo {
-  #_bar;
-
-  set bar(_value) {
-    this.#_bar = _setInterceptor(_value);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter uses class name instead of this for static property 1`] = `
+exports[`@ast-decorators/transform-accessor @setter class-related transformations compiles for static property 1`] = `
 "class Foo {
   static #_bar;
 
-  static set bar(_value) {
-    Foo.#_bar = _value;
+  static set bar(value) {
+    const _this = this;
+
+    this.#_bar = value;
   }
 
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @setter uses this for static property if class name is absent 1`] = `
+exports[`@ast-decorators/transform-accessor @setter class-related transformations compiles without interceptor 1`] = `
+"class Foo {
+  #_bar;
+
+  set bar(value) {
+    const _this = this;
+
+    this.#_bar = value;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter class-related transformations uses class name instead of this for static property 1`] = `
+"class Foo {
+  static #_bar;
+
+  static set bar(value) {
+    const _this = this;
+
+    Foo.#_bar = value;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter class-related transformations uses this for static property if class name is absent 1`] = `
 "const Foo = class {
   static #_bar;
 
-  static set bar(_value) {
-    this.#_bar = _value;
+  static set bar(value) {
+    const _this = this;
+
+    this.#_bar = value;
   }
 
 };"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter interceptor-related transformations compiles for imported interceptor 1`] = `
+"import { set } from './set';
+
+class Foo {
+  #_bar;
+
+  set bar(value) {
+    const _this = this;
+
+    this.#_bar = set(value, _this);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter interceptor-related transformations compiles for imported namespace interceptor 1`] = `
+"import * as setters from './set';
+
+class Foo {
+  #_bar;
+
+  set bar(value) {
+    const _this = this;
+
+    this.#_bar = setters.set(value, _this);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter interceptor-related transformations compiles for the arrow function interceptor 1`] = `
+"const _set = value => {
+  console.log(value);
+  return value;
+};
+
+class Foo {
+  #_bar;
+
+  set bar(value) {
+    const _this = this;
+
+    this.#_bar = _set(value, _this);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter interceptor-related transformations compiles for the regular function interceptor 1`] = `
+"function _set(value) {
+  console.log(value);
+  return value;
+}
+
+class Foo {
+  #_bar;
+
+  set bar(value) {
+    const _this = this;
+
+    this.#_bar = _set(value, _this);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter method content compiles for multiple decorators 1`] = `
+"import { set1, set2, set3 } from './sets';
+
+class Foo {
+  #_bar;
+
+  set bar(value) {
+    const _this = this;
+
+    value = set3(value, _this);
+    value = set2(value, _this);
+    this.#_bar = set1(value, _this);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter method content creates new this binding if there is no binding in the first statement 1`] = `
+"import { set } from './set';
+
+class Foo {
+  #bar;
+  #baz = '10';
+
+  set bar(value) {
+    const _this = this;
+
+    value = set(value, _this);
+    value = \`\${value}/\${value}\`;
+    const self = this;
+
+    this.#bar = function () {
+      return self.#baz + value;
+    };
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter method content does not create new this binding if it already exists as the first statement of the method 1`] = `
+"import { set } from './set';
+
+class Foo {
+  #bar;
+  #baz = '10';
+
+  set bar(value) {
+    const self = this;
+    value = set(value, self);
+
+    this.#bar = function () {
+      return self.#baz + value;
+    };
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter method content moves the array destructuring of the value param to the method body 1`] = `
+"import { set } from './set';
+
+class Foo {
+  #bar;
+
+  set bar(_value) {
+    const _this = this;
+
+    _value = set(_value, _this);
+    const [foo] = _value;
+    this.#bar = foo;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @setter method content moves the object destructuring of the value param to the method body 1`] = `
+"import { set } from './set';
+
+class Foo {
+  #bar;
+
+  set bar(_value) {
+    const _this = this;
+
+    _value = set(_value, _this);
+    const {
+      foo
+    } = _value;
+    this.#bar = foo;
+  }
+
+}"
 `;

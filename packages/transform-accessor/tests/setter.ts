@@ -10,140 +10,148 @@ const transformFile = async (
 
 describe('@ast-decorators/transform-accessor', () => {
   describe('@setter', () => {
-    it('compiles without interceptor', async () => {
-      const {code} = await transformFile('default', commonOptions);
-      expect(code).toMatchSnapshot();
+    describe('class-related transformations', () => {
+      it('compiles without interceptor', async () => {
+        const {code} = await transformFile('default', commonOptions);
+        expect(code).toMatchSnapshot();
+      });
+
+      it('compiles for private property', async () => {
+        const {code} = await transformFile('private-property', commonOptions);
+        expect(code).toMatchSnapshot();
+      });
+
+      it('compiles for property with assignment', async () => {
+        const {code} = await transformFile('property-assigning', commonOptions);
+        expect(code).toMatchSnapshot();
+      });
+
+      it('compiles for computed property', async () => {
+        const {code} = await transformFile('computed-property', commonOptions);
+        expect(code).toMatchSnapshot();
+      });
+
+      it('compiles for static property', async () => {
+        const {code} = await transformFile('static-property', commonOptions);
+        expect(code).toMatchSnapshot();
+      });
+
+      it('compiles for existing setter', async () => {
+        const {code} = await transformFile('setter-method', commonOptions);
+        expect(code).toMatchSnapshot();
+      });
+
+      it('uses class name instead of this for static property', async () => {
+        const {code} = await transformFile('static-property-class-name');
+        expect(code).toMatchSnapshot();
+      });
+
+      it('uses this for static property if class name is absent', async () => {
+        const {code} = await transformFile('static-property-no-class-name');
+        expect(code).toMatchSnapshot();
+      });
     });
 
-    it('compiles for private property', async () => {
-      const {code} = await transformFile('private-property', commonOptions);
-      expect(code).toMatchSnapshot();
-    });
-
-    it('compiles for property with assignment', async () => {
-      const {code} = await transformFile('property-assigning', commonOptions);
-      expect(code).toMatchSnapshot();
-    });
-
-    it('compiles for computed property', async () => {
-      const {code} = await transformFile('computed-property', commonOptions);
-      expect(code).toMatchSnapshot();
-    });
-
-    it('compiles for on static property', async () => {
-      const {code} = await transformFile('static-property', commonOptions);
-      expect(code).toMatchSnapshot();
-    });
-
-    it('uses class name instead of this for static property', async () => {
-      const {code} = await transformFile('static-property-class-name');
-      expect(code).toMatchSnapshot();
-    });
-
-    it('uses this for static property if class name is absent', async () => {
-      const {code} = await transformFile('static-property-no-class-name');
-      expect(code).toMatchSnapshot();
-    });
-
-    it('fails if applied to something else than property', async () => {
-      await expect(
-        transformFile('assert-property-type', commonOptions),
-      ).rejects.toThrowError(
-        'Applying @setter decorator to something other than property is not allowed',
-      );
-    });
-
-    it('fails if interceptor is something else than function or identifier', async () => {
-      await expect(
-        transformFile('assert-interceptor-type', commonOptions),
-      ).rejects.toThrowError(
-        'Accessor interceptor can only be function, free variable or object property',
-      );
-    });
-
-    it('fails if transformer is not plugged in', () => {
-      // @ts-expect-error: Here the runtime replacement used. It does not
-      // require arguments
-      expect(() => setter()()).toThrowError(
-        "Decorator @setter won't work because @ast-decorators/transform-accessor/lib/transformer" +
-          'is not plugged in. You have to add it to your Babel config',
-      );
-    });
-
-    describe('context', () => {
-      it('omitted for inline arrow function interceptor', async () => {
+    describe('interceptor-related transformations', () => {
+      it('compiles for the arrow function interceptor', async () => {
         const {code} = await transformFile(
-          'context-inline-arrow',
+          'interceptor-inline-arrow',
           commonOptions,
         );
         expect(code).toMatchSnapshot();
       });
 
-      it('added for inline regular function interceptor', async () => {
+      it('compiles for the regular function interceptor', async () => {
         const {code} = await transformFile(
-          'context-inline-regular',
+          'interceptor-inline-regular',
           commonOptions,
         );
         expect(code).toMatchSnapshot();
       });
 
-      it('omitted for in-file arrow function interceptor', async () => {
+      it('compiles for imported interceptor', async () => {
         const {code} = await transformFile(
-          'context-within-arrow',
+          'interceptor-import-default',
           commonOptions,
         );
         expect(code).toMatchSnapshot();
       });
 
-      it('added for in-file regular function interceptor (expression)', async () => {
+      it('compiles for imported namespace interceptor', async () => {
         const {code} = await transformFile(
-          'context-within-regular',
+          'interceptor-import-namespace',
+          commonOptions,
+        );
+        expect(code).toMatchSnapshot();
+      });
+    });
+
+    describe('method content', () => {
+      it('compiles for multiple decorators', async () => {
+        const {code} = await transformFile(
+          'content-multiple-decorators',
           commonOptions,
         );
         expect(code).toMatchSnapshot();
       });
 
-      it('added for in-file regular function interceptor (declaration)', async () => {
+      it('does not create new this binding if it already exists as the first statement of the method', async () => {
         const {code} = await transformFile(
-          'context-within-declaration',
+          'content-existing-this-1',
           commonOptions,
         );
         expect(code).toMatchSnapshot();
       });
 
-      it('added for imported interceptor by default', async () => {
+      it('creates new this binding if there is no binding in the first statement', async () => {
         const {code} = await transformFile(
-          'context-import-default',
+          'content-existing-this-2',
           commonOptions,
         );
         expect(code).toMatchSnapshot();
       });
 
-      it('omitted for imported interceptor if "disableByDefault" is set', async () => {
-        const {code} = await transformFile('context-import-disabled');
+      it('moves the object destructuring of the value param to the method body', async () => {
+        const {code} = await transformFile(
+          'content-object-destructuring',
+          commonOptions,
+        );
         expect(code).toMatchSnapshot();
       });
 
-      it('omitted for imported interceptor if it fits "exclude" options', async () => {
-        const {code} = await transformFile('context-import-ignored');
+      it('moves the array destructuring of the value param to the method body', async () => {
+        const {code} = await transformFile(
+          'content-array-destructuring',
+          commonOptions,
+        );
         expect(code).toMatchSnapshot();
       });
+    });
 
-      it('added for imported interceptor if it fits "exclude" options and "disableByDefault" is set', async () => {
-        const {code} = await transformFile('context-import-disabled-ignored');
-        expect(code).toMatchSnapshot();
-      });
-
-      it('fails if in-file interceptor is not a function', async () => {
+    describe('errors', () => {
+      it('fails if applied to something else than property', async () => {
         await expect(
-          transformFile('context-error-not-function', commonOptions),
-        ).rejects.toThrowError('set is not a function');
+          transformFile('assert-property-type', commonOptions),
+        ).rejects.toThrowError(
+          'Applying @setter decorator to something other than property or accessor is not allowed',
+        );
       });
 
-      it('fails if interceptor is not defined', async () => {
+      it('fails if interceptor is something else than function or identifier', async () => {
         await expect(
-          transformFile('context-error-not-defined', commonOptions),
-        ).rejects.toThrowError('set is not defined');
+          transformFile('assert-interceptor-type', commonOptions),
+        ).rejects.toThrowError(
+          'Accessor interceptor can only be function, free variable or object property',
+        );
+      });
+
+      it('fails if transformer is not plugged in', () => {
+        // @ts-expect-error: Here the runtime replacement used. It does not
+        // require arguments
+        expect(() => setter()()).toThrowError(
+          "Decorator @setter won't work because @ast-decorators/transform-accessor/lib/transformer" +
+            'is not plugged in. You have to add it to your Babel config',
+        );
       });
     });
   });

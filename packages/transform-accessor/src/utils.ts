@@ -4,47 +4,50 @@ import type {
   ASTSimpleDecorator,
   ClassMemberMethod,
   ClassMemberProperty,
-  PluginPass,
   PrivacyType,
 } from '@ast-decorators/utils/lib/common';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
-import shouldInterceptorUseContext from '@ast-decorators/utils/lib/shouldInterceptorUseContext';
+import {ClassMember} from '@ast-decorators/utils/src/common';
 import template from '@babel/template';
-import type {NodePath} from '@babel/traverse';
+import type {NodePath, Scope} from '@babel/traverse';
 import {
+  ArrayPattern,
   ArrowFunctionExpression,
-  callExpression,
-  CallExpression,
   Class,
   cloneNode,
   Decorator,
   FunctionDeclaration,
   functionDeclaration,
   FunctionExpression,
-  identifier,
   Identifier,
+  isArrayPattern,
   isArrowFunctionExpression,
+  isClassMethod,
+  isClassPrivateMethod,
   isClassPrivateProperty,
   isClassProperty,
   isFunctionExpression,
   isIdentifier,
   isMemberExpression,
-  memberExpression,
+  isObjectPattern,
+  isProperty,
   MemberExpression,
+  ObjectPattern,
   PrivateName,
   ThisExpression,
   thisExpression,
+  variableDeclaration,
   VariableDeclaration,
+  variableDeclarator,
 } from '@babel/types';
 
 export type TransformedNode = readonly [
   ClassMemberMethod,
-  Array<FunctionDeclaration | VariableDeclaration>,
+  ReadonlyArray<FunctionDeclaration | VariableDeclaration>,
 ];
 
 export type TransformAccessorOptions = Readonly<{
-  interceptorContext?: InterceptorContext;
   privacy?: PrivacyType;
   singleAccessorDecorators?: SuitabilityFactors;
   transformerPath?: string;
@@ -58,33 +61,38 @@ export type AccessorInterceptorNode =
   | Identifier
   | MemberExpression;
 
-export type InterceptorContext = Readonly<{
-  disableByDefault?: boolean;
-  exclude?: SuitabilityFactors;
-}>;
-
 export type AccessorMethodCreatorOptions = Readonly<{
   useClassName: boolean;
-  useContext: boolean;
   preservingDecorators: Decorator[] | null;
 }>;
 
 export type AccessorMethodCreator = (
   klass: NodePath<Class>,
-  member: NodePath<ClassMemberProperty>,
+  member: NodePath<ClassMember>,
   accessor: NodePath<AccessorInterceptorNode> | undefined,
-  storage: Identifier | PrivateName,
+  storage: Identifier | PrivateName | undefined,
   options: AccessorMethodCreatorOptions,
-) => TransformedNode;
+) => TransformedNode | null;
+
+export const isGetter = (member: ClassMemberMethod): boolean =>
+  member.kind === 'get';
+export const isSetter = (member: ClassMemberMethod): boolean =>
+  member.kind === 'set';
 
 export const assert = (
   decorator: string,
-  member: NodePath<ClassMemberProperty>,
-  interceptors: ReadonlyArray<NodePath<AccessorInterceptorNode> | undefined>,
+  member: ClassMember,
+  interceptors: ReadonlyArray<AccessorInterceptorNode | undefined>,
 ): void => {
-  if (!isClassProperty(member) && !isClassPrivateProperty(member)) {
+  if (
+    !(isClassProperty(member) || isClassPrivateProperty(member)) &&
+    !(
+      (isClassMethod(member) || isClassPrivateMethod(member)) &&
+      (isGetter(member) || isSetter(member))
+    )
+  ) {
     throw new ASTDecoratorsError(
-      `Applying @${decorator} decorator to something other than property is not allowed`,
+      `Applying @${decorator} decorator to something other than property or accessor is not allowed`,
     );
   }
 
@@ -105,13 +113,13 @@ export const assert = (
 
 export const createStorage = (
   klass: NodePath<Class>,
-  member: NodePath<ClassMemberProperty>,
+  member: ClassMemberProperty,
   privacy: PrivacyType = 'hard',
 ): ClassMemberProperty =>
-  createPropertyByPrivacy(privacy, getMemberName(member.node), klass, {
+  createPropertyByPrivacy(privacy, getMemberName(member), klass, {
     // @ts-expect-error: "static" is not listed in d.ts
-    static: member.node.static,
-    value: member.node.value,
+    static: member.static,
+    value: member.value,
   });
 
 const declarator = template(`const VAR = FUNCTION`);
@@ -120,38 +128,43 @@ export const createAccessorDecorator = (
   decorator: string,
   interceptor: NodePath<AccessorInterceptorNode> | undefined,
   impl: AccessorMethodCreator,
-): ASTSimpleDecorator<TransformAccessorOptions, ClassMemberProperty> => (
+): ASTSimpleDecorator<TransformAccessorOptions> => (
   {klass, member},
-  {
-    interceptorContext,
-    privacy,
-    useClassNameForStatic,
-  }: TransformAccessorOptions = {},
-  {filename}: PluginPass,
+  {privacy, useClassNameForStatic}: TransformAccessorOptions = {},
 ): void => {
-  assert(decorator, member!, [interceptor]);
+  assert(decorator, member!.node, [interceptor?.node]);
 
-  const storage = createStorage(klass, member!, privacy);
+  const storage = isProperty(member!.node)
+    ? createStorage(klass, member!.node, privacy)
+    : undefined;
 
-  const [method, declarations] = impl(
+  const result = impl(
     klass,
     member!,
     interceptor,
-    storage.key as Identifier | PrivateName,
+    storage?.key as Identifier | PrivateName | undefined,
     {
       preservingDecorators: member!.node.decorators,
       // @ts-expect-error: "static" is not listed in d.ts
       useClassName: !!member.node.static && !!useClassNameForStatic,
-      useContext: shouldInterceptorUseContext(
-        interceptor,
-        interceptorContext,
-        filename,
-      ),
     },
   );
 
-  klass.insertBefore(declarations);
-  member!.replaceWithMultiple([storage, method]);
+  if (!result) {
+    return;
+  }
+
+  const [method, declarations] = result;
+
+  klass.insertBefore(
+    declarations as Array<FunctionDeclaration | VariableDeclaration>,
+  );
+
+  if (storage) {
+    member!.insertBefore(storage);
+  }
+
+  member!.replaceWith(method);
 };
 
 export const ownerNode = (
@@ -163,49 +176,48 @@ export const ownerNode = (
 export const prepareInterceptor = (
   klass: NodePath<Class>,
   interceptor: AccessorInterceptorNode,
-  value: MemberExpression | Identifier,
   type: 'get' | 'set',
-  useContext: boolean,
-  useClassName: boolean,
 ): readonly [
-  CallExpression,
-  Array<FunctionDeclaration | VariableDeclaration>,
+  Identifier | MemberExpression,
+  FunctionDeclaration | VariableDeclaration | null,
 ] => {
   const isArrow = isArrowFunctionExpression(interceptor);
   const isRegular = isFunctionExpression(interceptor);
 
   const interceptorId =
     isArrow || isRegular
-      ? klass.parentPath.scope.generateUidIdentifier(`${type}Interceptor`)
-      : (interceptor as Identifier);
-
-  const declarations: Array<FunctionDeclaration | VariableDeclaration> = [];
-
-  if (isArrow) {
-    declarations.push(
-      declarator({
-        FUNCTION: interceptor,
-        VAR: interceptorId,
-      }) as VariableDeclaration,
-    );
-  } else if (isRegular) {
-    declarations.push(
-      functionDeclaration(
-        interceptorId,
-        (interceptor as FunctionExpression).params,
-        (interceptor as FunctionExpression).body,
-      ),
-    );
-  }
+      ? klass.parentPath.scope.generateUidIdentifier(type)
+      : (interceptor as Identifier | MemberExpression);
 
   return [
-    isArrowFunctionExpression(interceptor) ||
-    (isIdentifier(interceptor) && !useContext)
-      ? callExpression(interceptorId, [value])
-      : callExpression(memberExpression(interceptorId, identifier('call')), [
-          ownerNode(klass.node, useClassName),
-          value,
-        ]),
-    declarations,
+    interceptorId,
+    isArrow
+      ? (declarator({
+          FUNCTION: interceptor,
+          VAR: interceptorId as Identifier,
+        }) as VariableDeclaration)
+      : isRegular
+      ? functionDeclaration(
+          interceptorId as Identifier,
+          (interceptor as FunctionExpression).params,
+          (interceptor as FunctionExpression).body,
+        )
+      : null,
   ];
+};
+
+export const unifyValueParameter = (
+  scope: Scope,
+  rawValue: Identifier | ArrayPattern | ObjectPattern,
+): [Identifier, VariableDeclaration?] => {
+  if (isObjectPattern(rawValue) || isArrayPattern(rawValue)) {
+    const value = scope.generateUidIdentifier('value');
+
+    return [
+      value,
+      variableDeclaration('const', [variableDeclarator(rawValue, value)]),
+    ];
+  }
+
+  return [rawValue];
 };
