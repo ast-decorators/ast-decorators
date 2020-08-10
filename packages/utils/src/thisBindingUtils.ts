@@ -8,7 +8,7 @@ import {
   isVariableDeclaration,
   VariableDeclaration,
 } from '@babel/types';
-import {NodePath, Scope} from '@babel/traverse';
+import {Scope, NodePath} from '@babel/traverse';
 
 const thisDeclarationTemplate = template('const THIS = this');
 

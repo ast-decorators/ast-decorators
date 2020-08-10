@@ -2,7 +2,7 @@ import type {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
 import {
   createThisBinding,
   findOrCreateThisBinding,
-} from '@ast-decorators/utils/lib/useThisBinding';
+} from '@ast-decorators/utils/lib/thisBindingUtils';
 import type {NodePath} from '@babel/traverse';
 import {
   assignmentExpression,

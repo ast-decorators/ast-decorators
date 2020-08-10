@@ -3,7 +3,7 @@ import {
   createThisBinding,
   findThisBinding,
   findThisBindingIndex,
-} from '@ast-decorators/utils/lib/useThisBinding';
+} from '@ast-decorators/utils/lib/thisBindingUtils';
 import {ClassMemberMethod} from '@ast-decorators/utils/src/common';
 import type {NodePath} from '@babel/traverse';
 import {
