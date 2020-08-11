@@ -25,4 +25,4 @@ const foo: ASTCallableDecorator<
   member!.replaceWith(replacement);
 };
 
-export default () => [[foo, name => name === 'foo']];
+export default () => [[foo, (name) => name === 'foo']];

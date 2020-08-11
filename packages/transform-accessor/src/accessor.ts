@@ -48,7 +48,7 @@ export const accessorTransformer: ASTCallableDecorator<
       },
     ) ?? [];
 
-  const bothAccessorsDecorators = decorators?.filter(decorator => {
+  const bothAccessorsDecorators = decorators?.filter((decorator) => {
     const {importSource, originalImportName} = extractDecoratorMetadata(
       decorator,
     );

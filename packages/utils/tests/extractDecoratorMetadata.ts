@@ -26,7 +26,7 @@ describe('@ast-decorators/utils', () => {
     ): Promise<void> => {
       const ast = await parseToAST(fixture);
 
-      await new Promise(resolve => {
+      await new Promise((resolve) => {
         traverse(ast!, {
           CallExpression(path: NodePath<CallExpression>) {
             const callee = path.get('callee') as NodePath<Identifier>;
@@ -40,7 +40,7 @@ describe('@ast-decorators/utils', () => {
     };
 
     it('provides metadata for imported element', async () => {
-      await run('default', callee => {
+      await run('default', (callee) => {
         const metadata = extractImportMetadata(callee);
 
         expect(metadata.binding).toBe(
@@ -60,7 +60,7 @@ describe('@ast-decorators/utils', () => {
     });
 
     it('provides metadata for element that is a part of member expression', async () => {
-      await run('member', callee => {
+      await run('member', (callee) => {
         const metadata = extractImportMetadata(callee);
 
         expect(metadata.binding).toBe(
@@ -79,7 +79,7 @@ describe('@ast-decorators/utils', () => {
     });
 
     it('removes binding for an element', async () => {
-      await run('default', callee => {
+      await run('default', (callee) => {
         const metadata = extractImportMetadata(callee);
 
         const importDeclaration = metadata.binding!.path.parentPath as NodePath<
@@ -94,7 +94,7 @@ describe('@ast-decorators/utils', () => {
     });
 
     it('leaves untouched other bindings when removes an element binding', async () => {
-      await run('multiple-import', callee => {
+      await run('multiple-import', (callee) => {
         if (callee.node.name === 'foo') {
           return;
         }
@@ -119,7 +119,7 @@ describe('@ast-decorators/utils', () => {
 
     describe('originalImportName', () => {
       it('gets "default" as an original name if import is default', async () => {
-        await run('import-default', callee => {
+        await run('import-default', (callee) => {
           const metadata = extractImportMetadata(callee);
 
           expect(metadata.originalImportName).toBe('default');
@@ -127,7 +127,7 @@ describe('@ast-decorators/utils', () => {
       });
 
       it("gets an element's name if import is namespace", async () => {
-        await run('import-namespace', callee => {
+        await run('import-namespace', (callee) => {
           const metadata = extractImportMetadata(callee);
 
           expect(metadata.originalImportName).toBe('foo');
@@ -135,7 +135,7 @@ describe('@ast-decorators/utils', () => {
       });
 
       it('gets an imported name as an original name if import element is re-named', async () => {
-        await run('import-named', callee => {
+        await run('import-named', (callee) => {
           const metadata = extractImportMetadata(callee);
 
           expect(metadata.originalImportName).toBe('foo');
@@ -151,7 +151,7 @@ describe('@ast-decorators/utils', () => {
     ): Promise<void> => {
       const ast = await parseToAST(fixture);
 
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         traverse(ast!, {
           Decorator(path: NodePath<Decorator>) {
             callback(path);
@@ -162,7 +162,7 @@ describe('@ast-decorators/utils', () => {
     };
 
     it('provides metadata for decorator without args', async () => {
-      await run('without-args', decorator => {
+      await run('without-args', (decorator) => {
         const metadata = extractDecoratorMetadata(decorator);
 
         expect(metadata.args).toEqual([]);
@@ -171,7 +171,7 @@ describe('@ast-decorators/utils', () => {
     });
 
     it('provides metadata for decorator with args', async () => {
-      await run('with-args', decorator => {
+      await run('with-args', (decorator) => {
         const metadata = extractDecoratorMetadata(decorator);
 
         expect(metadata.args.length).toBe(1);
@@ -186,7 +186,7 @@ describe('@ast-decorators/utils', () => {
     });
 
     it('removes decorator', async () => {
-      await run('without-args', decorator => {
+      await run('without-args', (decorator) => {
         const metadata = extractDecoratorMetadata(decorator);
 
         metadata.remove();

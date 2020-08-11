@@ -7,4 +7,4 @@ const bar: ASTSimpleDecorator = ({klass}) => {
   klass.insertAfter([consoleTpl() as Statement]);
 };
 
-export default () => [[bar, name => name === 'bar']];
+export default () => [[bar, (name) => name === 'bar']];

@@ -13,7 +13,7 @@ const run = async (
 ): Promise<void> => {
   const ast = await parseToAST(fixture);
 
-  await new Promise(resolve => {
+  await new Promise((resolve) => {
     traverse(ast!, {
       // @ts-expect-error: Babel d.ts does not allow multiple combination while
       // Babel itself allows it.
@@ -31,37 +31,37 @@ const run = async (
 describe('@ast-decorators/utils', () => {
   describe('getMemberName', () => {
     it('gets a name for a regular property', async () => {
-      await run('regular-property', member => {
+      await run('regular-property', (member) => {
         expect(getMemberName(member)).toBe('bar');
       });
     });
 
     it('gets a name for a private property', async () => {
-      await run('private-property', member => {
+      await run('private-property', (member) => {
         expect(getMemberName(member)).toBe('bar');
       });
     });
 
     it('gets a name for a computed property', async () => {
-      await run('computed-property', member => {
+      await run('computed-property', (member) => {
         expect(getMemberName(member)).toBe('bar');
       });
     });
 
     it('gets a name for a string literal property', async () => {
-      await run('string-literal-property', member => {
+      await run('string-literal-property', (member) => {
         expect(getMemberName(member)).toBe('str-bar');
       });
     });
 
     it('gets a name for a numeric literal property', async () => {
-      await run('numeric-literal-property', member => {
+      await run('numeric-literal-property', (member) => {
         expect(getMemberName(member)).toBe(42);
       });
     });
 
     it('gets null for a property which key is an expression', async () => {
-      await run('expression-property', member => {
+      await run('expression-property', (member) => {
         expect(getMemberName(member)).toBeUndefined();
       });
     });

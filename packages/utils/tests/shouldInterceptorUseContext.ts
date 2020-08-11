@@ -23,7 +23,7 @@ const run = async (
     'input.ts',
   );
 
-  return new Promise(done => {
+  return new Promise((done) => {
     traverse(ast!, {
       Decorator(path: NodePath<Decorator>) {
         const expression = path.get('expression') as NodePath<CallExpression>;

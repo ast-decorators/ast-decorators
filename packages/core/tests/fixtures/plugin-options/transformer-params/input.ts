@@ -1,5 +1,5 @@
 import {foo} from '../decorators';
 
 @foo('bar', 'baz')
-  // @ts-ignore
+// @ts-ignore
 class Link extends HTMLAnchorElement {}

@@ -163,4 +163,4 @@ export const getter: AccessorMethodCreator = (
 export const getterTransformer: ASTCallableDecorator<
   [NodePath<AccessorInterceptorNode>?],
   TransformAccessorOptions
-> = get => createAccessorDecorator('getter', get, getter);
+> = (get) => createAccessorDecorator('getter', get, getter);

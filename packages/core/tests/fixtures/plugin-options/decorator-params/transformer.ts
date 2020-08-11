@@ -1,7 +1,4 @@
-import {
-  PluginPass,
-  PrivacyType,
-} from '@ast-decorators/utils/lib/common';
+import {PluginPass, PrivacyType} from '@ast-decorators/utils/lib/common';
 import {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
 import {NodePath} from '@babel/core';
 import {
@@ -21,7 +18,7 @@ const cwd = process.cwd();
 const foo: ASTCallableDecorator<
   [NodePath<StringLiteral>, NodePath<StringLiteral>],
   TransformerOptions
-> = name => (
+> = (name) => (
   {klass},
   {privacy}: TransformerOptions = {},
   {filename}: PluginPass,
@@ -37,4 +34,4 @@ const foo: ASTCallableDecorator<
   classBody.unshiftContainer('body', [node]);
 };
 
-export default () => [[foo, name => name === 'foo']];
+export default () => [[foo, (name) => name === 'foo']];

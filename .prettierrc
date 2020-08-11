@@ -1,5 +1,4 @@
 {
-  "arrowParens": "avoid",
   "bracketSpacing": false,
   "printWidth": 80,
   "trailingComma": "all",

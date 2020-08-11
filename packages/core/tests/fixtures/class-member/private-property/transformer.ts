@@ -19,4 +19,4 @@ const readonly = ({
   member.replaceWith(getter);
 };
 
-export default () => [[readonly, name => name === 'readonly']];
+export default () => [[readonly, (name) => name === 'readonly']];

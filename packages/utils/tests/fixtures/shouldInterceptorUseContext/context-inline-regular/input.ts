@@ -1,7 +1,7 @@
 // @ts-ignore
 class Foo {
   // @ts-ignore
-  @getter(function(value: string): string {
+  @getter(function (value: string): string {
     console.log(value);
 
     return value;

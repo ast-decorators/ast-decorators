@@ -78,4 +78,4 @@ const observe = (observer: NodePath<FunctionExpression>) => ({
   member.replaceWithMultiple([privateProperty, getter, setter]);
 };
 
-export default () => [[observe, name => name === 'observe']];
+export default () => [[observe, (name) => name === 'observe']];

@@ -82,7 +82,7 @@ const extractImportMetadata = (
       }
 
       binding.referencePaths = binding.referencePaths.filter(
-        p => p !== importIdentifier,
+        (p) => p !== importIdentifier,
       );
 
       if (binding.referencePaths.length === 0) {

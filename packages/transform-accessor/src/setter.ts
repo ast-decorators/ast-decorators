@@ -151,4 +151,4 @@ export const setter: AccessorMethodCreator = (
 export const setterTransformer: ASTCallableDecorator<
   [NodePath<AccessorInterceptorNode>?],
   TransformAccessorOptions
-> = set => createAccessorDecorator('setter', set, setter);
+> = (set) => createAccessorDecorator('setter', set, setter);

@@ -35,4 +35,4 @@ const bind = ({member}: Required<ASTDecoratorNodes>) => {
   member.insertBefore(constructor);
 };
 
-export default () => [[bind, name => name === 'bind']];
+export default () => [[bind, (name) => name === 'bind']];

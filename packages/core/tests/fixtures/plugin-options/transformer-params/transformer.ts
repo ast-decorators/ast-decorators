@@ -27,6 +27,6 @@ export default (
 
       classBody.unshiftContainer('body', [node]);
     },
-    name => name === 'foo',
+    (name) => name === 'foo',
   ],
 ];

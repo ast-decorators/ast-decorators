@@ -1,5 +1,5 @@
 // @ts-ignore
-import {markedGetter} from './get'
+import {markedGetter} from './get';
 
 // @ts-ignore
 class Foo {

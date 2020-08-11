@@ -1,7 +1,10 @@
 export default {
   plugins: [
-    [require('../../../../src'), {
-      transformers: []
-    }],
+    [
+      require('../../../../src'),
+      {
+        transformers: [],
+      },
+    ],
   ],
 };

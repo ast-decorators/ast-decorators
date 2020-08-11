@@ -25,4 +25,4 @@ const foo: ASTCallableDecorator<
   classBody.unshiftContainer('body', [node]);
 };
 
-export default () => [[foo, name => name === 'foo']];
+export default () => [[foo, (name) => name === 'foo']];

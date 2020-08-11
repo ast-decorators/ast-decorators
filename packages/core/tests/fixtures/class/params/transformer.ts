@@ -14,4 +14,4 @@ const foo = (...params: NodePath[]) => ({klass}: ASTDecoratorNodes) => {
   }
 };
 
-export default () => [[foo, name => name === 'foo']];
+export default () => [[foo, (name) => name === 'foo']];

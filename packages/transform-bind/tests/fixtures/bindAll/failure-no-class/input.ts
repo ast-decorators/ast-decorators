@@ -6,4 +6,3 @@ class Foo {
   @bindAll
   bar() {}
 }
-

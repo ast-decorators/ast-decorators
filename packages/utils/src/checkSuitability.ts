@@ -22,7 +22,7 @@ const checkSuitability = (
 ): boolean => {
   if (
     name &&
-    names?.some(rule =>
+    names?.some((rule) =>
       typeof rule === 'string' ? rule === name : rule.test(name),
     )
   ) {
@@ -38,14 +38,14 @@ const checkSuitability = (
   if (paths && !isNodeModule) {
     const fullPath = resolve(dirname(filename), source);
 
-    if (paths.some(rule => minimatch(fullPath, join(cwd, rule)))) {
+    if (paths.some((rule) => minimatch(fullPath, join(cwd, rule)))) {
       return true;
     }
   }
 
   if (nodeModules && isNodeModule) {
     if (
-      nodeModules.some(rule =>
+      nodeModules.some((rule) =>
         typeof rule === 'string'
           ? source.startsWith(rule) || minimatch(source, rule)
           : rule.test(source),

@@ -11,8 +11,8 @@ export default {
             {
               interceptorContext: {
                 exclude: {
-                  names: ['markedGetter']
-                }
+                  names: ['markedGetter'],
+                },
               },
               transformerPath: '**/transform-accessor/src',
             },

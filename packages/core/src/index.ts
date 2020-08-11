@@ -65,7 +65,7 @@ const extractClassMember: EntitiesExtractor = (
   member: NodePath<ClassMember>,
 ) => {
   const klass = member.findParent(
-    path => isClassDeclaration(path) || isClassExpression(path),
+    (path) => isClassDeclaration(path) || isClassExpression(path),
   ) as NodePath<Class>;
 
   return [klass, member];

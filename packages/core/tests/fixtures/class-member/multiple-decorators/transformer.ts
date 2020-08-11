@@ -36,6 +36,6 @@ const bar: ASTSimpleDecorator = ({klass, member}) => {
 };
 
 export default () => [
-  [foo, name => name === 'foo'],
-  [bar, name => name === 'bar'],
+  [foo, (name) => name === 'foo'],
+  [bar, (name) => name === 'bar'],
 ];
