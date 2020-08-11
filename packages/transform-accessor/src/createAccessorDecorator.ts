@@ -1,5 +1,5 @@
-import {ASTSimpleDecorator} from '@ast-decorators/utils/lib/common';
-import {NodePath} from '@babel/traverse';
+import type {ASTSimpleDecorator} from '@ast-decorators/utils/lib/common';
+import type {NodePath} from '@babel/traverse';
 import {
   FunctionDeclaration,
   Identifier,

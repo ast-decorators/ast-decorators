@@ -3,7 +3,7 @@ import type {
   ClassMember,
   ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
-import {Scope} from '@babel/traverse';
+import type {Scope} from '@babel/traverse';
 import {
   CallExpression,
   callExpression,
