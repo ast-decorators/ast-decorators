@@ -1,82 +1,144 @@
-import type {
-  ASTCallableDecorator,
-  ClassMemberProperty,
-} from '@ast-decorators/utils/lib/common';
+import type {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
+import {ClassMemberMethod} from '@ast-decorators/utils/src/common';
 import type {NodePath} from '@babel/traverse';
 import {
+  ArrayPattern,
   assignmentExpression,
+  BlockStatement,
   blockStatement,
-  CallExpression,
+  callExpression,
   classMethod,
   classPrivateMethod,
   Decorator,
   expressionStatement,
   FunctionDeclaration,
+  identifier,
   Identifier,
   isClassPrivateProperty,
+  isMethod,
   memberExpression,
   NumericLiteral,
+  ObjectPattern,
+  Pattern,
   PrivateName,
   StringLiteral,
+  thisExpression,
   VariableDeclaration,
 } from '@babel/types';
+import {createAccessorDecorator} from './createAccessorDecorator';
 import {
   AccessorInterceptorNode,
   AccessorMethodCreator,
-  createAccessorDecorator,
   ownerNode,
   prepareInterceptor,
   TransformAccessorOptions,
+  unifyValueParameter,
 } from './utils';
 
+// For properties, setter decorator creates a set method with a call to set the
+// interceptor function.
+// For methods, it puts the call to set the interceptor function before any
+// user-defined content. It works this way because we cannot actually understand
+// where the actual assignment happens and if it even happens at all. The only
+// thing we can do is to work with the "value" parameter.
+//
+// Original:
+//
+//   @setter(set)
+//   set foo(value) {
+//     THE_ACTUAL_ASSIGNMENT_HAPPENS_SOMEWHERE_HERE(value);
+//   }
+//
+// Transformed:
+//
+//   set foo(value) {
+//     value = set(value, this); // interceptor function
+//
+//     THE_ACTUAL_ASSIGNMENT_HAPPENS_SOMEWHERE_HERE(value);
+//   }
 export const setter: AccessorMethodCreator = (
   klass,
   member,
   interceptor,
   storageProperty,
-  {preservingDecorators, useClassName, useContext},
+  {preservingDecorators, useClassName},
 ) => {
-  const classBody = klass.get('body');
-  const valueId = classBody.scope.generateUidIdentifier('value');
+  const declarations: Array<FunctionDeclaration | VariableDeclaration> = [];
 
-  let statement: CallExpression | Identifier;
-  let declarations: Array<FunctionDeclaration | VariableDeclaration>;
+  const [interceptorId, interceptorDeclaration] = interceptor
+    ? prepareInterceptor(klass, interceptor.node, 'set')
+    : [];
 
-  if (interceptor) {
-    [statement, declarations] = prepareInterceptor(
-      klass,
-      interceptor.node,
-      valueId,
-      'set',
-      useContext,
-      useClassName,
-    );
-  } else {
-    statement = valueId;
-    declarations = [];
+  if (interceptorDeclaration) {
+    declarations.push(interceptorDeclaration);
   }
 
-  const body = blockStatement([
-    expressionStatement(
-      assignmentExpression(
-        '=',
-        memberExpression(ownerNode(klass.node, useClassName), storageProperty),
-        statement,
+  let params: ClassMemberMethod['params'];
+  let newBody: BlockStatement;
+
+  if (isMethod(member.node)) {
+    if (!interceptorId) {
+      return null;
+    }
+
+    const [rawValue] = member.get('params') as ReadonlyArray<
+      NodePath<Identifier | Pattern>
+    >;
+
+    const [valueId, valueSupportDeclaration] = unifyValueParameter(
+      member.scope,
+      // There is no reason to set the default value to value parameter
+      rawValue.node as Identifier | ArrayPattern | ObjectPattern,
+    );
+
+    params = [valueId];
+
+    const {body} = member.node;
+
+    newBody = blockStatement([
+      expressionStatement(
+        assignmentExpression(
+          '=',
+          valueId,
+          callExpression(interceptorId, [valueId, thisExpression()]),
+        ),
       ),
-    ),
-  ]);
+      ...(valueSupportDeclaration ? [valueSupportDeclaration] : []),
+      ...body.body,
+    ]);
+  } else {
+    const valueId = identifier('value');
+    params = [valueId];
+
+    const property = memberExpression(
+      ownerNode(klass.node, useClassName),
+      storageProperty!,
+    );
+
+    newBody = blockStatement([
+      expressionStatement(
+        assignmentExpression(
+          '=',
+          property,
+          interceptorId
+            ? callExpression(interceptorId, [valueId, thisExpression()])
+            : valueId,
+        ),
+      ),
+    ]);
+  }
 
   // @ts-expect-error: "computed" do not exist on the ClassMemberProperty (it
   // will simply be undefined) and "static" is not listed in d.ts
   const {computed, key, static: _static} = member.node;
 
   const method = isClassPrivateProperty(member)
-    ? classPrivateMethod('set', key as PrivateName, [valueId], body, _static)
+    ? classPrivateMethod('set', key as PrivateName, params, newBody, _static)
     : classMethod(
         'set',
         key as Identifier | StringLiteral | NumericLiteral,
-        [valueId],
-        body,
+        params,
+        newBody,
         computed,
         _static,
       );
@@ -88,6 +150,5 @@ export const setter: AccessorMethodCreator = (
 
 export const setterTransformer: ASTCallableDecorator<
   [NodePath<AccessorInterceptorNode>?],
-  TransformAccessorOptions,
-  ClassMemberProperty
+  TransformAccessorOptions
 > = set => createAccessorDecorator('setter', set, setter);

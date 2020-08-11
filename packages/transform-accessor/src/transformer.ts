@@ -1,7 +1,6 @@
 import type {
   ASTDecoratorDetector,
   ASTDecoratorTransformer,
-  ClassMemberProperty,
 } from '@ast-decorators/utils/lib/common';
 import type {NodePath} from '@babel/traverse';
 import minimatch from 'minimatch';
@@ -21,8 +20,7 @@ const detector = (
 const transformer: ASTDecoratorTransformer<
   | [NodePath<AccessorInterceptorNode>?, NodePath<AccessorInterceptorNode>?]
   | [NodePath<AccessorInterceptorNode>?],
-  TransformAccessorOptions,
-  ClassMemberProperty
+  TransformAccessorOptions
 > = (_, {transformerPath}: TransformAccessorOptions = {}) => [
   [accessorTransformer, detector('accessor', transformerPath)] as const,
   [getterTransformer, detector('getter', transformerPath)] as const,

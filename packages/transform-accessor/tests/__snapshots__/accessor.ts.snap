@@ -8,8 +8,8 @@ exports[`@ast-decorators/transform-accessor @accessor compiles for static proper
     return this.#_bar;
   }
 
-  static set bar(_value) {
-    this.#_bar = _value;
+  static set bar(value) {
+    this.#_bar = value;
   }
 
 }"
@@ -23,8 +23,8 @@ exports[`@ast-decorators/transform-accessor @accessor compiles without intercept
     return this.#_bar;
   }
 
-  set bar(_value) {
-    this.#_bar = _value;
+  set bar(value) {
+    this.#_bar = value;
   }
 
 }"
@@ -42,8 +42,8 @@ class Foo {
   }
 
   @other()
-  set bar(_value) {
-    this.#_bar = _value;
+  set bar(value) {
+    this.#_bar = value;
   }
 
 }"
@@ -60,8 +60,8 @@ class Foo {
     return this.#_bar;
   }
 
-  set bar(_value) {
-    this.#_bar = _value;
+  set bar(value) {
+    this.#_bar = value;
   }
 
 }"
