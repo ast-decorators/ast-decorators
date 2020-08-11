@@ -30,10 +30,10 @@ import {
   VariableDeclaration,
   variableDeclarator,
 } from '@babel/types';
+import {createAccessorDecorator} from './createAccessorDecorator';
 import {
   AccessorInterceptorNode,
   AccessorMethodCreator,
-  createAccessorDecorator,
   ownerNode,
   prepareInterceptor,
   TransformAccessorOptions,
@@ -83,15 +83,13 @@ const prepareResult = (
 //
 //   @getter(get)
 //   get foo() {
-//     const RESULT = DO SOMETHING;
-//     return RESULT;
+//     return SOMETHING;
 //   }
 //
 // Transformed
 //
 //   get foo() {
-//     const RESULT = DO SOMETHING;
-//     const _result = get(RESULT, this); // interceptor function
+//     const _result = get(SOMETHING, this); // interceptor function
 //
 //     return _result;
 //   }

@@ -1,7 +1,6 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import type {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
 import type {
-  ASTSimpleDecorator,
   ClassMemberMethod,
   ClassMemberProperty,
   PrivacyType,
@@ -31,7 +30,6 @@ import {
   isIdentifier,
   isMemberExpression,
   isObjectPattern,
-  isProperty,
   MemberExpression,
   ObjectPattern,
   PrivateName,
@@ -69,7 +67,7 @@ export type AccessorMethodCreatorOptions = Readonly<{
 export type AccessorMethodCreator = (
   klass: NodePath<Class>,
   member: NodePath<ClassMember>,
-  accessor: NodePath<AccessorInterceptorNode> | undefined,
+  interceptor: NodePath<AccessorInterceptorNode> | undefined,
   storage: Identifier | PrivateName | undefined,
   options: AccessorMethodCreatorOptions,
 ) => TransformedNode | null;
@@ -123,49 +121,6 @@ export const createStorage = (
   });
 
 const declarator = template(`const VAR = FUNCTION`);
-
-export const createAccessorDecorator = (
-  decorator: string,
-  interceptor: NodePath<AccessorInterceptorNode> | undefined,
-  impl: AccessorMethodCreator,
-): ASTSimpleDecorator<TransformAccessorOptions> => (
-  {klass, member},
-  {privacy, useClassNameForStatic}: TransformAccessorOptions = {},
-): void => {
-  assert(decorator, member!.node, [interceptor?.node]);
-
-  const storage = isProperty(member!.node)
-    ? createStorage(klass, member!.node, privacy)
-    : undefined;
-
-  const result = impl(
-    klass,
-    member!,
-    interceptor,
-    storage?.key as Identifier | PrivateName | undefined,
-    {
-      preservingDecorators: member!.node.decorators,
-      // @ts-expect-error: "static" is not listed in d.ts
-      useClassName: !!member.node.static && !!useClassNameForStatic,
-    },
-  );
-
-  if (!result) {
-    return;
-  }
-
-  const [method, declarations] = result;
-
-  klass.insertBefore(
-    declarations as Array<FunctionDeclaration | VariableDeclaration>,
-  );
-
-  if (storage) {
-    member!.insertBefore(storage);
-  }
-
-  member!.replaceWith(method);
-};
 
 export const ownerNode = (
   klass: Class,

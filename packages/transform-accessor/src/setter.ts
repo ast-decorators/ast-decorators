@@ -30,10 +30,10 @@ import {
   StringLiteral,
   VariableDeclaration,
 } from '@babel/types';
+import {createAccessorDecorator} from './createAccessorDecorator';
 import {
   AccessorInterceptorNode,
   AccessorMethodCreator,
-  createAccessorDecorator,
   ownerNode,
   prepareInterceptor,
   TransformAccessorOptions,
@@ -51,15 +51,15 @@ import {
 //
 //   @setter(set)
 //   set foo(value) {
-//     THE ACTUAL ASSIGNMENT HAPPENS SOMEWHERE HERE;
+//     THE_ACTUAL_ASSIGNMENT_HAPPENS_SOMEWHERE_HERE(value);
 //   }
 //
-// Transformed
+// Transformed:
 //
 //   set foo(value) {
 //     value = set(value, this); // interceptor function
 //
-//     THE ACTUAL ASSIGNMENT HAPPENS SOMEWHERE HERE;
+//     THE_ACTUAL_ASSIGNMENT_HAPPENS_SOMEWHERE_HERE(value);
 //   }
 export const setter: AccessorMethodCreator = (
   klass,
