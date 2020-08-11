@@ -97,9 +97,7 @@ class Foo {
   #_bar;
 
   get bar() {
-    const _this = this;
-
-    return get(this.#_bar, _this);
+    return get(this.#_bar, this);
   }
 
 }"
@@ -112,9 +110,7 @@ class Foo {
   #_bar;
 
   get bar() {
-    const _this = this;
-
-    return getters.get(this.#_bar, _this);
+    return getters.get(this.#_bar, this);
   }
 
 }"
@@ -130,9 +126,7 @@ class Foo {
   #_bar;
 
   get bar() {
-    const _this = this;
-
-    return _get(this.#_bar, _this);
+    return _get(this.#_bar, this);
   }
 
 }"
@@ -148,9 +142,7 @@ class Foo {
   #_bar;
 
   get bar() {
-    const _this = this;
-
-    return _get(this.#_bar, _this);
+    return _get(this.#_bar, this);
   }
 
 }"
@@ -163,31 +155,10 @@ class Foo {
   #_bar;
 
   get bar() {
-    const _this = this;
+    let _result = get1(this.#_bar, this);
 
-    let _result = get1(this.#_bar, _this);
-
-    _result = get2(_result, _this);
-    return get3(_result, _this);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @getter method content does not create new this binding if it already exists 1`] = `
-"import { get } from './get';
-
-class Foo {
-  #bar = '10';
-
-  get bar() {
-    const self = this;
-
-    let _result = function () {
-      return self.#bar;
-    };
-
-    return get(_result, self);
+    _result = get2(_result, this);
+    return get3(_result, this);
   }
 
 }"
@@ -198,12 +169,10 @@ exports[`@ast-decorators/transform-accessor @getter method content uses existing
 
 class Foo {
   get bar() {
-    const _this = this;
-
     const baz = {
       fuzz: 1
     };
-    return get(baz, _this);
+    return get(baz, this);
   }
 
 }"

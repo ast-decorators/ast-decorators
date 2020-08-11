@@ -1,8 +1,4 @@
 import type {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
-import {
-  createThisBinding,
-  findOrCreateThisBinding,
-} from '@ast-decorators/utils/lib/thisBindingUtils';
 import type {NodePath} from '@babel/traverse';
 import {
   assignmentExpression,
@@ -26,6 +22,7 @@ import {
   ReturnStatement,
   returnStatement,
   StringLiteral,
+  thisExpression,
   variableDeclaration,
   VariableDeclaration,
   variableDeclarator,
@@ -121,31 +118,26 @@ export const getter: AccessorMethodCreator = (
 
     const originalBody = body.node.body.slice(0, -1);
 
-    const [thisBinding, thisBindingDeclaration] = findOrCreateThisBinding(body);
     const [resultId, resultDeclaration] = prepareResult(body);
 
     newBody = blockStatement([
-      ...(thisBindingDeclaration ? [thisBindingDeclaration] : []),
       ...originalBody,
       ...(resultDeclaration ? [resultDeclaration] : []),
-      returnStatement(callExpression(interceptorId, [resultId, thisBinding])),
+      returnStatement(
+        callExpression(interceptorId, [resultId, thisExpression()]),
+      ),
     ]);
   } else {
-    const [thisId, thisDeclaration] = createThisBinding();
-
     const property = memberExpression(
       ownerNode(klass.node, useClassName),
       storageProperty!,
     );
 
     const result = interceptorId
-      ? callExpression(interceptorId, [property, thisId])
+      ? callExpression(interceptorId, [property, thisExpression()])
       : property;
 
-    newBody = blockStatement([
-      ...(interceptorId ? [thisDeclaration] : []),
-      returnStatement(result),
-    ]);
+    newBody = blockStatement([returnStatement(result)]);
   }
 
   // @ts-expect-error: "computed" do not exist on the ClassMemberProperty (it

@@ -7,8 +7,6 @@ class Foo {
   #_$bar;
 
   set [$bar](value) {
-    const _this = this;
-
     this.#_$bar = value;
   }
 
@@ -31,8 +29,6 @@ exports[`@ast-decorators/transform-accessor @setter class-related transformation
   #_bar;
 
   set #bar(value) {
-    const _this = this;
-
     this.#_bar = value;
   }
 
@@ -44,8 +40,6 @@ exports[`@ast-decorators/transform-accessor @setter class-related transformation
   #_bar = 'baz';
 
   set bar(value) {
-    const _this = this;
-
     this.#_bar = value;
   }
 
@@ -57,8 +51,6 @@ exports[`@ast-decorators/transform-accessor @setter class-related transformation
   static #_bar;
 
   static set bar(value) {
-    const _this = this;
-
     this.#_bar = value;
   }
 
@@ -70,8 +62,6 @@ exports[`@ast-decorators/transform-accessor @setter class-related transformation
   #_bar;
 
   set bar(value) {
-    const _this = this;
-
     this.#_bar = value;
   }
 
@@ -83,8 +73,6 @@ exports[`@ast-decorators/transform-accessor @setter class-related transformation
   static #_bar;
 
   static set bar(value) {
-    const _this = this;
-
     Foo.#_bar = value;
   }
 
@@ -96,8 +84,6 @@ exports[`@ast-decorators/transform-accessor @setter class-related transformation
   static #_bar;
 
   static set bar(value) {
-    const _this = this;
-
     this.#_bar = value;
   }
 
@@ -111,9 +97,7 @@ class Foo {
   #_bar;
 
   set bar(value) {
-    const _this = this;
-
-    this.#_bar = set(value, _this);
+    this.#_bar = set(value, this);
   }
 
 }"
@@ -126,9 +110,7 @@ class Foo {
   #_bar;
 
   set bar(value) {
-    const _this = this;
-
-    this.#_bar = setters.set(value, _this);
+    this.#_bar = setters.set(value, this);
   }
 
 }"
@@ -144,9 +126,7 @@ class Foo {
   #_bar;
 
   set bar(value) {
-    const _this = this;
-
-    this.#_bar = _set(value, _this);
+    this.#_bar = _set(value, this);
   }
 
 }"
@@ -162,9 +142,7 @@ class Foo {
   #_bar;
 
   set bar(value) {
-    const _this = this;
-
-    this.#_bar = _set(value, _this);
+    this.#_bar = _set(value, this);
   }
 
 }"
@@ -177,52 +155,9 @@ class Foo {
   #_bar;
 
   set bar(value) {
-    const _this = this;
-
-    value = set3(value, _this);
-    value = set2(value, _this);
-    this.#_bar = set1(value, _this);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter method content creates new this binding if there is no binding in the first statement 1`] = `
-"import { set } from './set';
-
-class Foo {
-  #bar;
-  #baz = '10';
-
-  set bar(value) {
-    const _this = this;
-
-    value = set(value, _this);
-    value = \`\${value}/\${value}\`;
-    const self = this;
-
-    this.#bar = function () {
-      return self.#baz + value;
-    };
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @setter method content does not create new this binding if it already exists as the first statement of the method 1`] = `
-"import { set } from './set';
-
-class Foo {
-  #bar;
-  #baz = '10';
-
-  set bar(value) {
-    const self = this;
-    value = set(value, self);
-
-    this.#bar = function () {
-      return self.#baz + value;
-    };
+    value = set3(value, this);
+    value = set2(value, this);
+    this.#_bar = set1(value, this);
   }
 
 }"
@@ -235,9 +170,7 @@ class Foo {
   #bar;
 
   set bar(_value) {
-    const _this = this;
-
-    _value = set(_value, _this);
+    _value = set(_value, this);
     const [foo] = _value;
     this.#bar = foo;
   }
@@ -252,9 +185,7 @@ class Foo {
   #bar;
 
   set bar(_value) {
-    const _this = this;
-
-    _value = set(_value, _this);
+    _value = set(_value, this);
     const {
       foo
     } = _value;

@@ -95,22 +95,6 @@ describe('@ast-decorators/transform-accessor', () => {
         expect(code).toMatchSnapshot();
       });
 
-      it('does not create new this binding if it already exists as the first statement of the method', async () => {
-        const {code} = await transformFile(
-          'content-existing-this-1',
-          commonOptions,
-        );
-        expect(code).toMatchSnapshot();
-      });
-
-      it('creates new this binding if there is no binding in the first statement', async () => {
-        const {code} = await transformFile(
-          'content-existing-this-2',
-          commonOptions,
-        );
-        expect(code).toMatchSnapshot();
-      });
-
       it('moves the object destructuring of the value param to the method body', async () => {
         const {code} = await transformFile(
           'content-object-destructuring',

@@ -9,8 +9,6 @@ exports[`@ast-decorators/transform-accessor @accessor compiles for static proper
   }
 
   static set bar(value) {
-    const _this = this;
-
     this.#_bar = value;
   }
 
@@ -26,8 +24,6 @@ exports[`@ast-decorators/transform-accessor @accessor compiles without intercept
   }
 
   set bar(value) {
-    const _this = this;
-
     this.#_bar = value;
   }
 
@@ -47,8 +43,6 @@ class Foo {
 
   @other()
   set bar(value) {
-    const _this = this;
-
     this.#_bar = value;
   }
 
@@ -67,8 +61,6 @@ class Foo {
   }
 
   set bar(value) {
-    const _this = this;
-
     this.#_bar = value;
   }
 

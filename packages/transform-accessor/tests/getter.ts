@@ -95,14 +95,6 @@ describe('@ast-decorators/transform-accessor', () => {
         expect(code).toMatchSnapshot();
       });
 
-      it('does not create new this binding if it already exists', async () => {
-        const {code} = await transformFile(
-          'content-existing-this',
-          commonOptions,
-        );
-        expect(code).toMatchSnapshot();
-      });
-
       it('uses existing variable for return', async () => {
         const {code} = await transformFile('content-return-var', commonOptions);
         expect(code).toMatchSnapshot();

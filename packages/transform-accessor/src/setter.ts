@@ -1,9 +1,4 @@
 import type {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
-import {
-  createThisBinding,
-  findThisBinding,
-  findThisBindingIndex,
-} from '@ast-decorators/utils/lib/thisBindingUtils';
 import {ClassMemberMethod} from '@ast-decorators/utils/src/common';
 import type {NodePath} from '@babel/traverse';
 import {
@@ -26,8 +21,8 @@ import {
   ObjectPattern,
   Pattern,
   PrivateName,
-  Statement,
   StringLiteral,
+  thisExpression,
   VariableDeclaration,
 } from '@babel/types';
 import {createAccessorDecorator} from './createAccessorDecorator';
@@ -98,44 +93,20 @@ export const setter: AccessorMethodCreator = (
 
     params = [valueId];
 
-    const body = member.get('body') as NodePath<BlockStatement>;
-
-    // Unlike the getter decorator, in the setter, the user-defined content is
-    // placed below the decorator-produced one. So, we cannot easily use the
-    // user-defined "this" binding if it exists. The only thing we can do is to
-    // check if the first statement contains "this" binding. If it does, we use
-    // it; otherwise, we create our own.
-    const hasThisBindingDeclarationOnTop =
-      findThisBindingIndex(body.node) === 0;
-
-    let originalBody: Statement[];
-    let topThisDeclaration: Statement;
-    let thisId: Identifier;
-
-    if (hasThisBindingDeclarationOnTop) {
-      originalBody = body.node.body.slice(1);
-      [topThisDeclaration] = body.node.body;
-      thisId = findThisBinding(body.node)!;
-    } else {
-      originalBody = body.node.body;
-      [thisId, topThisDeclaration] = createThisBinding(body.scope);
-    }
+    const {body} = member.node;
 
     newBody = blockStatement([
-      topThisDeclaration,
       expressionStatement(
         assignmentExpression(
           '=',
           valueId,
-          callExpression(interceptorId, [valueId, thisId]),
+          callExpression(interceptorId, [valueId, thisExpression()]),
         ),
       ),
       ...(valueSupportDeclaration ? [valueSupportDeclaration] : []),
-      ...originalBody,
+      ...body.body,
     ]);
   } else {
-    const [thisId, thisDeclaration] = createThisBinding();
-
     const valueId = identifier('value');
     params = [valueId];
 
@@ -144,17 +115,17 @@ export const setter: AccessorMethodCreator = (
       storageProperty!,
     );
 
-    const assignment = expressionStatement(
-      assignmentExpression(
-        '=',
-        property,
-        interceptorId
-          ? callExpression(interceptorId, [valueId, thisId])
-          : valueId,
+    newBody = blockStatement([
+      expressionStatement(
+        assignmentExpression(
+          '=',
+          property,
+          interceptorId
+            ? callExpression(interceptorId, [valueId, thisExpression()])
+            : valueId,
+        ),
       ),
-    );
-
-    newBody = blockStatement([thisDeclaration, assignment]);
+    ]);
   }
 
   // @ts-expect-error: "computed" do not exist on the ClassMemberProperty (it
