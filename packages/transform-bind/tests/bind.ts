@@ -27,9 +27,46 @@ describe('@ast-decorators/transform-bind', () => {
       expect(code).toMatchSnapshot();
     });
 
+    it('compiles for static method', async () => {
+      const {code} = await transformFile('method-static', commonOptions);
+      expect(code).toMatchSnapshot();
+    });
+
+    it('compiles for static generator method', async () => {
+      const {code} = await transformFile(
+        'method-static-generator',
+        commonOptions,
+      );
+      expect(code).toMatchSnapshot();
+    });
+
+    it('compiles for private static method', async () => {
+      const {code} = await transformFile(
+        'method-private-static',
+        commonOptions,
+      );
+      expect(code).toMatchSnapshot();
+    });
+
+    it('compiles for private static generator method', async () => {
+      const {code} = await transformFile(
+        'method-private-static-generator',
+        commonOptions,
+      );
+      expect(code).toMatchSnapshot();
+    });
+
     it('fails if decorator applied to something other than method', async () => {
       await expect(
-        transformFile('failure-no-method', commonOptions),
+        transformFile('failure-not-method', commonOptions),
+      ).rejects.toThrowError(
+        'Applying @bind decorator to something other than method is not allowed',
+      );
+    });
+
+    it('fails if decorator applied to accessor', async () => {
+      await expect(
+        transformFile('failure-not-method-accessor', commonOptions),
       ).rejects.toThrowError(
         'Applying @bind decorator to something other than method is not allowed',
       );

@@ -1,20 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`@ast-decorators/transform-bind @bind compiles for private generator method 1`] = `
-"function* _bar() {
-  console.log(this);
-}
+"class Foo {
+  #bar = this.#_bar.bind(this);
 
-class Foo {
-  #bar = _bar.bind(this);
+  *#_bar() {
+    console.log(this);
+  }
+
 }"
 `;
 
 exports[`@ast-decorators/transform-bind @bind compiles for private method 1`] = `
 "class Foo {
-  #bar = () => {
+  #bar = this.#_bar.bind(this);
+
+  #_bar() {
     console.log(this);
-  };
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-bind @bind compiles for private static generator method 1`] = `
+"class Foo {
+  static #bar = this.#_bar.bind(this);
+
+  static *#_bar() {
+    console.log(this);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-bind @bind compiles for private static method 1`] = `
+"class Foo {
+  static #bar = this.#_bar.bind(this);
+
+  static #_bar() {
+    console.log(this);
+  }
+
 }"
 `;
 
@@ -23,6 +49,28 @@ exports[`@ast-decorators/transform-bind @bind compiles for regular method 1`] = 
   bar = this.bar.bind(this);
 
   bar() {
+    console.log(this);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-bind @bind compiles for static generator method 1`] = `
+"class Foo {
+  static bar = this.bar.bind(this);
+
+  static *bar() {
+    console.log(this);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-bind @bind compiles for static method 1`] = `
+"class Foo {
+  static bar = this.bar.bind(this);
+
+  static bar() {
     console.log(this);
   }
 

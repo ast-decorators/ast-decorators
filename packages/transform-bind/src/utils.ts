@@ -7,7 +7,10 @@ export type TransformBindOptions = Readonly<{
 }>;
 
 export const assertBind = (member: ClassMember): void => {
-  if (!isClassMethod(member) && !isClassPrivateMethod(member)) {
+  if (
+    (!isClassMethod(member) && !isClassPrivateMethod(member)) ||
+    member.kind !== 'method'
+  ) {
     throw new ASTDecoratorsError(
       `Applying @bind decorator to something other than method is not allowed`,
     );

@@ -32,17 +32,7 @@ export const bindAllTransformer: ASTSimpleDecorator<
     const declarations: FunctionDeclaration[] = [];
 
     if (isClassMethod(node) || isClassPrivateMethod(node)) {
-      const [replacement, declaration] = bind(node, klass.scope);
-
-      if (declaration) {
-        declarations.push(declaration);
-      }
-
-      if (Array.isArray(replacement)) {
-        member.replaceWithMultiple(replacement);
-      } else {
-        member.replaceWith(replacement);
-      }
+      member.replaceWithMultiple(bind(node, klass.scope));
     }
 
     klass.insertBefore(declarations);
