@@ -5,57 +5,29 @@ import type {
 } from '@ast-decorators/utils/lib/common';
 import type {Scope} from '@babel/traverse';
 import {
-  arrowFunctionExpression,
+  CallExpression,
   callExpression,
   ClassMethod,
+  classPrivateMethod,
   ClassPrivateMethod,
   classPrivateProperty,
   classProperty,
-  FunctionDeclaration,
-  functionDeclaration,
+  Expression,
   identifier,
   isPrivate,
   memberExpression,
+  privateName,
+  PrivateName,
   thisExpression,
 } from '@babel/types';
 import {assertBind, TransformBindOptions} from './utils';
 
-export type BoundNodes = readonly [
-  ClassMember | ClassMember[],
-  FunctionDeclaration?,
-];
+export type BoundNodes = [ClassMember, ClassMemberMethod];
 
-const bindPrivate = (method: ClassPrivateMethod, scope: Scope): BoundNodes => {
-  const {async, body, decorators, generator, key, params} = method;
-
-  if (generator) {
-    const functionId = scope.generateUidIdentifier(key.id.name);
-
-    return [
-      classPrivateProperty(
-        key,
-        callExpression(memberExpression(functionId, identifier('bind')), [
-          thisExpression(),
-        ]),
-        decorators,
-      ),
-      functionDeclaration(functionId, params, body, generator, async),
-    ];
-  }
-
-  return [
-    classPrivateProperty(
-      key,
-      arrowFunctionExpression(params, body, async),
-      decorators,
-    ),
-  ];
-};
-
-const bindRegular = (method: ClassMethod): BoundNodes => {
-  const {computed, decorators, key, static: _static} = method;
-
-  const bindingExpression = callExpression(
+const createBindingExpression = (
+  key: Expression | PrivateName,
+): CallExpression =>
+  callExpression(
     memberExpression(
       memberExpression(thisExpression(), key),
       identifier('bind'),
@@ -63,18 +35,55 @@ const bindRegular = (method: ClassMethod): BoundNodes => {
     [thisExpression()],
   );
 
+const bindPrivate = (method: ClassPrivateMethod, scope: Scope): BoundNodes => {
+  const {
+    async,
+    body,
+    decorators,
+    generator,
+    key,
+    params,
+    static: _static,
+  } = method;
+
+  const replacementKey = privateName(scope.generateUidIdentifier(key.id.name));
+
+  const replacementNode = classPrivateProperty(
+    key,
+    createBindingExpression(replacementKey),
+  );
+
+  // @ts-expect-error: "static" is not listed in d.ts
+  replacementNode.static = _static;
+
+  const replacementMethod = classPrivateMethod(
+    'method',
+    replacementKey,
+    params,
+    body,
+    _static,
+  );
+
+  replacementMethod.async = async;
+  replacementMethod.generator = generator;
+  replacementMethod.decorators = decorators;
+
+  return [replacementNode, replacementMethod];
+};
+
+const bindRegular = (method: ClassMethod): BoundNodes => {
+  const {computed, key, static: _static} = method;
+
   return [
-    [
-      classProperty(
-        key,
-        bindingExpression,
-        null,
-        decorators,
-        computed,
-        _static,
-      ),
-      method,
-    ],
+    classProperty(
+      key,
+      createBindingExpression(key),
+      null,
+      null,
+      computed,
+      _static,
+    ),
+    method,
   ];
 };
 
@@ -87,15 +96,7 @@ export const bindTransformer: ASTSimpleDecorator<
 > = ({klass, member}) => {
   assertBind(member!.node);
 
-  const [replacement, declaration] = bind(member!.node, klass.scope);
+  const replacement = bind(member!.node, klass.scope);
 
-  if (declaration) {
-    klass.insertBefore(declaration);
-  }
-
-  if (Array.isArray(replacement)) {
-    member!.replaceWithMultiple(replacement);
-  } else {
-    member!.replaceWith(replacement);
-  }
+  member!.replaceWithMultiple(replacement);
 };

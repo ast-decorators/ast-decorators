@@ -7,7 +7,7 @@ import type {
 } from '@ast-decorators/utils/lib/common';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
-import {ClassMember} from '@ast-decorators/utils/src/common';
+import type {ClassMember} from '@ast-decorators/utils/src/common';
 import template from '@babel/template';
 import type {NodePath, Scope} from '@babel/traverse';
 import {
