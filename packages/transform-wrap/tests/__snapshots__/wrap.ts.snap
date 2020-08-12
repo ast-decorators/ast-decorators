@@ -1,0 +1,204 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@ast-decorators/transform-wrap @wrap method compiles for a generator method 1`] = `
+"import { wrapper } from './bar';
+
+class Foo {
+  static #_bar = wrapper(function* bar(num) {
+    return num * num;
+  });
+
+  bar(...args) {
+    return this.constructor.#_bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap method compiles for a private generator method 1`] = `
+"import { wrapper } from './bar';
+
+class Foo {
+  static #_bar = wrapper(function* bar(num) {
+    return num * num;
+  });
+
+  #bar(...args) {
+    return this.constructor.#_bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap method compiles for a private method 1`] = `
+"import { wrapper } from './bar';
+
+class Foo {
+  static #_bar = wrapper(function bar(num) {
+    return num * num;
+  });
+
+  #bar(...args) {
+    return this.constructor.#_bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap property compiles for a private property 1`] = `
+"import { wrapper } from './wrapper';
+
+class Foo {
+  #bar = wrapper(num => {
+    return num * num;
+  });
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap property compiles for a property defined as a regular function 1`] = `
+"import { wrapper } from './wrapper';
+
+class Foo {
+  bar = wrapper(function (num) {
+    return num * num;
+  });
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap property compiles for a property defined as an arrow function 1`] = `
+"import { wrapper } from './wrapper';
+
+class Foo {
+  bar = wrapper(num => {
+    return num * num;
+  });
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with inline arrow wrapper 1`] = `
+"const _wrap = fn => function (...args) {
+  const result = fn.apply(this, args);
+  console.log(result);
+  return result;
+};
+
+class Foo {
+  static #_bar = _wrap(function bar(num) {
+    return num * num;
+  });
+
+  bar(...args) {
+    return this.constructor.#_bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with inline regular wrapper 1`] = `
+"function _wrap(fn) {
+  return function (...args) {
+    const result = fn.apply(this, args);
+    console.log(result);
+    return result;
+  };
+}
+
+class Foo {
+  static #_bar = _wrap(function bar(num) {
+    return num * num;
+  });
+
+  bar(...args) {
+    return this.constructor.#_bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with multiple wrappers 1`] = `
+"import { wrap } from '../../../../src';
+import { dec1 } from './dec1';
+import { dec2 } from './dec2';
+import { dec3 } from './dec2';
+
+class Foo {
+  static #_bar = dec3(dec2(dec1(function bar(num) {
+    return num * num;
+  }, 1), 2, 1), 3, 2, 1);
+
+  bar(...args) {
+    return this.constructor.#_bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with wrapper declared in the same file as a regular function 1`] = `
+"function wrapper(fn) {
+  return function (...args) {
+    const result = fn.apply(this, args);
+    console.log(result);
+    return result;
+  };
+}
+
+class Foo {
+  static #_bar = wrapper(function bar(num) {
+    return num * num;
+  });
+
+  bar(...args) {
+    return this.constructor.#_bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with wrapper declared in the same file as an arrow function 1`] = `
+"const wrapper = fn => function (...args) {
+  const result = fn.apply(this, args);
+  console.log(result);
+  return result;
+};
+
+class Foo {
+  static #_bar = wrapper(function bar(num) {
+    return num * num;
+  });
+
+  bar(...args) {
+    return this.constructor.#_bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types compiles for a method with wrapper imported from an external file 1`] = `
+"import { wrapper } from './bar';
+
+class Foo {
+  static #_bar = wrapper(function bar(num) {
+    return num * num;
+  });
+
+  bar(...args) {
+    return this.constructor.#_bar.apply(this, args);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-wrap @wrap wrapper types sends arguments to a wrapper function 1`] = `
+"import { wrapper } from './wrapper';
+
+class Foo {
+  static #_bar = wrapper(function bar(num) {
+    return num * num;
+  }, 'foo', 'bar', 42);
+
+  bar(...args) {
+    return this.constructor.#_bar.apply(this, args);
+  }
+
+}"
+`;

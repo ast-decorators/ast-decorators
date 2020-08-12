@@ -1,0 +1,21 @@
+{
+  "name": "@ast-decorators/transform-wrap",
+  "version": "0.1.0",
+  "description": "Wraps method with a received function",
+  "main": "lib/index.js",
+  "scripts": {
+    "build:js": "babel src -d lib -x .ts --config-file ../../babel.config.json --ignore \"src/**/*.d.ts\" --copy-files",
+    "build:dts": "tsc -p tsconfig.build.json --emitDeclarationOnly",
+    "build:remove": "rimraf lib",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@ast-decorators/utils": "^0.1.0",
+    "@babel/traverse": "^7.9.6",
+    "@babel/types": "^7.9.6",
+    "minimatch": "^3.0.4"
+  },
+  "devDependencies": {
+    "@ast-decorators/core": "^0.1.0"
+  }
+}
