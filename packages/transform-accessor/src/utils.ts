@@ -1,14 +1,13 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
 import type {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
 import type {
+  ClassMember,
   ClassMemberMethod,
   ClassMemberProperty,
   PrivacyType,
 } from '@ast-decorators/utils/lib/common';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
-import type {ClassMember} from '@ast-decorators/utils/src/common';
-import template from '@babel/template';
 import type {NodePath, Scope} from '@babel/traverse';
 import {
   ArrayPattern,
@@ -17,7 +16,6 @@ import {
   cloneNode,
   Decorator,
   FunctionDeclaration,
-  functionDeclaration,
   FunctionExpression,
   Identifier,
   isArrayPattern,
@@ -120,46 +118,11 @@ export const createStorage = (
     value: member.value,
   });
 
-const declarator = template(`const VAR = FUNCTION`);
-
 export const ownerNode = (
   klass: Class,
   useClassName: boolean,
 ): Identifier | ThisExpression =>
   useClassName && klass.id ? cloneNode(klass.id) : thisExpression();
-
-export const prepareInterceptor = (
-  klass: NodePath<Class>,
-  interceptor: AccessorInterceptorNode,
-  type: 'get' | 'set',
-): readonly [
-  Identifier | MemberExpression,
-  FunctionDeclaration | VariableDeclaration | null,
-] => {
-  const isArrow = isArrowFunctionExpression(interceptor);
-  const isRegular = isFunctionExpression(interceptor);
-
-  const interceptorId =
-    isArrow || isRegular
-      ? klass.parentPath.scope.generateUidIdentifier(type)
-      : (interceptor as Identifier | MemberExpression);
-
-  return [
-    interceptorId,
-    isArrow
-      ? (declarator({
-          FUNCTION: interceptor,
-          VAR: interceptorId as Identifier,
-        }) as VariableDeclaration)
-      : isRegular
-      ? functionDeclaration(
-          interceptorId as Identifier,
-          (interceptor as FunctionExpression).params,
-          (interceptor as FunctionExpression).body,
-        )
-      : null,
-  ];
-};
 
 export const unifyValueParameter = (
   scope: Scope,
