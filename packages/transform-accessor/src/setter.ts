@@ -2,7 +2,7 @@ import type {
   ASTCallableDecorator,
   ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
-import hoistParameterFunction from '@ast-decorators/utils/lib/hoistParameterFunction';
+import hoistFunctionParameter from '@ast-decorators/utils/lib/hoistFunctionParameter';
 import type {NodePath} from '@babel/traverse';
 import {
   ArrayPattern,
@@ -68,7 +68,7 @@ export const setter: AccessorMethodCreator = (
   const declarations: Array<FunctionDeclaration | VariableDeclaration> = [];
 
   const [interceptorId, interceptorDeclaration] = interceptor
-    ? hoistParameterFunction(interceptor.node, 'set', klass.parentPath.scope)
+    ? hoistFunctionParameter(interceptor.node, 'set', klass.parentPath.scope)
     : [];
 
   if (interceptorDeclaration) {

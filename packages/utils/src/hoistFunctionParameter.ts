@@ -12,14 +12,16 @@ import {
   VariableDeclaration,
 } from '@babel/types';
 
+export type FunctionParameter =
+  | FunctionExpression
+  | ArrowFunctionExpression
+  | Identifier
+  | MemberExpression;
+
 const declarator = template(`const VAR = FUNCTION`);
 
-const hoistParameterFunction = (
-  fn:
-    | FunctionExpression
-    | ArrowFunctionExpression
-    | Identifier
-    | MemberExpression,
+const hoistFunctionParameter = (
+  fn: FunctionParameter,
   name: string,
   scope: Scope,
 ): readonly [
@@ -51,4 +53,4 @@ const hoistParameterFunction = (
   ];
 };
 
-export default hoistParameterFunction;
+export default hoistFunctionParameter;

@@ -1,5 +1,5 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import type {ClassMember, PrivacyType} from '@ast-decorators/utils/src/common';
+import type {ClassMember, PrivacyType} from '@ast-decorators/utils/lib/common';
 import {
   ArrowFunctionExpression,
   FunctionExpression,

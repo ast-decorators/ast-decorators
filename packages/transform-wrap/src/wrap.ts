@@ -7,7 +7,7 @@ import type {
 } from '@ast-decorators/utils/lib/common';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
-import hoistParameterFunction from '@ast-decorators/utils/lib/hoistParameterFunction';
+import hoistFunctionParameter from '@ast-decorators/utils/lib/hoistFunctionParameter';
 import {cloneClassMember} from '@ast-decorators/utils/lib/babelFixes';
 import template from '@babel/template';
 import type {NodePath} from '@babel/traverse';
@@ -152,7 +152,7 @@ export const wrap = (
   ClassMemberProperty?,
   (FunctionDeclaration | VariableDeclaration)?,
 ] => {
-  const [wrapperId, wrapperFunctionDeclaration] = hoistParameterFunction(
+  const [wrapperId, wrapperFunctionDeclaration] = hoistFunctionParameter(
     wrapper,
     'wrap',
     klass.parentPath.scope,
