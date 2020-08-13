@@ -1,4 +1,5 @@
 import {transformFile as _transformFile} from '../../../utils/testing';
+import {wrap} from '../src';
 import commonOptions from './fixtures/options';
 
 const transformFile = async (
@@ -112,6 +113,15 @@ describe('@ast-decorators/transform-wrap', () => {
           '@wrap can only be applied to class methods or properties with function assigned',
         );
       });
+    });
+
+    it('fails if transformer is not plugged in', () => {
+      // @ts-expect-error: Here the runtime replacement used. It does not
+      // require arguments
+      expect(() => wrap()()).toThrowError(
+        "Decorator @wrap won't work because @ast-decorators/transform-wrap/lib/transformer" +
+          'is not plugged in. You have to add it to your Babel config',
+      );
     });
   });
 });

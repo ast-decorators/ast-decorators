@@ -8,7 +8,7 @@ import type {
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
 import hoistFunctionParameter from '@ast-decorators/utils/lib/hoistFunctionParameter';
-import {cloneClassMember} from '@ast-decorators/utils/lib/babelFixes';
+import {cloneNode} from '@ast-decorators/utils/lib/babelFixes';
 import template from '@babel/template';
 import type {NodePath} from '@babel/traverse';
 import {
@@ -89,7 +89,7 @@ const addNewWrapperToStaticMirror = (
   wrapperId: Identifier | MemberExpression,
   args: CallExpression['arguments'],
 ): StaticMirror => {
-  const newDeclaration = cloneClassMember(declaration);
+  const newDeclaration = cloneNode(declaration);
 
   newDeclaration.value = callExpression(wrapperId, [
     declaration.value!,
@@ -119,7 +119,7 @@ const prepareMethodReplacement = (
     ),
   ]);
 
-  const method = cloneClassMember(member);
+  const method = cloneNode(member);
   method.params = params;
   method.body = body;
   method.generator = false;
@@ -134,7 +134,7 @@ const preparePropertyReplacement = (
 ): ClassMemberProperty => {
   const wrappedValue = callExpression(wrapperId, [member.value!, ...args]);
 
-  const property = cloneClassMember(member);
+  const property = cloneNode(member);
   property.value = wrappedValue;
 
   return property;

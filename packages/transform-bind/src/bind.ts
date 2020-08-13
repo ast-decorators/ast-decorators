@@ -3,14 +3,16 @@ import type {
   ClassMember,
   ClassMemberMethod,
 } from '@ast-decorators/utils/lib/common';
+import {
+  classPrivateMethod,
+  classPrivateProperty,
+} from '@ast-decorators/utils/lib/babelFixes';
 import type {Scope} from '@babel/traverse';
 import {
   CallExpression,
   callExpression,
   ClassMethod,
-  classPrivateMethod,
   ClassPrivateMethod,
-  classPrivateProperty,
   classProperty,
   Expression,
   identifier,
@@ -51,24 +53,23 @@ const bindPrivate = (method: ClassPrivateMethod, scope: Scope): BoundNodes => {
   const replacementNode = classPrivateProperty(
     key,
     createBindingExpression(replacementKey),
+    null,
+    null,
+    _static,
   );
 
-  // @ts-expect-error: "static" is not listed in d.ts
-  replacementNode.static = _static;
-
-  const replacementMethod = classPrivateMethod(
+  const replacementMethodDeclaration = classPrivateMethod(
     'method',
     replacementKey,
     params,
     body,
+    decorators,
     _static,
+    generator,
+    async,
   );
 
-  replacementMethod.async = async;
-  replacementMethod.generator = generator;
-  replacementMethod.decorators = decorators;
-
-  return [replacementNode, replacementMethod];
+  return [replacementNode, replacementMethodDeclaration];
 };
 
 const bindRegular = (method: ClassMethod): BoundNodes => {
