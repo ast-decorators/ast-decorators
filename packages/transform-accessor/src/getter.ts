@@ -1,3 +1,7 @@
+import {
+  classMethod,
+  classPrivateMethod,
+} from '@ast-decorators/utils/lib/babelFixes';
 import type {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
 import hoistFunctionParameter from '@ast-decorators/utils/lib/hoistFunctionParameter';
 import type {NodePath} from '@babel/traverse';
@@ -6,9 +10,6 @@ import {
   BlockStatement,
   blockStatement,
   callExpression,
-  classMethod,
-  classPrivateMethod,
-  Decorator,
   ExpressionStatement,
   expressionStatement,
   FunctionDeclaration,
@@ -23,7 +24,6 @@ import {
   ReturnStatement,
   returnStatement,
   StringLiteral,
-  thisExpression,
   variableDeclaration,
   VariableDeclaration,
   variableDeclarator,
@@ -111,7 +111,7 @@ export const getter: AccessorMethodCreator = (
 
   if (isMethod(member.node)) {
     if (!interceptorId) {
-      return null;
+      return undefined;
     }
 
     const body = member.get('body') as NodePath<BlockStatement>;
@@ -123,9 +123,7 @@ export const getter: AccessorMethodCreator = (
     newBody = blockStatement([
       ...originalBody,
       ...(resultDeclaration ? [resultDeclaration] : []),
-      returnStatement(
-        callExpression(interceptorId, [resultId, thisExpression()]),
-      ),
+      returnStatement(callExpression(interceptorId, [resultId])),
     ]);
   } else {
     const property = memberExpression(
@@ -134,7 +132,7 @@ export const getter: AccessorMethodCreator = (
     );
 
     const result = interceptorId
-      ? callExpression(interceptorId, [property, thisExpression()])
+      ? callExpression(interceptorId, [property])
       : property;
 
     newBody = blockStatement([returnStatement(result)]);
@@ -145,17 +143,23 @@ export const getter: AccessorMethodCreator = (
   const {computed, key, static: _static} = member.node;
 
   const method = isPrivate(member)
-    ? classPrivateMethod('get', key as PrivateName, [], newBody, _static)
+    ? classPrivateMethod(
+        'get',
+        key as PrivateName,
+        [],
+        newBody,
+        preservingDecorators,
+        _static,
+      )
     : classMethod(
         'get',
         key as Identifier | StringLiteral | NumericLiteral,
         [],
         newBody,
+        preservingDecorators,
         computed,
         _static,
       );
-
-  method.decorators = preservingDecorators as Decorator[];
 
   return [method, declarations];
 };

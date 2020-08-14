@@ -10,27 +10,39 @@ const transformFile = async (
 
 describe('@ast-decorators/transform-accessor', () => {
   describe('@accessor', () => {
-    it('compiles without interceptors', async () => {
-      const {code} = await transformFile('default', commonOptions);
-      expect(code).toMatchSnapshot();
+    describe('class-related transformations', () => {
+      it('compiles without interceptors', async () => {
+        const {code} = await transformFile('default', commonOptions);
+        expect(code).toMatchSnapshot();
+      });
+
+      it('compiles for static property', async () => {
+        const {code} = await transformFile('static-property', commonOptions);
+        expect(code).toMatchSnapshot();
+      });
+
+      it('preserves following decorators for both accessors', async () => {
+        const {code} = await transformFile(
+          'preserve-decorators-for-both',
+          commonOptions,
+        );
+        expect(code).toMatchSnapshot();
+      });
+
+      it('preserves following decorators only for getter', async () => {
+        const {code} = await transformFile('preserve-decorators-for-single');
+        expect(code).toMatchSnapshot();
+      });
     });
 
-    it('compiles for static property', async () => {
-      const {code} = await transformFile('static-property', commonOptions);
-      expect(code).toMatchSnapshot();
-    });
-
-    it('preserves following decorators for both accessors', async () => {
-      const {code} = await transformFile(
-        'preserve-decorators-for-both',
-        commonOptions,
-      );
-      expect(code).toMatchSnapshot();
-    });
-
-    it('preserves following decorators only for getter', async () => {
-      const {code} = await transformFile('preserve-decorators-for-single');
-      expect(code).toMatchSnapshot();
+    describe('content-related transformations', () => {
+      it('compiles for the multiple decorators', async () => {
+        const {code} = await transformFile(
+          'content-multiple-decorators',
+          commonOptions,
+        );
+        expect(code).toMatchSnapshot();
+      });
     });
 
     it('throws an error if transformer is not plugged in', () => {

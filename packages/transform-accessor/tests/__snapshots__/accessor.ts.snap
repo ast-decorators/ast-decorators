@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`@ast-decorators/transform-accessor @accessor compiles for static property 1`] = `
+exports[`@ast-decorators/transform-accessor @accessor class-related transformations compiles for static property 1`] = `
 "class Foo {
   static #_bar;
 
@@ -15,7 +15,7 @@ exports[`@ast-decorators/transform-accessor @accessor compiles for static proper
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @accessor compiles without interceptors 1`] = `
+exports[`@ast-decorators/transform-accessor @accessor class-related transformations compiles without interceptors 1`] = `
 "class Foo {
   #_bar;
 
@@ -30,7 +30,7 @@ exports[`@ast-decorators/transform-accessor @accessor compiles without intercept
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @accessor preserves following decorators for both accessors 1`] = `
+exports[`@ast-decorators/transform-accessor @accessor class-related transformations preserves following decorators for both accessors 1`] = `
 "import { other } from 'decorators';
 
 class Foo {
@@ -49,7 +49,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @accessor preserves following decorators only for getter 1`] = `
+exports[`@ast-decorators/transform-accessor @accessor class-related transformations preserves following decorators only for getter 1`] = `
 "import { other } from 'decorators';
 
 class Foo {
@@ -62,6 +62,29 @@ class Foo {
 
   set bar(value) {
     this.#_bar = value;
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @accessor content-related transformations compiles for the multiple decorators 1`] = `
+"import { get1, get2, get3 } from './getters';
+import { set1, set2, set3 } from './setters';
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    let _result = get1(this.#_bar);
+
+    _result = get2(_result);
+    return get3(_result);
+  }
+
+  set bar(value) {
+    value = set3(value);
+    value = set2(value);
+    this.#_bar = set1(value);
   }
 
 }"

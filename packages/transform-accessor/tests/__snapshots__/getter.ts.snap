@@ -90,6 +90,36 @@ exports[`@ast-decorators/transform-accessor @getter class-related transformation
 };"
 `;
 
+exports[`@ast-decorators/transform-accessor @getter content-related transformations compiles for multiple decorators 1`] = `
+"import { get1, get2, get3 } from './gets';
+
+class Foo {
+  #_bar;
+
+  get bar() {
+    let _result = get1(this.#_bar);
+
+    _result = get2(_result);
+    return get3(_result);
+  }
+
+}"
+`;
+
+exports[`@ast-decorators/transform-accessor @getter content-related transformations uses existing variable for return 1`] = `
+"import { get } from './get';
+
+class Foo {
+  get bar() {
+    const baz = {
+      fuzz: 1
+    };
+    return get(baz);
+  }
+
+}"
+`;
+
 exports[`@ast-decorators/transform-accessor @getter interceptor-related transformations compiles for imported interceptor 1`] = `
 "import { get } from './get';
 
@@ -97,7 +127,7 @@ class Foo {
   #_bar;
 
   get bar() {
-    return get(this.#_bar, this);
+    return get(this.#_bar);
   }
 
 }"
@@ -110,7 +140,7 @@ class Foo {
   #_bar;
 
   get bar() {
-    return getters.get(this.#_bar, this);
+    return getters.get(this.#_bar);
   }
 
 }"
@@ -126,7 +156,7 @@ class Foo {
   #_bar;
 
   get bar() {
-    return _get(this.#_bar, this);
+    return _get(this.#_bar);
   }
 
 }"
@@ -142,37 +172,7 @@ class Foo {
   #_bar;
 
   get bar() {
-    return _get(this.#_bar, this);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @getter method content compiles for multiple decorators 1`] = `
-"import { get1, get2, get3 } from './gets';
-
-class Foo {
-  #_bar;
-
-  get bar() {
-    let _result = get1(this.#_bar, this);
-
-    _result = get2(_result, this);
-    return get3(_result, this);
-  }
-
-}"
-`;
-
-exports[`@ast-decorators/transform-accessor @getter method content uses existing variable for return 1`] = `
-"import { get } from './get';
-
-class Foo {
-  get bar() {
-    const baz = {
-      fuzz: 1
-    };
-    return get(baz, this);
+    return _get(this.#_bar);
   }
 
 }"

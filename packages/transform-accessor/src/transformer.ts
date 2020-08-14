@@ -7,9 +7,11 @@ import minimatch from 'minimatch';
 import {accessorTransformer} from './accessor';
 import {getterTransformer} from './getter';
 import {setterTransformer} from './setter';
-import type {AccessorInterceptorNode, TransformAccessorOptions} from './utils';
-
-export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
+import {
+  AccessorInterceptorNode,
+  TransformAccessorOptions,
+  TRANSFORMER_NAME,
+} from './utils';
 
 const detector = (
   decoratorName: string,

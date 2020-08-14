@@ -86,7 +86,7 @@ describe('@ast-decorators/transform-accessor', () => {
       });
     });
 
-    describe('method content', () => {
+    describe('content-related transformations', () => {
       it('compiles for multiple decorators', async () => {
         const {code} = await transformFile(
           'content-multiple-decorators',

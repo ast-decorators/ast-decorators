@@ -25,7 +25,6 @@ import {
   Pattern,
   PrivateName,
   StringLiteral,
-  thisExpression,
   VariableDeclaration,
 } from '@babel/types';
 import {createAccessorDecorator} from './createAccessorDecorator';
@@ -80,7 +79,7 @@ export const setter: AccessorMethodCreator = (
 
   if (isMethod(member.node)) {
     if (!interceptorId) {
-      return null;
+      return undefined;
     }
 
     const [rawValue] = member.get('params') as ReadonlyArray<
@@ -102,7 +101,7 @@ export const setter: AccessorMethodCreator = (
         assignmentExpression(
           '=',
           valueId,
-          callExpression(interceptorId, [valueId, thisExpression()]),
+          callExpression(interceptorId, [valueId]),
         ),
       ),
       ...(valueSupportDeclaration ? [valueSupportDeclaration] : []),
@@ -122,9 +121,7 @@ export const setter: AccessorMethodCreator = (
         assignmentExpression(
           '=',
           property,
-          interceptorId
-            ? callExpression(interceptorId, [valueId, thisExpression()])
-            : valueId,
+          interceptorId ? callExpression(interceptorId, [valueId]) : valueId,
         ),
       ),
     ]);
