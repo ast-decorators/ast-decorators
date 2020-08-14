@@ -1,4 +1,5 @@
 import {transformFile as _transformFile} from '../../../utils/testing';
+import {bindAll} from '../src';
 import commonOptions from './fixtures/options';
 
 const transformFile = async (
@@ -19,6 +20,15 @@ describe('@ast-decorators/transform-bind', () => {
         transformFile('failure-no-class', commonOptions),
       ).rejects.toThrowError(
         'Applying @bindAll decorator to something other than class is not allowed',
+      );
+    });
+
+    it('fails if transformer is not plugged in', () => {
+      // @ts-expect-error: Here the runtime replacement used. It does not
+      // require arguments
+      expect(() => bindAll()()).toThrowError(
+        "Decorator @bindAll won't work because @ast-decorators/transform-bind/lib/transformer" +
+          'is not plugged in. You have to add it to your Babel config',
       );
     });
   });

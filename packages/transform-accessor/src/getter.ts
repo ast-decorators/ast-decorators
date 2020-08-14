@@ -1,4 +1,5 @@
 import type {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
+import hoistFunctionParameter from '@ast-decorators/utils/lib/hoistFunctionParameter';
 import type {NodePath} from '@babel/traverse';
 import {
   assignmentExpression,
@@ -13,9 +14,9 @@ import {
   FunctionDeclaration,
   identifier,
   Identifier,
-  isClassPrivateProperty,
   isIdentifier,
   isMethod,
+  isPrivate,
   memberExpression,
   NumericLiteral,
   PrivateName,
@@ -32,7 +33,6 @@ import {
   AccessorInterceptorNode,
   AccessorMethodCreator,
   ownerNode,
-  prepareInterceptor,
   TransformAccessorOptions,
 } from './utils';
 
@@ -100,7 +100,7 @@ export const getter: AccessorMethodCreator = (
   const declarations: Array<FunctionDeclaration | VariableDeclaration> = [];
 
   const [interceptorId, interceptorDeclaration] = interceptor
-    ? prepareInterceptor(klass, interceptor.node, 'get')
+    ? hoistFunctionParameter(interceptor.node, 'get', klass.parentPath.scope)
     : [];
 
   if (interceptorDeclaration) {
@@ -140,11 +140,11 @@ export const getter: AccessorMethodCreator = (
     newBody = blockStatement([returnStatement(result)]);
   }
 
-  // @ts-expect-error: "computed" do not exist on the ClassMemberProperty (it
+  // @ts-expect-error: "computed" do not exist on the ClassPrivateProperty (it
   // will simply be undefined) and "static" is not listed in d.ts
   const {computed, key, static: _static} = member.node;
 
-  const method = isClassPrivateProperty(member)
+  const method = isPrivate(member)
     ? classPrivateMethod('get', key as PrivateName, [], newBody, _static)
     : classMethod(
         'get',

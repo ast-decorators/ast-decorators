@@ -1,4 +1,5 @@
 import {transformFile as _transformFile} from '../../../utils/testing';
+import {bind} from '../src';
 import commonOptions from './fixtures/options';
 
 const transformFile = async (
@@ -69,6 +70,15 @@ describe('@ast-decorators/transform-bind', () => {
         transformFile('failure-not-method-accessor', commonOptions),
       ).rejects.toThrowError(
         'Applying @bind decorator to something other than method is not allowed',
+      );
+    });
+
+    it('fails if transformer is not plugged in', () => {
+      // @ts-expect-error: Here the runtime replacement used. It does not
+      // require arguments
+      expect(() => bind()()).toThrowError(
+        "Decorator @bind won't work because @ast-decorators/transform-bind/lib/transformer" +
+          'is not plugged in. You have to add it to your Babel config',
       );
     });
   });

@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`@ast-decorators/utils hoistFunctionParameter hoists the arrow function parameter 1`] = `"const _param = (baz: number) => baz * 10;"`;
+
+exports[`@ast-decorators/utils hoistFunctionParameter hoists the regular function parameter 1`] = `
+"function _param(baz: number) {
+  return baz * 10;
+}"
+`;
