@@ -38,6 +38,8 @@ import {
   variableDeclarator,
 } from '@babel/types';
 
+export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
+
 export type TransformedNode = readonly [
   ClassMemberMethod,
   ReadonlyArray<FunctionDeclaration | VariableDeclaration>,
@@ -68,7 +70,7 @@ export type AccessorMethodCreator = (
   interceptor: NodePath<AccessorInterceptorNode> | undefined,
   storage: Identifier | PrivateName | undefined,
   options: AccessorMethodCreatorOptions,
-) => TransformedNode | null;
+) => TransformedNode | undefined;
 
 export const isGetter = (member: ClassMemberMethod): boolean =>
   member.kind === 'get';

@@ -1,5 +1,3 @@
-// TODO: remove eslint-disable when typescript-eslint can handle TS 3.8 properly
-/* eslint-disable @typescript-eslint/explicit-member-accessibility */
 import type {NodePath, Binding} from '@babel/traverse';
 import {
   Identifier,
