@@ -1,7 +1,5 @@
 import {cloneNode} from '@ast-decorators/utils/lib/babelFixes';
-import checkSuitability from '@ast-decorators/utils/lib/checkSuitability';
 import type {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
-import {extractDecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
 import {
   ClassMember,
   ClassMemberProperty,
@@ -19,11 +17,14 @@ import {getter} from './getter';
 import {setter} from './setter';
 import {
   AccessorInterceptorNode,
+  applyChanges,
   assert,
   createStorage,
+  prepareSetterDecorators,
   TransformAccessorOptions,
   TransformedNode,
-  TRANSFORMER_NAME,
+  TwinAccessorOptions,
+  TwinAccessorTransformedNode,
 } from './utils';
 
 export type AccessorInterceptors = Readonly<{
@@ -31,25 +32,16 @@ export type AccessorInterceptors = Readonly<{
   set?: NodePath<AccessorInterceptorNode>;
 }>;
 
-export type AccessorOptions = TransformAccessorOptions &
-  Readonly<{
-    accessorDecoratorName: string;
-    filename: string;
-  }>;
-
 export const accessor = (
   klass: NodePath<Class>,
   member: NodePath<ClassMember>,
   {get, set}: AccessorInterceptors,
   {
-    accessorDecoratorName,
-    filename,
     privacy,
-    singleAccessorDecorators,
-    transformerPath,
     useClassNameForStatic,
-  }: AccessorOptions,
-): readonly [TransformedNode?, TransformedNode?, ClassMemberProperty?] => {
+    ...decoratorsPreparationOptions
+  }: TwinAccessorOptions,
+): TwinAccessorTransformedNode => {
   const decorators = member.node.decorators
     ? (member.get('decorators') as ReadonlyArray<NodePath<Decorator>>)
     : null;
@@ -61,7 +53,7 @@ export const accessor = (
     ? createStorage(klass, member.node as ClassMemberProperty, privacy)
     : undefined;
 
-  const getterResults =
+  const getterResults: TransformedNode =
     isMemberProperty || (isMethod(member.node) && member.node.kind === 'get')
       ? getter(
           klass,
@@ -73,32 +65,16 @@ export const accessor = (
             useClassName,
           },
         )
-      : undefined;
+      : [];
 
-  const bothAccessorsDecorators = decorators
-    ?.filter((decorator) => {
-      const {importSource, originalImportName} = extractDecoratorMetadata(
-        decorator,
-      );
+  const setterPreservedDecorators = decorators
+    ? prepareSetterDecorators(decorators, decoratorsPreparationOptions)
+        // We need to add decorator nodes to binding registry only if we create two
+        // nodes (getter and setter) instead of one (property).
+        .map(({node}) => (isMemberProperty ? cloneNode(node) : node))
+    : null;
 
-      return (
-        (importSource?.value === transformerPath &&
-          originalImportName === accessorDecoratorName) ||
-        !checkSuitability(
-          {
-            name: originalImportName,
-            source: importSource?.value,
-          },
-          singleAccessorDecorators,
-          filename,
-        )
-      );
-    })
-    // We need to add decorator nodes to binding registry only if we create two
-    // nodes (getter and setter) instead of one (property).
-    .map(({node}) => (isMemberProperty ? cloneNode(node) : node));
-
-  const setterResults =
+  const setterResults: TransformedNode =
     isMemberProperty || (isMethod(member.node) && member.node.kind === 'set')
       ? setter(
           klass,
@@ -106,11 +82,11 @@ export const accessor = (
           set,
           storage?.key as Identifier | PrivateName | undefined,
           {
-            preservingDecorators: bothAccessorsDecorators ?? null,
+            preservingDecorators: setterPreservedDecorators,
             useClassName,
           },
         )
-      : undefined;
+      : [];
 
   return [getterResults, setterResults, storage];
 };
@@ -125,36 +101,9 @@ export const accessorTransformer: ASTCallableDecorator<
 ) => {
   assert('accessor', member!.node, [get?.node, set?.node]);
 
-  const [
-    [getMethod, getterDeclarations] = [],
-    [setMethod, setterDeclarations] = [],
-    storage,
-  ] = accessor(
+  applyChanges(
     klass,
     member!,
-    {get, set},
-    {
-      ...options,
-      accessorDecoratorName: 'accessor',
-      filename,
-      transformerPath: options.transformerPath ?? TRANSFORMER_NAME,
-    },
+    accessor(klass, member!, {get, set}, {...options, filename}),
   );
-
-  klass.insertBefore([
-    ...(getterDeclarations ?? []),
-    ...(setterDeclarations ?? []),
-  ]);
-
-  if (storage) {
-    member!.insertBefore(storage);
-  }
-
-  if (getMethod && setMethod) {
-    member!.replaceWithMultiple([getMethod, setMethod]);
-  } else if (getMethod) {
-    member!.replaceWith(getMethod);
-  } else if (setMethod) {
-    member!.replaceWith(setMethod);
-  }
 };

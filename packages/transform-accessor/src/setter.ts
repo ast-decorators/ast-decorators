@@ -1,37 +1,23 @@
-import type {
-  ASTCallableDecorator,
-  ClassMemberMethod,
-} from '@ast-decorators/utils/lib/common';
+import type {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
 import hoistFunctionParameter from '@ast-decorators/utils/lib/hoistFunctionParameter';
 import type {NodePath} from '@babel/traverse';
 import {
   ArrayPattern,
+  AssignmentExpression,
   assignmentExpression,
-  BlockStatement,
   blockStatement,
   callExpression,
-  classMethod,
-  classPrivateMethod,
-  Decorator,
+  ExpressionStatement,
   expressionStatement,
-  FunctionDeclaration,
-  identifier,
   Identifier,
   isMethod,
-  isPrivate,
-  memberExpression,
-  NumericLiteral,
   ObjectPattern,
-  Pattern,
-  PrivateName,
-  StringLiteral,
-  VariableDeclaration,
 } from '@babel/types';
+import {basicSetter} from './basics';
 import {createAccessorDecorator} from './createAccessorDecorator';
 import {
   AccessorInterceptorNode,
   AccessorMethodCreator,
-  ownerNode,
   TransformAccessorOptions,
   unifyValueParameter,
 } from './utils';
@@ -62,41 +48,32 @@ export const setter: AccessorMethodCreator = (
   member,
   interceptor,
   storageProperty,
-  {preservingDecorators, useClassName},
+  options,
 ) => {
-  const declarations: Array<FunctionDeclaration | VariableDeclaration> = [];
+  const method = basicSetter(klass, member, storageProperty, options);
 
-  const [interceptorId, interceptorDeclaration] = interceptor
-    ? hoistFunctionParameter(interceptor.node, 'set', klass.parentPath.scope)
-    : [];
-
-  if (interceptorDeclaration) {
-    declarations.push(interceptorDeclaration);
+  if (!interceptor) {
+    return [method, []];
   }
 
-  let params: ClassMemberMethod['params'];
-  let newBody: BlockStatement;
+  const [interceptorId, interceptorDeclaration] = hoistFunctionParameter(
+    interceptor.node,
+    'set',
+    klass.parentPath.scope,
+  );
 
   if (isMethod(member.node)) {
-    if (!interceptorId) {
-      return undefined;
-    }
-
-    const [rawValue] = member.get('params') as ReadonlyArray<
-      NodePath<Identifier | Pattern>
-    >;
+    const [rawValue] = method.params;
 
     const [valueId, valueSupportDeclaration] = unifyValueParameter(
       member.scope,
       // There is no reason to set the default value to value parameter
-      rawValue.node as Identifier | ArrayPattern | ObjectPattern,
+      rawValue as Identifier | ArrayPattern | ObjectPattern,
     );
 
-    params = [valueId];
+    method.params = [valueId];
 
-    const {body} = member.node;
-
-    newBody = blockStatement([
+    method.body = blockStatement([
       expressionStatement(
         assignmentExpression(
           '=',
@@ -105,46 +82,21 @@ export const setter: AccessorMethodCreator = (
         ),
       ),
       ...(valueSupportDeclaration ? [valueSupportDeclaration] : []),
-      ...body.body,
+      ...method.body.body,
     ]);
   } else {
-    const valueId = identifier('value');
-    params = [valueId];
+    // Update default setter body to reduce code size
+    const {left, right} = (method.body.body[0] as ExpressionStatement)
+      .expression as AssignmentExpression;
 
-    const property = memberExpression(
-      ownerNode(klass.node, useClassName),
-      storageProperty!,
-    );
-
-    newBody = blockStatement([
+    method.body = blockStatement([
       expressionStatement(
-        assignmentExpression(
-          '=',
-          property,
-          interceptorId ? callExpression(interceptorId, [valueId]) : valueId,
-        ),
+        assignmentExpression('=', left, callExpression(interceptorId, [right])),
       ),
     ]);
   }
 
-  // @ts-expect-error: "computed" do not exist on the ClassPrivateProperty (it
-  // will simply be undefined) and "static" is not listed in d.ts
-  const {computed, key, static: _static} = member.node;
-
-  const method = isPrivate(member)
-    ? classPrivateMethod('set', key as PrivateName, params, newBody, _static)
-    : classMethod(
-        'set',
-        key as Identifier | StringLiteral | NumericLiteral,
-        params,
-        newBody,
-        computed,
-        _static,
-      );
-
-  method.decorators = preservingDecorators as Decorator[];
-
-  return [method, declarations];
+  return [method, interceptorDeclaration ? [interceptorDeclaration] : []];
 };
 
 export const setterTransformer: ASTCallableDecorator<

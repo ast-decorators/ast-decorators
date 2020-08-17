@@ -117,7 +117,7 @@ describe('@ast-decorators/transform-accessor', () => {
         await expect(
           transformFile('assert-property-type', commonOptions),
         ).rejects.toThrowError(
-          'Applying @setter decorator to something other than property or accessor is not allowed',
+          '@setter: applying to something other than property or accessor is not allowed',
         );
       });
 
@@ -125,7 +125,7 @@ describe('@ast-decorators/transform-accessor', () => {
         await expect(
           transformFile('assert-interceptor-type', commonOptions),
         ).rejects.toThrowError(
-          'Accessor interceptor can only be function, free variable or object property',
+          '@setter: interceptor can only be function, free variable or object property',
         );
       });
 

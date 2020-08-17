@@ -41,19 +41,19 @@ export const createAccessorDecorator = (
     },
   );
 
-  if (!result) {
-    return;
-  }
-
   const [method, declarations] = result;
 
-  klass.insertBefore(
-    declarations as Array<FunctionDeclaration | VariableDeclaration>,
-  );
+  if (declarations) {
+    klass.insertBefore(
+      declarations as Array<FunctionDeclaration | VariableDeclaration>,
+    );
+  }
 
   if (storage) {
     member!.insertBefore(storage);
   }
 
-  member!.replaceWith(method);
+  if (method) {
+    member!.replaceWith(method);
+  }
 };

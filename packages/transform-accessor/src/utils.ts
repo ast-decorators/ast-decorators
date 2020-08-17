@@ -1,5 +1,7 @@
 import ASTDecoratorsError from '@ast-decorators/utils/lib/ASTDecoratorsError';
-import type {SuitabilityFactors} from '@ast-decorators/utils/lib/checkSuitability';
+import checkSuitability, {
+  SuitabilityFactors,
+} from '@ast-decorators/utils/lib/checkSuitability';
 import type {
   ClassMember,
   ClassMemberMethod,
@@ -8,6 +10,7 @@ import type {
 } from '@ast-decorators/utils/lib/common';
 import createPropertyByPrivacy from '@ast-decorators/utils/lib/createPropertyByPrivacy';
 import getMemberName from '@ast-decorators/utils/lib/getMemberName';
+import {extractDecoratorMetadata} from '@ast-decorators/utils/lib/metadata';
 import type {NodePath, Scope} from '@babel/traverse';
 import {
   ArrayPattern,
@@ -41,8 +44,8 @@ import {
 export const TRANSFORMER_NAME = '@ast-decorators/transform-accessor';
 
 export type TransformedNode = readonly [
-  ClassMemberMethod,
-  ReadonlyArray<FunctionDeclaration | VariableDeclaration>,
+  ClassMemberMethod?,
+  ReadonlyArray<FunctionDeclaration | VariableDeclaration>?,
 ];
 
 export type TransformAccessorOptions = Readonly<{
@@ -70,7 +73,21 @@ export type AccessorMethodCreator = (
   interceptor: NodePath<AccessorInterceptorNode> | undefined,
   storage: Identifier | PrivateName | undefined,
   options: AccessorMethodCreatorOptions,
-) => TransformedNode | undefined;
+) => TransformedNode;
+
+export type TwinAccessorOptions = Omit<
+  TransformAccessorOptions,
+  'transformerPath'
+> &
+  Readonly<{
+    filename: string;
+  }>;
+
+export type TwinAccessorTransformedNode = readonly [
+  TransformedNode,
+  TransformedNode,
+  ClassMemberProperty?,
+];
 
 export const isGetter = (member: ClassMemberMethod): boolean =>
   member.kind === 'get';
@@ -90,7 +107,7 @@ export const assert = (
     )
   ) {
     throw new ASTDecoratorsError(
-      `Applying @${decorator} decorator to something other than property or accessor is not allowed`,
+      `@${decorator}: applying to something other than property or accessor is not allowed`,
     );
   }
 
@@ -103,7 +120,7 @@ export const assert = (
       !isMemberExpression(interceptor)
     ) {
       throw new ASTDecoratorsError(
-        'Accessor interceptor can only be function, free variable or object property',
+        `@${decorator}: interceptor can only be function, free variable or object property`,
       );
     }
   }
@@ -140,4 +157,52 @@ export const unifyValueParameter = (
   }
 
   return [rawValue];
+};
+
+export type SetterDecoratorPreparationOptions = Readonly<{
+  filename: string;
+  singleAccessorDecorators?: SuitabilityFactors;
+}>;
+
+export const prepareSetterDecorators = (
+  decorators: ReadonlyArray<NodePath<Decorator>>,
+  {filename, singleAccessorDecorators}: SetterDecoratorPreparationOptions,
+): ReadonlyArray<NodePath<Decorator>> =>
+  decorators.filter((decorator) => {
+    const {importSource, originalImportName} = extractDecoratorMetadata(
+      decorator,
+    );
+
+    return !checkSuitability(
+      {
+        name: originalImportName,
+        source: importSource?.value,
+      },
+      singleAccessorDecorators,
+      filename,
+    );
+  });
+
+export const applyChanges = (
+  klass: NodePath<Class>,
+  member: NodePath<ClassMember>,
+  [
+    [getMethod, getterDeclarations = []],
+    [setMethod, setterDeclarations = []],
+    storage,
+  ]: TwinAccessorTransformedNode,
+): void => {
+  klass.insertBefore([...getterDeclarations, ...setterDeclarations]);
+
+  if (storage) {
+    member.insertBefore(storage);
+  }
+
+  if (getMethod && setMethod) {
+    member.replaceWithMultiple([getMethod, setMethod]);
+  } else if (getMethod) {
+    member.replaceWith(getMethod);
+  } else if (setMethod) {
+    member.replaceWith(setMethod);
+  }
 };

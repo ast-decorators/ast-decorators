@@ -7,6 +7,7 @@ import minimatch from 'minimatch';
 import {accessorTransformer} from './accessor';
 import {getterTransformer} from './getter';
 import {setterTransformer} from './setter';
+import {trackedTransformer} from './tracked';
 import {
   AccessorInterceptorNode,
   TransformAccessorOptions,
@@ -27,6 +28,7 @@ const transformer: ASTDecoratorTransformer<
   [accessorTransformer, detector('accessor', transformerPath)] as const,
   [getterTransformer, detector('getter', transformerPath)] as const,
   [setterTransformer, detector('setter', transformerPath)] as const,
+  [trackedTransformer, detector('tracked', transformerPath)] as const,
 ];
 
 export default transformer;

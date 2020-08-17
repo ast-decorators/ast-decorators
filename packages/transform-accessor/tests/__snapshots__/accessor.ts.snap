@@ -67,7 +67,7 @@ class Foo {
 }"
 `;
 
-exports[`@ast-decorators/transform-accessor @accessor content-related transformations compiles for the multiple decorators 1`] = `
+exports[`@ast-decorators/transform-accessor @accessor content-related transformations compiles for multiple decorators 1`] = `
 "import { get1, get2, get3 } from './getters';
 import { set1, set2, set3 } from './setters';
 

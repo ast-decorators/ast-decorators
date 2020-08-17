@@ -1,7 +1,3 @@
-import {
-  classMethod,
-  classPrivateMethod,
-} from '@ast-decorators/utils/lib/babelFixes';
 import type {ASTCallableDecorator} from '@ast-decorators/utils/lib/common';
 import hoistFunctionParameter from '@ast-decorators/utils/lib/hoistFunctionParameter';
 import type {NodePath} from '@babel/traverse';
@@ -12,45 +8,37 @@ import {
   callExpression,
   ExpressionStatement,
   expressionStatement,
-  FunctionDeclaration,
   identifier,
   Identifier,
   isIdentifier,
   isMethod,
-  isPrivate,
-  memberExpression,
-  NumericLiteral,
-  PrivateName,
   ReturnStatement,
   returnStatement,
-  StringLiteral,
   variableDeclaration,
   VariableDeclaration,
   variableDeclarator,
 } from '@babel/types';
+import {basicGetter} from './basics';
 import {createAccessorDecorator} from './createAccessorDecorator';
 import {
   AccessorInterceptorNode,
   AccessorMethodCreator,
-  ownerNode,
   TransformAccessorOptions,
 } from './utils';
 
 const resultKey = 'binding:result-var';
 
 const prepareResult = (
-  body: NodePath<BlockStatement>,
+  body: BlockStatement,
+  path?: NodePath<any>,
 ): [Identifier, (VariableDeclaration | ExpressionStatement)?] => {
-  const {argument} = body.node.body[
-    body.node.body.length - 1
-  ] as ReturnStatement;
+  const {argument} = body.body[body.body.length - 1] as ReturnStatement;
 
   if (isIdentifier(argument)) {
     return [argument];
   }
 
-  const member = body.parentPath;
-  const data: Identifier | undefined = member.getData(resultKey);
+  const data: Identifier | undefined = path?.getData(resultKey);
 
   if (data) {
     return [
@@ -61,12 +49,13 @@ const prepareResult = (
     ];
   }
 
-  const resultId = body.scope.generateUidIdentifier('result');
+  const resultId =
+    path?.scope.generateUidIdentifier('result') ?? identifier('_result');
   const resultDeclaration = variableDeclaration('let', [
     variableDeclarator(resultId, argument),
   ]);
 
-  member.setData(resultKey, resultId);
+  path?.setData(resultKey, resultId);
 
   return [resultId, resultDeclaration];
 };
@@ -95,73 +84,42 @@ export const getter: AccessorMethodCreator = (
   member,
   interceptor,
   storageProperty,
-  {preservingDecorators, useClassName},
+  options,
 ) => {
-  const declarations: Array<FunctionDeclaration | VariableDeclaration> = [];
+  const method = basicGetter(klass, member, storageProperty, options);
 
-  const [interceptorId, interceptorDeclaration] = interceptor
-    ? hoistFunctionParameter(interceptor.node, 'get', klass.parentPath.scope)
-    : [];
-
-  if (interceptorDeclaration) {
-    declarations.push(interceptorDeclaration);
+  if (!interceptor) {
+    return [method, []];
   }
 
-  let newBody: BlockStatement;
+  const [interceptorId, interceptorDeclaration] = hoistFunctionParameter(
+    interceptor.node,
+    'get',
+    klass.parentPath.scope,
+  );
 
   if (isMethod(member.node)) {
-    if (!interceptorId) {
-      return undefined;
-    }
+    const originalBody = method.body.body.slice(0, -1);
+    const [resultId, resultDeclaration] = prepareResult(
+      method.body,
+      isMethod(member.node) ? member : undefined,
+    );
 
-    const body = member.get('body') as NodePath<BlockStatement>;
-
-    const originalBody = body.node.body.slice(0, -1);
-
-    const [resultId, resultDeclaration] = prepareResult(body);
-
-    newBody = blockStatement([
+    method.body = blockStatement([
       ...originalBody,
       ...(resultDeclaration ? [resultDeclaration] : []),
       returnStatement(callExpression(interceptorId, [resultId])),
     ]);
   } else {
-    const property = memberExpression(
-      ownerNode(klass.node, useClassName),
-      storageProperty!,
-    );
+    // Update default getter body to reduce code size
+    const {argument} = method.body.body[0] as ReturnStatement;
 
-    const result = interceptorId
-      ? callExpression(interceptorId, [property])
-      : property;
-
-    newBody = blockStatement([returnStatement(result)]);
+    method.body = blockStatement([
+      returnStatement(callExpression(interceptorId, [argument!])),
+    ]);
   }
 
-  // @ts-expect-error: "computed" do not exist on the ClassPrivateProperty (it
-  // will simply be undefined) and "static" is not listed in d.ts
-  const {computed, key, static: _static} = member.node;
-
-  const method = isPrivate(member)
-    ? classPrivateMethod(
-        'get',
-        key as PrivateName,
-        [],
-        newBody,
-        preservingDecorators,
-        _static,
-      )
-    : classMethod(
-        'get',
-        key as Identifier | StringLiteral | NumericLiteral,
-        [],
-        newBody,
-        preservingDecorators,
-        computed,
-        _static,
-      );
-
-  return [method, declarations];
+  return [method, interceptorDeclaration ? [interceptorDeclaration] : []];
 };
 
 export const getterTransformer: ASTCallableDecorator<

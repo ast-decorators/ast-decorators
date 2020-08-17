@@ -9,6 +9,8 @@ export type AccessorDecorator = (
 export type GetterDecorator = (get?: AccessorInterceptor) => PropertyDecorator;
 export type SetterDecorator = (set?: AccessorInterceptor) => PropertyDecorator;
 
+export type TrackDecorator = (track?: AccessorInterceptor) => PropertyDecorator;
+
 const transformerName = '@ast-decorators/transform-accessor';
 
 export const accessor = replaceDecorator(
@@ -25,3 +27,8 @@ export const setter = replaceDecorator(
   'setter',
   transformerName,
 ) as SetterDecorator;
+
+export const tracked = replaceDecorator(
+  'tracked',
+  transformerName,
+) as TrackDecorator;
