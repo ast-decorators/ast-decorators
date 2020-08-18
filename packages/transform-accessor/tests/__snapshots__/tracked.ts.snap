@@ -73,9 +73,7 @@ exports[`@ast-decorators/transform-accessor @tracked content-related transformat
 class Foo {
   #bar = 'baz';
 
-  set bar({
-    test
-  }) {
+  set bar(_value) {
     const {
       test
     } = _value;

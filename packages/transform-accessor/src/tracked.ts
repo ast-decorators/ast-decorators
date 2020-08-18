@@ -49,6 +49,8 @@ const addTracker = (
       rawValue as Identifier | ArrayPattern | ObjectPattern,
     );
 
+    method.params = [valueId];
+
     method.body = blockStatement([
       ...(valueSupportDeclaration ? [valueSupportDeclaration] : []),
       ...method.body.body,
